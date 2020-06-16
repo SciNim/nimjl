@@ -1,12 +1,10 @@
 # Nim-Julia bridge WIP
-=======================
 
 You may need to update your Julia installation location in the Makefile.
 This is a WIP so far only the makefile and embedding.nim are relevant.
 
 
 ## Ressources
-=================
 
 How to embed Julia w/ C :
 
