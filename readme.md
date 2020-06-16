@@ -1,6 +1,7 @@
 # Nim-Julia bridge WIP
 
-This is a WIP so far only the makefile and embedding.nim are relevant
+You may need to update your Julia installation location in the Makefile.
+This is a WIP so far only the makefile and embedding.nim are relevant.
 
 ## Ressources:
 

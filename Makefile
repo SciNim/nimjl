@@ -6,6 +6,7 @@
 #   BIN:   binary build directory
 
 JULIA=~/julia-1.2.0/bin/julia
+BIN=.
 
 ifndef JULIA
   $(error "Please pass JULIA=[path of target julia binary], or set as environment variable!")
