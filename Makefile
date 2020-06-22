@@ -5,7 +5,7 @@
 #   JULIA: path to julia[.exe] executable
 #   BIN:   binary build directory
 
-JULIA=~/julia-1.2.0/bin/julia
+JULIA=~/julia-1.4.2/bin/julia
 BIN=.
 
 ifndef JULIA
@@ -39,7 +39,7 @@ release: $(BIN)/embedding$(EXE)
 debug:   $(BIN)/embedding-debug$(EXE)
 
 nim:
-	nim c -r -d:JULIA_ENABLE_THREADING=1 --passC:-fPIC --passC:-I/home/rcaillaud/julia-1.2.0/include/julia --clibdir:/home/rcaillaud/julia-1.2.0/lib --passL:-Wl,--export-dynamic --passL:-lm --passL:-Wl,-rpath,/home/rcaillaud/julia-1.2.0/lib/ --passL:-Wl,-rpath,/home/rcaillaud/julia-1.2.0/lib/julia --passL:-ljulia embedding.nim
+	nim c -r -d:JULIA_ENABLE_THREADING=1 --passC:-fPIC --passC:-I/home/rcaillaud/julia-1.4.2/include/julia --clibdir:/home/rcaillaud/julia-1.4.2/lib --passL:-Wl,--export-dynamic --passL:-lm --passL:-Wl,-rpath,/home/rcaillaud/julia-1.4.2/lib/ --passL:-Wl,-rpath,/home/rcaillaud/julia-1.4.2/lib/julia --passL:-ljulia embedding.nim
 
 
 $(BIN)/embedding$(EXE): $(SRCDIR)/embedding.c
