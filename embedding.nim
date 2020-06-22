@@ -1,6 +1,16 @@
-{.compile:"embedding.c", passc:"-DJULIA_ENABLE_THREADING=1", passc:"-I/home/rcaillaud/julia-1.4.2/include/julia", passL:"-lm" passL:"-Wl,-rpath,/home/rcaillaud/julia-1.4.2/lib/" passL:"-Wl,-rpath,/home/rcaillaud/julia-1.4.2/lib/julia" passL:"-ljulia".}
+
+const JULIA_PATH = "~/julia-1.4.2/"
+const JULIA_INCLUDES_PATH = JULIA_PATH & "include/julia"
+const JULIA_LIB_PATH = JULIA_PATH & "lib/"
+const JULIA_DEPLIB_PATH = JULIA_PATH & "lib/julia"
+
+const JULIA_INCLUDE_FLAG = "-I"&JULIA_INCLUDES_PATH
+const JULIA_LINK_FLAG = ["-Wl,-rpath," & JULIA_LIB_PATH, "-Wl,-rpath," & JULIA_DEPLIB_PATH,"-lm", "-ljulia"]
+
+{.compile: "embedding.c", passc:JULIA_INCLUDE_FLAG, passL:JULIA_LINK_FLAG[0], passL:JULIA_LINK_FLAG[1], passL:JULIA_LINK_FLAG[2], passL:JULIA_LINK_FLAG[3].}
 
 type nimjl_value {.importc: "jl_value_t*", header: "julia.h".} = distinct pointer
+type nimjl_array {.importc: "jl_array_t", header: "julia.h".} = object
 type nimjl_func {.importc: "jl_function_t *", header: "julia.h".} = distinct pointer
 type nimjl_module{.importc: "jl_module_t *", header: "julia.h".} = distinct pointer
 
@@ -37,6 +47,12 @@ proc nimjl_box_uint8*   (value: uint8)    : nimjl_value  {.importc.}
 
 proc nimjl_get_function*(name: cstring): nimjl_func {.importc.}
 proc nimjl_call*(function: nimjl_func, values: ptr nimjl_value, nargs: cint): nimjl_value {.importc.}
+
+# Values will need to be cast
+# is it possible to
+proc nimjl_array_data(values: nimjl_array): ptr {.importc:"jl_array_data", header: "julia.h".}
+
+
 
 echo "init"
 nimjl_init()
