@@ -18,7 +18,7 @@ endif
 
 #=============================================================================
 # this source directory where embedding.c is located
-SRCDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+SRCDIR := .
 
 # get the executable suffix, if any
 EXE := $(suffix $(abspath $(JULIA)))
@@ -38,8 +38,8 @@ DEBUGFLAGS += -g
 release: $(BIN)/embedding$(EXE)
 debug:   $(BIN)/embedding-debug$(EXE)
 
-nim:
-	nim c -r -d:JULIA_ENABLE_THREADING=1 --passC:-fPIC --passC:-I/home/rcaillaud/julia-1.4.2/include/julia --clibdir:/home/rcaillaud/julia-1.4.2/lib --passL:-Wl,--export-dynamic --passL:-lm --passL:-Wl,-rpath,/home/rcaillaud/julia-1.4.2/lib/ --passL:-Wl,-rpath,/home/rcaillaud/julia-1.4.2/lib/julia --passL:-ljulia embedding.nim
+#nim:
+#	nim c -r -d:JULIA_ENABLE_THREADING=1 --passC:-fPIC --passC:-I/home/rcaillaud/julia-1.4.2/include/julia --clibdir:/home/rcaillaud/julia-1.4.2/lib --passL:-Wl,--export-dynamic --passL:-lm --passL:-Wl,-rpath,/home/rcaillaud/julia-1.4.2/lib/ --passL:-Wl,-rpath,/home/rcaillaud/julia-1.4.2/lib/julia --passL:-ljulia embedding.nim
 
 
 $(BIN)/embedding$(EXE): $(SRCDIR)/embedding.c

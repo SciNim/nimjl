@@ -6,14 +6,39 @@ JULIA_DEFINE_FAST_TLS() // only define this once, in an executable (not in a sha
 int main(int argc, char *argv[])
 {
     /* required: setup the Julia context */
+    printf("jl_init \n");
     jl_init();
 
     {
+      printf("\neval_string \n");
       /* run Julia commands */
       jl_eval_string("print(sqrt(2.0))");
+      printf("\n");
+    }
+    {
+        printf("\njl_call1\n");
+        jl_function_t *func = jl_get_function(jl_base_module, "sqrt");
+        jl_value_t* argument = jl_box_float64(2.0);
+        jl_value_t* ret = jl_call1(func, argument);
+        double cret = jl_unbox_float64(ret);
+        printf("cret=%f \n", cret);
+        double retDouble = jl_unbox_float64(ret);
+        printf("sqrt(2.0) in C: %e\n", retDouble);
+    }
+    {
+      printf("\njl_call\n");
+      /* test jl_call */
+      jl_function_t *func = jl_get_function(jl_base_module, "sqrt");
+      jl_value_t *argument = jl_box_float64(4.0);
+      jl_value_t *ret = jl_call(func, (jl_value_t**)&argument, 1);
+      int cret = jl_unbox_int32(ret);
+      printf("cret=%i \n", cret);
+      double cargs = jl_unbox_float64(argument);
+      printf("cargs= %f \n", cargs);
     }
     {
       // 1D arrays
+      printf("\n1D Array\n");
 
       jl_value_t* array_type = jl_apply_array_type((jl_value_t*)jl_float64_type, 1);
       jl_array_t* x          = jl_alloc_array_1d(array_type, 10);
@@ -29,7 +54,6 @@ int main(int argc, char *argv[])
 
       jl_function_t *func  = jl_get_function(jl_base_module, "reverse!");
       jl_call(func, (jl_value_t**) &x, 1);
-      printf("\n");
       printf("x = [");
       for (i = 0; i < jl_array_len(x); i++)
           printf("%e ", xData[i]);
