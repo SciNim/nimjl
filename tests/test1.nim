@@ -1,6 +1,5 @@
 import unittest
 import nimjl
-import arraymancer
 
 echo "init"
 nimjl_init()
@@ -88,52 +87,13 @@ test "jl_array_1d_own_buffer":
   for i in 0..<ARRAY_LEN:
     check unchecked_orig[i] == (ARRAY_LEN - i - 1).float
 
-test "jl_array_2d_own_buffer":
-  let dims = @[6, 5]
-  var orig : Tensor[float64] = newTensor[float64](30)
-  for coord, x in orig.mpairs:
-    x = coord[0].float
-
-  let unchecked_orig = cast[ptr UncheckedArray[float64]](orig.data)
-
-  var array_type : nimjl_value  = nimjl_apply_array_type_float64(1)
-  var x = nimjl_ptr_to_array(array_type, unchecked_orig, ARRAY_LEN.csize_t, 0)
-
-  check ARRAY_LEN == nimjl_array_len(x)
-
-  for i in 0..<nimjl_array_len(x):
-    unchecked_orig[i] = i.float64
-
-
-  var reverse = nimjl_get_function("reverse!")
-  var res = nimjl_call(reverse, x.addr, 1)
-  var resData = cast[ptr UncheckedArray[float64]](nimjl_array_data(x))
-
-  check resData == unchecked_orig
-
-  for i in 0..<ARRAY_LEN:
-    check unchecked_orig[i] == (ARRAY_LEN - i - 1).float
-
-
-
-  #block:
-  #  let ARRAY_LEN = 10
-  #  var orig : seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-  #  let unchecked_orig = cast[ptr UncheckedArray[float64]](orig[0].addr)
-  #  var array_type : nimjl_value  = nimjl_apply_array_type_float64(2)
-  #  var x = nimjl_alloc_array_2d(array_type, 10, 12)
-
-  #  nimjl_gc_push1(x.addr)
-
-  #  var xData = cast[ptr float64](nimjl_array_data(x))
-
-  #  for i in 0..<nimjl_array_len(x):
-  #    xData[i] = i.float64
-
-
-  #  nimjl_gc_pop()
-
-
+test "include test.jl":
+  discard nimjl_eval_string("include(\"tests/test.jl\")")
+  var ret : nimjl_value = nimjl_eval_string("testMeBaby()")
+  var retData = cast[ptr UncheckedArray[float64]](ret)
+  echo "Result ?"
+  for i in 0..<nimjl_array_len(ret):
+    echo retData[i]
 
 echo "exithook"
 ## atexit cause stack overflow ?

@@ -10,33 +10,59 @@ int main(int argc, char *argv[])
   jl_init();
 
   {
+    // jl_module_t* aaa_module = jl_new_module(jl_symbol("AAA"));
+    // printf("%p \n", aaa_module);
+    // jl_function_t *func = jl_get_function(aaa_module, "testMeBaby");
+    // printf("%p \n", func);
+  }
+  {
+    printf("include test.jl \n");
+    jl_eval_string("include(\"test.jl\")");
+    jl_value_t* ret = jl_eval_string("AAA.testMeBaby()");
+    printf("len(ret)=%li \n", jl_array_len(ret));
+    printf("rank %i = jl_array_rank(x) \n" , jl_array_rank((jl_value_t*)ret));
+    printf("jl_array_dim(x, 0) = %li \n"   , jl_array_dim(ret, 0));
+    printf("jl_array_dim(x, 1) = %li \n"   , jl_array_dim(ret, 1));
+
+    int d1 = jl_array_dim(ret, 0);
+    int d2 = jl_array_dim(ret, 1);
+    // JL_GC_PUSH1(&ret);
+    int* xData = jl_array_data(ret);
+    printf("Result ?\n");
+
+    printf("x = [");
+    for (int i = 0; i < d1; i++)
+      for (int j = 0; j < d2; j++)
+        printf("%i ", xData[i*d2+j]);
+    printf("]\n");
+
+    // JL_GC_POP();
+  }
+
+  {
     printf("\neval_string \n");
     /* run Julia commands */
     jl_eval_string("print(sqrt(2.0))");
     printf("\n");
   }
+
   {
     printf("\njl_call1\n");
     jl_function_t *func = jl_get_function(jl_base_module, "sqrt");
-    printf("%p \n", func);
     jl_value_t* argument = jl_box_float64(2.0);
     jl_value_t* ret = jl_call1(func, argument);
     double cret = jl_unbox_float64(ret);
     printf("cret=%f \n", cret);
-    double retDouble = jl_unbox_float64(ret);
-    printf("sqrt(2.0) in C: %e\n", retDouble);
   }
   {
     printf("\njl_call\n");
-    /* test jl_call */
     jl_function_t *func = jl_get_function(jl_base_module, "sqrt");
     jl_value_t *argument = jl_box_float64(4.0);
     jl_value_t *ret = jl_call(func, (jl_value_t**)&argument, 1);
-    int cret = jl_unbox_int32(ret);
-    printf("cret=%i \n", cret);
-    double cargs = jl_unbox_float64(argument);
-    printf("cargs= %f \n", cargs);
+    double cret = jl_unbox_float64(ret);
+    printf("cret=%f \n", cret);
   }
+
   {
     // 1D arrays
     printf("\n1D Array\n");
@@ -54,22 +80,37 @@ int main(int argc, char *argv[])
       xData[i] = i;
 
     jl_function_t *func  = jl_get_function(jl_base_module, "reverse!");
-    jl_call(func, (jl_value_t**) &x, 1);
+    jl_value_t* ret = jl_call(func, (jl_value_t**) &x, 1);
+
     printf("x = [");
     for (i = 0; i < jl_array_len(x); i++)
-      printf("%e ", xData[i]);
+      printf("%f ", xData[i]);
     printf("]\n");
+
+    printf("size_t %li = jl_array_len(x)\n", jl_array_len((jl_value_t*)x));
+    printf("rank %i = jl_array_rank(x) \n" , jl_array_rank((jl_value_t*)x));
+    printf("jl_array_dim(x, 0) = %li \n"   , jl_array_dim(x, 0));
+    printf("jl_array_dim(x, 1) = %li \n"   , jl_array_dim(x, 1));
+
     JL_GC_POP();
+
+    double* retData = jl_array_data(ret);
+    printf("retData = [");
+    for (i = 0; i < jl_array_len(x); i++)
+      printf("%f ", xData[i]);
+    printf("]\n");
   }
+
   {
     // 2D arrays
     printf("\n2D Array\n");
     int xData[5][6];
     for(int i = 0; i < 5; ++i) {
       for(int j = 0; j < 6; ++j) {
-        xData[i][j] = i + 5*j;
+        xData[i][j] = 6*i + j;
       }
     }
+
     printf("x = [");
     for(int i = 0; i < 5; ++i) {
       printf("[ ");
@@ -80,26 +121,17 @@ int main(int argc, char *argv[])
     }
     printf("]\n");
 
-
     jl_value_t* array_type = jl_apply_array_type((jl_value_t*)jl_float64_type, 2);
-    jl_value_t* int_type   = jl_apply_array_type((jl_value_t*)jl_int32_type, 1);
-
     jl_value_t* dims       = jl_eval_string("(5, 6)");
-
     jl_array_t* x          = jl_ptr_to_array(array_type, xData, dims, 0);
 
-    size_t i = jl_array_len((jl_value_t*)x);
-    printf("size_t %li = jl_array_len(x) \n", i);
-
-    int rank = jl_array_rank((jl_value_t*)x);
-    printf("rank %i = jl_array_rank(x) \n", rank);
-
-    printf("jl_array_dim(x, 0) = %li \n", jl_array_dim(x, 0));
-    printf("jl_array_dim(x, 1) = %li \n", jl_array_dim(x, 1));
+    printf("size_t %li = jl_array_len(x)\n", jl_array_len((jl_value_t*)x));
+    printf("rank %i = jl_array_rank(x) \n" , jl_array_rank((jl_value_t*)x));
+    printf("jl_array_dim(x, 0) = %li \n"   , jl_array_dim(x, 0));
+    printf("jl_array_dim(x, 1) = %li \n"   , jl_array_dim(x, 1));
 
     jl_function_t *func  = jl_get_function(jl_base_module, "transpose");
-
-    jl_value_t* res = jl_call(func, (jl_value_t**) &x, 1);
+    jl_value_t* res = jl_call(func, (jl_value_t**)&x, 1);
     int* resData = jl_array_data(x);
 
     printf("jl_array_dim(x, 0) = %li \n", jl_array_dim(x, 0));

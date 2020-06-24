@@ -68,13 +68,6 @@ proc nimjl_call2*(function: nimjl_func, arg1: pointer, arg2: pointer): pointer {
 
 proc nimjl_call3*(function: nimjl_func, arg1: pointer, arg2: pointer, arg3: pointer): pointer {.importc.}
 
-#proc nimjl_call*(function: nimjl_func, values: ptr nimjl_value, nargs: cint): nimjl_value {.importc.}
-#proc nimjl_call0*(function: nimjl_func): nimjl_value {.importc.}
-#proc nimjl_call1*(function: nimjl_func, arg: nimjl_value): nimjl_value {.importc.}
-#proc nimjl_call2*(function: nimjl_func, arg1: nimjl_value, arg2: nimjl_value): nimjl_value {.importc.}
-#proc nimjl_call3*(function: nimjl_func, arg1: nimjl_value, arg2: nimjl_value, arg3: nimjl_value): nimjl_value {.importc.}
-
-
 
 ## Array
 # Values will need to be cast
