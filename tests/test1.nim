@@ -88,9 +88,26 @@ test "jl_array_1d_own_buffer":
     check unchecked_orig[i] == (ARRAY_LEN - i - 1).float
 
 test "include test.jl":
-  discard nimjl_eval_string("include(\"tests/test.jl\")")
-  var ret : nimjl_value = nimjl_eval_string("testMeBaby()")
-  var retData = cast[ptr UncheckedArray[float64]](ret)
+  discard nimjl_eval_string("include(\"test.jl\")")
+  echo "0"
+  var local_func = nimjl_get_function("AAA.testMeBaby")
+  echo local_func.repr
+  echo "1"
+  var ret : nimjl_value = nimjl_eval_string("AAA.testMeBaby()")
+  var ex = nimjl_exception_occurred()
+  echo nimjl_typeof_str(ex)
+  echo ret.repr
+  echo "2"
+  var len_ret = nimjl_array_len(ret)
+  echo len_ret
+  echo "3"
+  var rank_ret = nimjl_array_rank(ret)
+  echo rank_ret
+  echo "4"
+  var data_ret : pointer = nimjl_array_data(ret)
+  echo data_ret.repr
+  echo "5"
+  var retData = cast[ptr UncheckedArray[float64]](data_ret)
   echo "Result ?"
   for i in 0..<nimjl_array_len(ret):
     echo retData[i]

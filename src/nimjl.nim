@@ -15,7 +15,8 @@ const JULIA_LINK_FLAG = ["-Wl,-rpath," & JULIA_LIB_PATH, "-Wl,-rpath," & JULIA_D
 ##Types
 
 type nimjl_value     *{.importc: "jl_value_t*", header: "julia.h".}     = pointer
-type nimjl_array = nimjl_value
+type nimjl_array* = nimjl_value
+type nimjl_datatype * {.importc: "jl_datatype_t", header: "julia.h"} = pointer
 #type nimjl_array     *{.importc: "jl_array_t", header: "julia.h".}      = pointer
 type nimjl_func      *{.importc: "jl_function_t *", header: "julia.h".} = distinct pointer
 #type nimjl_module    *{.importc: "jl_module_t *", header: "julia.h".}   = distinct pointer
@@ -140,3 +141,6 @@ proc nimjl_gc_pushargs*(a: ptr nimjl_value, n: csize_t) {.importc.}
 
 proc nimjl_gc_pop*() {.importc.}
 
+proc nimjl_exception_occurred*(): nimjl_value {.importc.}
+
+proc nimjl_typeof_str*(v: nimjl_value): cstring {.importc.}

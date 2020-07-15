@@ -8,24 +8,22 @@ int main(int argc, char *argv[])
   /* required: setup the Julia context */
   printf("jl_init \n");
   jl_init();
-
   {
-    // jl_module_t* aaa_module = jl_new_module(jl_symbol("AAA"));
-    // printf("%p \n", aaa_module);
-    // jl_function_t *func = jl_get_function(aaa_module, "testMeBaby");
-    // printf("%p \n", func);
+  //     jl_function_t *func = jl_get_function(jl_base_module, "AAA.testMeBaby");
+  //     jl_value_t* ret = jl_call0(func);
+
   }
+
   {
     printf("include test.jl \n");
     jl_eval_string("include(\"test.jl\")");
     jl_value_t* ret = jl_eval_string("AAA.testMeBaby()");
     printf("len(ret)=%li \n", jl_array_len(ret));
     printf("rank %i = jl_array_rank(x) \n" , jl_array_rank((jl_value_t*)ret));
-    printf("jl_array_dim(x, 0) = %li \n"   , jl_array_dim(ret, 0));
-    printf("jl_array_dim(x, 1) = %li \n"   , jl_array_dim(ret, 1));
 
     int d1 = jl_array_dim(ret, 0);
     int d2 = jl_array_dim(ret, 1);
+
     // JL_GC_PUSH1(&ret);
     int* xData = jl_array_data(ret);
     printf("Result ?\n");

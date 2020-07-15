@@ -186,6 +186,15 @@ void nimjl_gc_pop() {
   JL_GC_POP();
 }
 
+jl_value_t* nimjl_exception_occurred() {
+  return jl_exception_occurred();
+}
+
+char* nimjl_typeof_str(jl_value_t* v) {
+  return jl_typeof_str(v);
+}
+
+
 /////////////////////////////////////////////////////
 jl_value_t* testMeBaby() {
   nimjl_init();
