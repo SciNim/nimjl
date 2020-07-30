@@ -205,12 +205,13 @@ int external_module(int argc, char *argv[])
 
   {
     printf("include test.jl \n");
-    jl_eval_string("Base.include(Main, \"./test.jl\")");
-    // jl_eval_string("include(\"./test.jl\")");
+    // jl_eval_string("Base.include(Main, \"./test.jl\")");
+    jl_eval_string("include(\"./test.jl\")");
     printf("using custom_module \n");
-    jl_eval_string("using custom_module");
+    jl_eval_string("using .custom_module");
     {
         printf("dummy \n");
+        printf("##################################################### \n");
         // Call easy function
         jl_function_t *dummy= jl_get_function(jl_main_module, "dummy");
         if (dummy!= NULL)
@@ -225,18 +226,23 @@ int external_module(int argc, char *argv[])
         }
         jl_call0(dummy);
     } 
+
+    printf("##################################################### \n");
+    printf("##################################################### \n\n");
+
     {
-      printf("TestMeBaby\n");
+      printf("TestMeBaby \n");
+      printf("##################################################### \n");
       jl_function_t *func = jl_get_function(jl_main_module, "testMeBaby");
       // jl_function_t *func = jl_get_function(jl_main_module, "custom_module.testMeBaby");
 
       if (func != NULL)
       {
-        printf("func is not Null\n");
+        printf("testMeBaby is not Null\n");
       }
       else
       {
-        printf("func is null\n");
+        printf("testMeBaby is null\n");
         jl_atexit_hook(0);
         return 0;
       }
@@ -254,7 +260,14 @@ int external_module(int argc, char *argv[])
       for (int i = 0; i < length; i++)
         xData[i] = i * i;
 
+      for (int i = 0; i < 5; i++)
+        for (int j = 0; j < 6; j++)
+          printf("%lf ", xData[i * 6 + j]);
+
+      printf("\n");    
+
       jl_value_t *ret = jl_call1(func, (jl_value_t *)x);
+      JL_GC_PUSH1(&ret);
 
       printf("len(ret)=%li \n", jl_array_len(ret));
       printf("rank %i = jl_array_rank(x) \n", jl_array_rank((jl_value_t *)ret));
@@ -262,18 +275,83 @@ int external_module(int argc, char *argv[])
       int d1 = jl_array_dim(ret, 0);
       int d2 = jl_array_dim(ret, 1);
 
-      JL_GC_PUSH1(&ret);
-      int *xResult = jl_array_data(ret);
-      printf("Result ?\n");
-
-      printf("x = [");
+      double *xResult = jl_array_data(ret);
+      printf("xResult = [");
       for (int i = 0; i < d1; i++)
         for (int j = 0; j < d2; j++)
-          printf("%i ", xResult[i * d2 + j]);
+          printf("%lf ", xResult[i * d2 + j]);
       printf("]\n");
       JL_GC_POP();
+
       free(existingArray);
     }
+
+    printf("##################################################### \n");
+    printf("##################################################### \n\n");
+
+    {
+      printf("MutateMeBaby\n");
+      printf("##################################################### \n");
+      jl_function_t *func = jl_get_function(jl_main_module, "mutateMeBaby!");
+      // jl_function_t *func = jl_get_function(jl_main_module, "custom_module.testMeBaby");
+
+      if (func != NULL)
+      {
+        printf("mutateMeBaby is not Null\n");
+      }
+      else
+      {
+        printf("mutateMeBaby is null\n");
+        jl_atexit_hook(0);
+        return 0;
+      }
+
+      // create a 2D array of length 30
+      int d1 = 5;
+      int d2 = 6;
+      double length = d1 * d2;
+      double *existingArray = (double *)malloc(sizeof(double) * length);
+
+      jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 2);
+      jl_value_t *dims = jl_eval_string("(5, 6)");
+      jl_array_t *x = jl_ptr_to_array(array_type, existingArray, dims, 0);
+
+      // fill in values 
+      double *xData = (double *)jl_array_data(x);
+      int index = 0;
+      for (int i = 0; i < d1; i++) {
+        for (int j = 0; j < d2; j++) {
+          xData[i * d2 + j] = ++index;
+        }
+      }
+      for (int i = 0; i < d1; i++) {
+        for (int j = 0; j < d2; j++) {
+          printf("%lf ", xData[i * d2 + j]);
+        }
+      }
+      printf("\n");
+
+
+      jl_value_t *ret = jl_call1(func, (jl_value_t *)x);
+      {
+        int d1 = jl_array_dim(x, 0);
+        int d2 = jl_array_dim(x, 1);
+        int len = jl_array_len(x);
+
+        printf("%i %i \n", d1, d2);
+        printf("len(ret)=%i \n", len);
+
+        for (int i = 0; i < d1; i++)
+          for (int j = 0; j < d2; j++)
+            printf("%f ", xData[i*d2 + j]);
+        printf("\n");    
+      }
+
+      free(existingArray);
+    }
+
+    printf("##################################################### \n");
+    printf("##################################################### \n\n");
 
     jl_atexit_hook(0);
     return 0;
