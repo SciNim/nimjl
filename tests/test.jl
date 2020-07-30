@@ -7,14 +7,15 @@ module custom_module
 
   function testMeBaby(A)
     println(A)
-    B = lmul!(10, A)
+    B = A .* A 
     println(B)
     return B
   end
 
   function mutateMeBaby!(A)
     println(A)
-    A = lmul!(10, A)
+    lmul!(10, A)
+    A[1] = 111.11
     println(A)
   end
 

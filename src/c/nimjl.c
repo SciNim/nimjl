@@ -38,8 +38,8 @@ jl_value_t* nimjl_box_float32(float value) { return jl_box_float32(value);}
 jl_value_t* nimjl_box_float64(double value) { return jl_box_float64(value);}
 
 // Call function
-jl_function_t* nimjl_get_function(const char* name) {
-  return jl_get_function(jl_base_module, name);
+jl_function_t* nimjl_get_function(jl_module_t* module, const char* name) {
+  return jl_get_function(module, name);
 }
 
 jl_value_t* nimjl_call(jl_function_t* f, jl_value_t* *args, int32_t nargs) {
@@ -195,17 +195,3 @@ char* nimjl_typeof_str(jl_value_t* v) {
 }
 
 
-/////////////////////////////////////////////////////
-jl_value_t* testMeBaby() {
-  nimjl_init();
-  printf("\nnimjl_call1\n");
-  jl_function_t *func = nimjl_get_function("sqrt");
-  printf("%p \n", func);
-  jl_value_t* argument = nimjl_box_float64(4.0);
-  jl_value_t* ret = nimjl_call1(func, argument);
-  double cret = nimjl_unbox_float64(ret);
-  printf("cret=%f \n", cret);
-  double retDouble = nimjl_unbox_float64(ret);
-  printf("sqrt(2.0) in C: %e\n", retDouble);
-  return argument;
-}

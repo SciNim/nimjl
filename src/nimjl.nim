@@ -15,12 +15,15 @@ const JULIA_LINK_FLAG = ["-Wl,-rpath," & JULIA_LIB_PATH, "-Wl,-rpath," & JULIA_D
 ##Types
 
 type nimjl_value     *{.importc: "jl_value_t*", header: "julia.h".}     = pointer
-type nimjl_array* = nimjl_value
-type nimjl_datatype * {.importc: "jl_datatype_t", header: "julia.h"} = pointer
-#type nimjl_array     *{.importc: "jl_array_t", header: "julia.h".}      = pointer
+type nimjl_array     *                                                  = nimjl_value
+type nimjl_datatype  *{.importc: "jl_datatype_t",   header: "julia.h"}  = distinct pointer
 type nimjl_func      *{.importc: "jl_function_t *", header: "julia.h".} = distinct pointer
-#type nimjl_module    *{.importc: "jl_module_t *", header: "julia.h".}   = distinct pointer
-#type nimjl_datatype  *{.importc: "jl_datatype_t*", header: "julia.h".}  = distinct pointer
+type nimjl_module    *{.importc: "jl_module_t *",   header: "julia.h".} = distinct pointer
+
+var jl_main_module *{.importc:"jl_main_module", header:"julia.h".} : nimjl_module  
+var jl_core_module *{.importc:"jl_core_module", header:"julia.h".} : nimjl_module 
+var jl_base_module *{.importc:"jl_base_module", header:"julia.h".} : nimjl_module 
+var jl_top_module  *{.importc:"jl_top_module",  header:"julia.h".} : nimjl_module 
 
 ## Box & Unbox
 
@@ -57,7 +60,7 @@ proc nimjl_box_uint8*   (value: uint8)    : nimjl_value  {.importc.}
 
 
 ## Call functions
-proc nimjl_get_function*(name: cstring): nimjl_func {.importc.}
+proc nimjl_get_function*(module: nimjl_module, name: cstring): nimjl_func {.importc.}
 
 proc nimjl_call*(function: nimjl_func, values: pointer, nargs: cint): pointer {.importc.}
 
