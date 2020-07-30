@@ -89,11 +89,14 @@ test "jl_array_1d_own_buffer":
 
 test "include test.jl":
   discard nimjl_eval_string("include(\"test.jl\")")
+  #discard nimjl_eval_string("include(\"tests/test.jl\")")
   echo "0"
   var local_func = nimjl_get_function("AAA.testMeBaby")
   echo local_func.repr
   echo "1"
   var ret : nimjl_value = nimjl_eval_string("AAA.testMeBaby()")
+  nimjl_gc_push1(ret.addr)
+
   var ex = nimjl_exception_occurred()
   echo nimjl_typeof_str(ex)
   echo ret.repr
@@ -111,6 +114,8 @@ test "include test.jl":
   echo "Result ?"
   for i in 0..<nimjl_array_len(ret):
     echo retData[i]
+
+  nimjl_gc_pop()
 
 echo "exithook"
 ## atexit cause stack overflow ?
