@@ -128,9 +128,7 @@ test "external_module : mutateMeBaby":
   let orig_ptr = cast[ptr UncheckedArray[float64]](orig[0].addr)
   var array_type : nimjl_value  = nimjl_apply_array_type_float64(1)
   var xArray= nimjl_ptr_to_array_1d(array_type, orig_ptr, orig.len.csize_t, 1)
-  echo "############"
   var ret : nimjl_value = nimjl_call1(mutateMeBaby, xArray)
-  echo "*************"
 
   var len_ret = nimjl_array_len(xArray)
   check len_ret == orig.len
@@ -141,9 +139,8 @@ test "external_module : mutateMeBaby":
   var data_ret : nimjl_array = nimjl_array_data(xArray)
   var seqData : seq[float64] = newSeq[float64](len_ret)
   copyMem(seqData[0].unsafeAddr, data_ret, len_ret*sizeof(float64))
-  echo seqData
   check seqData == @[111.11, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0]
 
 echo "exithook"
 ## atexit cause stack overflow ?
-# nimjl_atexit_hook(0)
+nimjl_atexit_hook(0)

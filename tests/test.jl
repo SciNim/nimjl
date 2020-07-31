@@ -6,17 +6,17 @@ module custom_module
   end
 
   function testMeBaby(A)
-    println(A)
+    println("From Julia: ", A)
     B = A .* A 
-    println(B)
+    println("From Julia: ", B)
     return B
   end
 
   function mutateMeBaby!(A)
-    println(A)
+    println("From Julia: ", A)
     lmul!(10, A)
     A[1] = 111.11
-    println(A)
+    println("From Julia: ", A)
   end
 
   export dummy

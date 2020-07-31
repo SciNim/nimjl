@@ -5,7 +5,7 @@
 
 // eval
 void nimjl_init() {jl_init();}
-void nimjl_atexit_hook(int code) {nimjl_atexit_hook(code);}
+void nimjl_atexit_hook(int code) {jl_atexit_hook(code);}
 
 // eval_string
 jl_value_t* nimjl_eval_string(char* code) { return jl_eval_string(code);}
