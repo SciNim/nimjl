@@ -24,7 +24,7 @@ void simple_eval_string()
   printf("%s -- BEGIN \n", __FUNCTION__);
   jl_init();
   // run Julia commands
-  jl_value_t* ret1 = jl_eval_string("println(sqrt(2.0))");
+  jl_value_t *ret1 = jl_eval_string("println(sqrt(2.0))");
   printf("ret1 = %p (should be nil)\n", ret1);
   jl_atexit_hook(0);
   printf("%s -- END \n\n", __FUNCTION__);
@@ -54,114 +54,112 @@ void simple_call()
   return;
 }
 
-void arrays_stuff()
+void arrays_1D()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
   jl_init();
-  {
-    // 1D arrays
-    printf("1D Array\n");
 
-    jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
-    jl_array_t *x = jl_alloc_array_1d(array_type, 10);
-    // JL_GC_PUSH* is required here to ensure that `x` is not deleted before
-    // (aka, is gc-rooted until) the program reaches the corresponding JL_GC_POP()
-    JL_GC_PUSH1(&x);
+  jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
+  jl_array_t *x = jl_alloc_array_1d(array_type, 10);
+  // JL_GC_PUSH* is required here to ensure that `x` is not deleted before
+  // (aka, is gc-rooted until) the program reaches the corresponding JL_GC_POP()
+  JL_GC_PUSH1(&x);
 
-    double *xData = jl_array_data(x);
+  double *xData = jl_array_data(x);
 
-    size_t i;
-    for (i = 0; i < jl_array_len(x); i++)
-      xData[i] = i;
+  size_t i;
+  for (i = 0; i < jl_array_len(x); i++)
+    xData[i] = i;
 
-    jl_function_t *func = jl_get_function(jl_base_module, "reverse!");
-    jl_value_t *ret = jl_call(func, (jl_value_t **)&x, 1);
+  jl_function_t *func = jl_get_function(jl_base_module, "reverse!");
+  jl_value_t *ret = jl_call(func, (jl_value_t **)&x, 1);
 
-    printf("x = [");
-    for (i = 0; i < jl_array_len(x); i++)
-      printf("%f ", xData[i]);
-    printf("]\n");
+  printf("x = [");
+  for (i = 0; i < jl_array_len(x); i++)
+    printf("%f ", xData[i]);
+  printf("]\n");
 
-    printf("size_t %li = jl_array_len(x)\n", jl_array_len((jl_value_t *)x));
-    printf("rank %i = jl_array_rank(x) \n", jl_array_rank((jl_value_t *)x));
-    printf("jl_array_dim(x, 0) = %li \n", jl_array_dim(x, 0));
-    printf("jl_array_dim(x, 1) = %li \n", jl_array_dim(x, 1));
+  printf("size_t %li = jl_array_len(x)\n", jl_array_len((jl_value_t *)x));
+  printf("rank %i = jl_array_rank(x) \n", jl_array_rank((jl_value_t *)x));
+  printf("jl_array_dim(x, 0) = %li \n", jl_array_dim(x, 0));
+  printf("jl_array_dim(x, 1) = %li \n", jl_array_dim(x, 1));
 
-    JL_GC_POP();
+  JL_GC_POP();
 
-    double *retData = jl_array_data(ret);
-    printf("retData = [");
-    for (i = 0; i < jl_array_len(x); i++)
-      printf("%f ", xData[i]);
-    printf("]\n");
-  }
+  double *retData = jl_array_data(ret);
+  printf("retData = [");
+  for (i = 0; i < jl_array_len(x); i++)
+    printf("%f ", xData[i]);
+  printf("]\n");
 
-  {
-    // 2D arrays
-    printf("\n2D Array\n");
-    int xData[5][6];
-    for (int i = 0; i < 5; ++i)
-    {
-      for (int j = 0; j < 6; ++j)
-      {
-        xData[i][j] = 6 * i + j;
-      }
-    }
-
-    printf("x = [");
-    for (int i = 0; i < 5; ++i)
-    {
-      printf("[ ");
-      for (int j = 0; j < 6; ++j)
-      {
-        printf("%i ", xData[i][j]);
-      }
-      printf("]");
-    }
-    printf("]\n");
-
-    jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 2);
-    jl_value_t *dims = jl_eval_string("(5, 6)");
-    jl_array_t *x = jl_ptr_to_array(array_type, xData, dims, 0);
-
-    printf("size_t %li = jl_array_len(x)\n", jl_array_len((jl_value_t *)x));
-    printf("rank %i = jl_array_rank(x) \n", jl_array_rank((jl_value_t *)x));
-    printf("jl_array_dim(x, 0) = %li \n", jl_array_dim(x, 0));
-    printf("jl_array_dim(x, 1) = %li \n", jl_array_dim(x, 1));
-
-    jl_function_t *func = jl_get_function(jl_base_module, "transpose");
-    jl_value_t *res = jl_call(func, (jl_value_t **)&x, 1);
-    int *resData = jl_array_data(x);
-
-    printf("jl_array_dim(x, 0) = %li \n", jl_array_dim(x, 0));
-    printf("jl_array_dim(x, 1) = %li \n", jl_array_dim(x, 1));
-
-    printf("x = [");
-    for (int i = 0; i < 5; ++i)
-    {
-      printf("[ ");
-      for (int j = 0; j < 6; ++j)
-      {
-        printf("%i ", resData[6 * i + j]);
-      }
-      printf("]");
-    }
-    printf("]\n");
-  }
   printf("\n");
   jl_atexit_hook(0);
   printf("%s -- END \n\n", __FUNCTION__);
   return;
 }
 
-void external_module()
+void arrays_2D()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
-  // required: setup the Julia context
   jl_init();
+  // 2D arrays
+  int xData[5][6];
+  for (int i = 0; i < 5; ++i)
+  {
+    for (int j = 0; j < 6; ++j)
+    {
+      xData[i][j] = 6 * i + j;
+    }
+  }
 
-  jl_eval_string("include(\"test.jl\")");
-  jl_eval_string("using .custom_module");
+  printf("x = [");
+  for (int i = 0; i < 5; ++i)
+  {
+    printf("[ ");
+    for (int j = 0; j < 6; ++j)
+    {
+      printf("%i ", xData[i][j]);
+    }
+    printf("]");
+  }
+  printf("]\n");
+
+  jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 2);
+  jl_value_t *dims = jl_eval_string("(5, 6)");
+  jl_array_t *x = jl_ptr_to_array(array_type, xData, dims, 0);
+
+  printf("size_t %li = jl_array_len(x)\n", jl_array_len((jl_value_t *)x));
+  printf("rank %i = jl_array_rank(x) \n", jl_array_rank((jl_value_t *)x));
+  printf("jl_array_dim(x, 0) = %li \n", jl_array_dim(x, 0));
+  printf("jl_array_dim(x, 1) = %li \n", jl_array_dim(x, 1));
+
+  jl_function_t *func = jl_get_function(jl_base_module, "transpose");
+  jl_value_t *res = jl_call(func, (jl_value_t **)&x, 1);
+  int *resData = jl_array_data(x);
+
+  printf("jl_array_dim(x, 0) = %li \n", jl_array_dim(x, 0));
+  printf("jl_array_dim(x, 1) = %li \n", jl_array_dim(x, 1));
+
+  printf("x = [");
+  for (int i = 0; i < 5; ++i)
+  {
+    printf("[ ");
+    for (int j = 0; j < 6; ++j)
+    {
+      printf("%i ", resData[6 * i + j]);
+    }
+    printf("]");
+  }
+  printf("]\n");
+  printf("\n");
+  jl_atexit_hook(0);
+  printf("%s -- END \n\n", __FUNCTION__);
+  return;
+}
+
+static void external_module_dummy()
+{
+  printf("%s -- BEGIN \n", __FUNCTION__);
   {
     printf("dummy \n");
     // Call easy function
@@ -173,11 +171,18 @@ void external_module()
     else
     {
       printf("dummy is null\n");
-      jl_atexit_hook(0);
       return;
     }
     jl_call0(dummy);
   }
+  printf("\n");
+  printf("%s -- END \n\n", __FUNCTION__);
+  return;
+}
+
+static void external_module_squareMeBaby()
+{
+  printf("%s -- BEGIN \n", __FUNCTION__);
   {
     printf("\nsquareMeBaby \n");
     jl_function_t *func = jl_get_function(jl_main_module, "squareMeBaby");
@@ -189,7 +194,6 @@ void external_module()
     else
     {
       printf("squareMeBaby is null\n");
-      jl_atexit_hook(0);
       return;
     }
 
@@ -235,7 +239,6 @@ void external_module()
     if (!ret)
     {
       printf("ret is %p \n", ret);
-      jl_atexit_hook(0);
       return;
     }
     {
@@ -253,6 +256,15 @@ void external_module()
     }
     free(existingArray);
   }
+  printf("\n");
+  printf("%s -- END \n\n", __FUNCTION__);
+  return;
+}
+
+static void external_module_mutateMeByTen()
+{
+  printf("%s -- BEGIN \n", __FUNCTION__);
+  // required: setup the Julia context
   {
     printf("\nmutateMeByTen\n");
     jl_function_t *func = jl_get_function(jl_main_module, "mutateMeByTen!");
@@ -264,7 +276,6 @@ void external_module()
     else
     {
       printf("mutateMeByTen is null\n");
-      jl_atexit_hook(0);
       return;
     }
 
@@ -301,7 +312,6 @@ void external_module()
     if (!ret)
     {
       printf("ret is null \n");
-      jl_atexit_hook(0);
       return;
     }
     {
@@ -318,18 +328,28 @@ void external_module()
       printf("\n");
     }
   }
-  printf("\n\n");
-  jl_atexit_hook(0);
+  printf("\n");
   printf("%s -- END \n\n", __FUNCTION__);
+  return;
+}
+
+void external_module()
+{
+  jl_init();
+  jl_eval_string("include(\"test.jl\")");
+  jl_eval_string("using .custom_module");
+  external_module_dummy();
+  external_module_squareMeBaby();
+  external_module_mutateMeByTen();
+  jl_atexit_hook(0);
   return;
 }
 
 int main(int argc, char *argv[])
 {
-  for(int i=0; i<5; ++i) {
-    simple_eval_string();
-    simple_call();
-    arrays_stuff();
-    // external_module();
-  }
+  simple_eval_string();
+  simple_call();
+  arrays_1D();
+  arrays_2D();
+  external_module();
 }
