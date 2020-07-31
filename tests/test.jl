@@ -2,7 +2,7 @@ module custom_module
   using LinearAlgebra
 
   function dummy()
-    println("Hello world from dummy")
+    println("Julia says... Hello, world ! Function dummy() from module custom_module has been executed !")
   end
 
   function testMeBaby(A)
