@@ -225,7 +225,7 @@ int external_module(int argc, char *argv[])
           return 0;
         }
         jl_call0(dummy);
-    } 
+    }
 
     printf("##################################################### \n");
     printf("##################################################### \n\n");
@@ -264,7 +264,7 @@ int external_module(int argc, char *argv[])
         for (int j = 0; j < 6; j++)
           printf("%lf ", xData[i * 6 + j]);
 
-      printf("\n");    
+      printf("\n");
 
       jl_value_t *ret = jl_call1(func, (jl_value_t *)x);
       JL_GC_PUSH1(&ret);
@@ -316,7 +316,7 @@ int external_module(int argc, char *argv[])
       jl_value_t *dims = jl_eval_string("(5, 6)");
       jl_array_t *x = jl_ptr_to_array(array_type, existingArray, dims, 0);
 
-      // fill in values 
+      // fill in values
       double *xData = (double *)jl_array_data(x);
       int index = 0;
       for (int i = 0; i < d1; i++) {
@@ -344,7 +344,7 @@ int external_module(int argc, char *argv[])
         for (int i = 0; i < d1; i++)
           for (int j = 0; j < d2; j++)
             printf("%f ", xData[i*d2 + j]);
-        printf("\n");    
+        printf("\n");
       }
 
       free(existingArray);

@@ -1,7 +1,7 @@
 import os
 # Const julia path
 const C_NIMJL = "c/nimjl.c"
-const JULIA_PATH = getEnv("JULIA_PATH") & "/" 
+const JULIA_PATH = getEnv("JULIA_PATH") & "/"
 const JULIA_INCLUDES_PATH = JULIA_PATH & "include/julia"
 const JULIA_LIB_PATH = JULIA_PATH & "lib/"
 const JULIA_DEPLIB_PATH = JULIA_PATH & "lib/julia"
@@ -21,10 +21,10 @@ type nimjl_datatype  *{.importc: "jl_datatype_t",   header: "julia.h"}  = pointe
 type nimjl_func      *{.importc: "jl_function_t *", header: "julia.h".} = pointer
 type nimjl_module    *{.importc: "jl_module_t *",   header: "julia.h".} = pointer
 
-var jl_main_module *{.importc:"jl_main_module", header:"julia.h".} : nimjl_module  
-var jl_core_module *{.importc:"jl_core_module", header:"julia.h".} : nimjl_module 
-var jl_base_module *{.importc:"jl_base_module", header:"julia.h".} : nimjl_module 
-var jl_top_module  *{.importc:"jl_top_module",  header:"julia.h".} : nimjl_module 
+var jl_main_module *{.importc:"jl_main_module", header:"julia.h".} : nimjl_module
+var jl_core_module *{.importc:"jl_core_module", header:"julia.h".} : nimjl_module
+var jl_base_module *{.importc:"jl_base_module", header:"julia.h".} : nimjl_module
+var jl_top_module  *{.importc:"jl_top_module",  header:"julia.h".} : nimjl_module
 
 ## Box & Unbox
 

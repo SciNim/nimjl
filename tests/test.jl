@@ -1,4 +1,4 @@
-module custom_module 
+module custom_module
   using LinearAlgebra
 
   function dummy()
@@ -7,7 +7,7 @@ module custom_module
 
   function testMeBaby(A)
     println("From Julia: ", A)
-    B = A .* A 
+    B = A .* A
     println("From Julia: ", B)
     return B
   end
@@ -15,7 +15,6 @@ module custom_module
   function mutateMeBaby!(A)
     println("From Julia: ", A)
     lmul!(10, A)
-    A[1] = 111.11
     println("From Julia: ", A)
   end
 
