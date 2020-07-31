@@ -26,7 +26,7 @@ EXE := $(suffix $(abspath $(JULIA)))
 # get compiler and linker flags. (see: `contrib/julia-config.jl`)
 JULIA_CONFIG := $(JULIA) -e 'include(joinpath(Sys.BINDIR, Base.DATAROOTDIR, "julia", "julia-config.jl"))' --
 CPPFLAGS_ADD :=
-CFLAGS_ADD = $(shell $(JULIA_CONFIG) --cflags)
+CFLAGS_ADD = $(shell $(JULIA_CONFIG) --cflags) -g
 $(info $(CFLAGS_ADD))
 LDFLAGS_ADD = -lm $(shell $(JULIA_CONFIG) --ldflags --ldlibs)
 $(info $(LDFLAGS_ADD))
@@ -37,10 +37,6 @@ DEBUGFLAGS += -g
 
 release: $(BIN)/embedding$(EXE)
 debug:   $(BIN)/embedding-debug$(EXE)
-
-#nim:
-#	nim c -r -d:JULIA_ENABLE_THREADING=1 --passC:-fPIC --passC:-I/home/rcaillaud/julia-1.4.2/include/julia --clibdir:/home/rcaillaud/julia-1.4.2/lib --passL:-Wl,--export-dynamic --passL:-lm --passL:-Wl,-rpath,/home/rcaillaud/julia-1.4.2/lib/ --passL:-Wl,-rpath,/home/rcaillaud/julia-1.4.2/lib/julia --passL:-ljulia embedding.nim
-
 
 $(BIN)/embedding$(EXE): $(SRCDIR)/embedding.c
 	$(CC) $^ -o $@ $(CPPFLAGS_ADD) $(CPPFLAGS) $(CFLAGS_ADD) $(CFLAGS) $(LDFLAGS_ADD) $(LDFLAGS)

@@ -84,10 +84,9 @@ proc nimjl_call3*(function: nimjl_func, arg1: pointer, arg2: pointer,
 
 ## Array
 # Values will need to be cast
-# is it possible to
 proc nimjl_array_data*(values: nimjl_array): pointer {.importc.}
 
-proc nimjl_array_dim*(a: nimjl_array): cint {.importc.}
+proc nimjl_array_dim*(a: nimjl_array, dim: cint): cint {.importc.}
 
 proc nimjl_array_len*(a: nimjl_array): cint {.importc.}
 

@@ -5,20 +5,27 @@ module custom_module
     println("Julia says... Hello, world ! Function dummy() from module custom_module has been executed !")
   end
 
-  function testMeBaby(A)
+  function squareMeBaby(A)
     println("From Julia: ", A)
     B = A .* A
     println("From Julia: ", B)
     return B
   end
 
-  function mutateMeBaby!(A)
+  function mutateMeByTen!(A)
     println("From Julia: ", A)
     lmul!(10, A)
     println("From Julia: ", A)
   end
 
+  function printArray(A)
+    println(ndims(A))
+    println(size(A))
+    println(length(A))
+  end
+
   export dummy
-  export testMeBaby
-  export mutateMeBaby!
+  export squareMeBaby
+  export mutateMeByTen!
+  export printArray
 end
