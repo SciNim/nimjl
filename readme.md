@@ -1,9 +1,6 @@
 # Nim-Julia bridge 
 
-This is repo is a WIP.
-
-You may need to update your Julia installation location in the Makefile.
-This is a WIP so far only the makefile and embedding.nim are relevant.
+This is repo is a WIP to be able to call Julia function from Nim using the C-API of Julia.
 
 # Prerequisite
 
