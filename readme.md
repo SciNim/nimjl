@@ -1,4 +1,6 @@
-# Nim-Julia bridge WIP
+# Nim-Julia bridge 
+
+This is repo is a WIP.
 
 You may need to update your Julia installation location in the Makefile.
 This is a WIP so far only the makefile and embedding.nim are relevant.
@@ -19,3 +21,11 @@ How to embed Julia w/ C :
 
 * https://github.com/JuliaLang/julia/tree/master/test/embedding
 
+## TODO List
+
+* Tuples API
+* Pass complex struct / object from Nim to Julia & vice-versa
+* Wrap proc for sequence / Tensor to nijl_array & nimjl_array to seq / Tensor conversion
+* Macro that wrap box / unbox API
+* Wrap using external Julia module
+* Macro for calling julia function without intermediate code
