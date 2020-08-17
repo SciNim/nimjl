@@ -213,18 +213,8 @@ static void external_module_squareMeBaby()
     // fill in values
     double *xData = (double *)jl_array_data(xArray);
     for (int i = 0; i < length; i++)
-      xData[i] = i * i;
-    jl_function_t *printArray = jl_get_function(jl_main_module, "printArray");
-    if (printArray)
-    {
-      printf("printArray not Nil \n");
-    }
-    jl_value_t *printArrayRes = jl_call1(printArray, (jl_value_t *)xArray);
-    if (!printArrayRes)
-    {
-      printf("xArray Error \n");
-      return;
-    }
+      xData[i] = i;
+
     {
       int d1 = jl_array_dim(xArray, 0);
       int d2 = jl_array_dim(xArray, 1);
@@ -232,18 +222,13 @@ static void external_module_squareMeBaby()
 
       printf("dims(xArray, 0) = %i, dims(xArray, 1) = %i \n", d1, d2);
       printf("len(xArray)=%i \n", len);
-
-      for (int i = 0; i < d1; i++)
-        for (int j = 0; j < d2; j++)
-          printf("xArray[%i, %i] = %f \n", i, j, xData[i * d2 + j]);
-      printf("\n");
     };
 
     printf("\n");
     jl_value_t *ret = jl_call1(func, (jl_value_t *)xArray);
     if (!ret)
     {
-      printf("ret is %p \n", ret);
+      printf("ret is %p \n\n", ret);
       return;
     }
     {
@@ -316,7 +301,7 @@ static void external_module_mutateMeByTen()
     jl_value_t *ret = jl_call1(func, (jl_value_t *)xArray);
     if (!ret)
     {
-      printf("ret is null \n");
+      printf("ret is %p \n\n", ret);
       return;
     }
     {
