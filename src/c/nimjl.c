@@ -124,23 +124,26 @@ jl_array_t *nimjl_alloc_array_3d(jl_value_t *atype, size_t nr, size_t nc, size_t
   return jl_alloc_array_3d(atype, nr, nc, z);
 }
 // Array type
-jl_value_t *nimjl_apply_array_type(jl_value_t *type, size_t dim)
-{
-  return jl_apply_array_type(type, dim);
-}
+// jl_value_t *nimjl_apply_array_type(jl_value_t *type, size_t dim)
+// {
+//   return jl_apply_array_type(type, dim);
+// }
 
 jl_value_t *nimjl_apply_array_type_int8(size_t dim)
 {
   return jl_apply_array_type(jl_int8_type, dim);
 }
+
 jl_value_t *nimjl_apply_array_type_int16(size_t dim)
 {
   return jl_apply_array_type(jl_int16_type, dim);
 }
+
 jl_value_t *nimjl_apply_array_type_int32(size_t dim)
 {
   return jl_apply_array_type(jl_int32_type, dim);
 }
+
 jl_value_t *nimjl_apply_array_type_int64(size_t dim)
 {
   return jl_apply_array_type(jl_int64_type, dim);
@@ -150,14 +153,17 @@ jl_value_t *nimjl_apply_array_type_uint8(size_t dim)
 {
   return jl_apply_array_type(jl_uint8_type, dim);
 }
+
 jl_value_t *nimjl_apply_array_type_uint16(size_t dim)
 {
   return jl_apply_array_type(jl_uint16_type, dim);
 }
+
 jl_value_t *nimjl_apply_array_type_uint32(size_t dim)
 {
   return jl_apply_array_type(jl_uint32_type, dim);
 }
+
 jl_value_t *nimjl_apply_array_type_uint64(size_t dim)
 {
   return jl_apply_array_type(jl_uint64_type, dim);
@@ -167,6 +173,7 @@ jl_value_t *nimjl_apply_array_type_float32(size_t dim)
 {
   return jl_apply_array_type(jl_float32_type, dim);
 }
+
 jl_value_t *nimjl_apply_array_type_float64(size_t dim)
 {
   return jl_apply_array_type(jl_float64_type, dim);
@@ -176,6 +183,7 @@ jl_value_t *nimjl_apply_array_type_bool(size_t dim)
 {
   return jl_apply_array_type(jl_bool_type, dim);
 }
+
 jl_value_t *nimjl_apply_array_type_char(size_t dim)
 {
   return jl_apply_array_type(jl_char_type, dim);

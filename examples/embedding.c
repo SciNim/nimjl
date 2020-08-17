@@ -103,12 +103,12 @@ void arrays_2D()
   printf("%s -- BEGIN \n", __FUNCTION__);
   jl_init();
   // 2D arrays
-  int xData[5][6];
+  double xData[5][5];
   for (int i = 0; i < 5; ++i)
   {
-    for (int j = 0; j < 6; ++j)
+    for (int j = 0; j < 5; ++j)
     {
-      xData[i][j] = 6 * i + j;
+      xData[i][j] = 5 * i + j;
     }
   }
 
@@ -116,37 +116,42 @@ void arrays_2D()
   for (int i = 0; i < 5; ++i)
   {
     printf("[ ");
-    for (int j = 0; j < 6; ++j)
+    for (int j = 0; j < 5; ++j)
     {
-      printf("%i ", xData[i][j]);
+      printf("%f ", xData[i][j]);
     }
     printf("]");
   }
   printf("]\n");
 
   jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 2);
-  jl_value_t *dims = jl_eval_string("(5, 6)");
+  jl_value_t *dims = jl_eval_string("(5, 5)");
   jl_array_t *x = jl_ptr_to_array(array_type, xData, dims, 0);
 
   printf("size_t %li = jl_array_len(x)\n", jl_array_len((jl_value_t *)x));
   printf("rank %i = jl_array_rank(x) \n", jl_array_rank((jl_value_t *)x));
+
   printf("jl_array_dim(x, 0) = %li \n", jl_array_dim(x, 0));
   printf("jl_array_dim(x, 1) = %li \n", jl_array_dim(x, 1));
 
-  jl_function_t *func = jl_get_function(jl_base_module, "transpose");
+  jl_function_t *func = jl_get_function(jl_base_module, "rot180");
+  if(!func) {
+    printf("func is NULL\n");
+    assert(0);
+  }
   jl_value_t *res = jl_call(func, (jl_value_t **)&x, 1);
-  int *resData = jl_array_data(x);
+  double*resData = jl_array_data(res);
 
-  printf("jl_array_dim(x, 0) = %li \n", jl_array_dim(x, 0));
-  printf("jl_array_dim(x, 1) = %li \n", jl_array_dim(x, 1));
+  printf("jl_array_dim(res, 0) = %li \n", jl_array_dim(res, 0));
+  printf("jl_array_dim(res, 1) = %li \n", jl_array_dim(res, 1));
 
-  printf("x = [");
+  printf("resData = [");
   for (int i = 0; i < 5; ++i)
   {
     printf("[ ");
-    for (int j = 0; j < 6; ++j)
+    for (int j = 0; j < 5; ++j)
     {
-      printf("%i ", resData[6 * i + j]);
+      printf("%f ", resData[5 * i + j]);
     }
     printf("]");
   }

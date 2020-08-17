@@ -18,14 +18,7 @@ module custom_module
     println("From Julia: ", A)
   end
 
-  function printArray(A)
-    println(ndims(A))
-    println(size(A))
-    println(length(A))
-  end
-
   export dummy
   export squareMeBaby
   export mutateMeByTen!
-  export printArray
 end
