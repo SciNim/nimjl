@@ -183,8 +183,7 @@ test "external_module : rot180[2D_Array]":
 # WIP TODO : MAKE IT WORK
 # Maybe try 2d array first ?
 test "external_module : squareMeBaby[Tensor]":
-  var squareMeBaby = nimjl_get_function(jl_main_module, "rot180")
-  # var squareMeBaby = nimjl_get_function(jl_main_module, "squareMeBaby")
+  var squareMeBaby = nimjl_get_function(jl_main_module, "squareMeBaby")
   check not isNil(squareMeBaby)
 
   var orig: Tensor[float64] = ones[float64](3, 4, 5)
@@ -210,10 +209,12 @@ test "external_module : squareMeBaby[Tensor]":
     check @[d0, d1, d2] == orig.shape.toSeq
     echo &"({d0}, {d1}, {d2})"
 
-  # var ret: nimjl_value = nimjl_call(squareMeBaby, addr(xTensor), 1)
   var ret: nimjl_value = nimjl_call1(squareMeBaby, xTensor)
   echo &"ret> {ret.repr}"
   echo &"orig> {orig}"
+  check not isNil(ret)
+  if isNil(ret): 
+    assert false
 
   var len_ret = nimjl_array_len(ret)
   check len_ret == orig.size
