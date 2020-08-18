@@ -154,12 +154,15 @@ test "external_module : rot180[2D_Array]":
   var rot180 = nimjl_get_function(jl_main_module, "rot180")
   check not isNil(rot180)
 
-  var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0]
-  let orig_ptr = cast[ptr UncheckedArray[float64]](orig[0].addr)
+  var orig_tensor = newTensor[float64](4, 3) 
+  var index = 0
+  for i in orig_tensor.mitems:
+    i = index.float64 
+    inc(index)
 
   var array_type: nimjl_value = nimjl_apply_array_type_float64(2)
   var xDims = nimjl_eval_string("(4, 3)")
-  var xArray = nimjl_ptr_to_array(array_type, orig_ptr, xDims, 0)
+  var xArray = nimjl_ptr_to_array(array_type, orig_tensor.get_data_ptr(), xDims, 0)
 
   var d0 = nimjl_array_dim(xArray, 0).int
   var d1 = nimjl_array_dim(xArray, 1).int
@@ -169,14 +172,10 @@ test "external_module : rot180[2D_Array]":
   var ret: nimjl_value = nimjl_call1(rot180, xArray)
   check not isNil(ret)
 
-  var origT = orig.toTensor.reshape(4, 3)
-  echo origT
-
   var data_ret = nimjl_array_data(ret)
-  var seqData: seq[float64] = newSeq[float64](12)
-  copyMem(seqData[0].unsafeAddr, data_ret, 12*sizeof(float64))
-  var seqDataT = seqData.toTensor.reshape(4, 3)
-  echo seqDataT
+  var tensorResData = newTensor[float64](4, 3) 
+  copyMem(tensorResData.get_data_ptr(), data_ret, orig_tensor.size*sizeof(float64))
+  check tensorResData == (11.0 -. orig_tensor) 
 
 # WIP TODO : MAKE IT WORK
 # Maybe try 2d array first ?
