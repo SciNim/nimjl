@@ -162,3 +162,5 @@ proc nimjl_gc_pop*() {.importc.}
 proc nimjl_exception_occurred*(): nimjl_value {.importc.}
 
 proc nimjl_typeof_str*(v: nimjl_value): cstring {.importc.}
+
+proc nimjl_string_ptr*(v: nimjl_value): cstring {.importc.}

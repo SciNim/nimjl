@@ -237,3 +237,8 @@ char *nimjl_typeof_str(jl_value_t *v)
 {
   return jl_typeof_str(v);
 }
+
+char* nimjl_string_ptr(jl_value_t* v)
+{
+  return jl_string_ptr(v);
+}
