@@ -272,7 +272,6 @@ static void external_module_mutateMeByTen()
       return;
     }
 
-    // create a 2D array of length 30
     int d1 = 3;
     int d2 = 4;
     int d3 = 5;

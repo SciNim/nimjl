@@ -139,6 +139,18 @@ proc nimjl_apply_array_type_char*(dim: csize_t): nimjl_value {.importc.}
 
 # proc nimjl_array_size(a: nimjl_array): csize_t {.importc.}
 
+proc nimjl_make_array_float64*(data: ptr UncheckedArray[float64], dims: seq[int]): nimjl_array=
+    var array_type: nimjl_value = nimjl_apply_array_type_float64(dims.len.csize_t)
+    var dimStr = "("
+    for d in dims:
+        dimStr = dimStr & $d
+        if d != dims[^1]:
+            dimStr = dimStr & ","
+    dimStr = dimStr & ")"
+    echo dimStr
+    var xDims = nimjl_eval_string(dimStr)
+    result = nimjl_ptr_to_array(array_type, data, xDims, 0)
+
 ##GC Functions
 
 proc nimjl_gc_push1*(a: pointer) {.importc.}
