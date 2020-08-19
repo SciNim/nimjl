@@ -103,7 +103,8 @@ test "dummy":
   check not isNil(ret)
 
 test "external_module : squareMeBaby[Array]":
-  var squareMeBaby = nimjl_get_function(jl_main_module, "squareMeBaby")
+  let custom_module : nimjl_module = nimjl_eval_string("custom_module")
+  var squareMeBaby = nimjl_get_function(custom_module, "squareMeBaby")
   check not isNil(squareMeBaby)
 
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
@@ -180,7 +181,8 @@ test "external_module : rot180[2D_Array]":
 # WIP TODO : MAKE IT WORK
 # Maybe try 2d array first ?
 test "external_module : squareMeBaby[Tensor]":
-  var squareMeBaby = nimjl_get_function(jl_main_module, "squareMeBaby")
+  let custom_module : nimjl_module = nimjl_eval_string("custom_module")
+  var squareMeBaby = nimjl_get_function(custom_module, "squareMeBaby")
   check not isNil(squareMeBaby)
 
   var orig: Tensor[float64] = ones[float64](3, 4, 5)
@@ -206,15 +208,12 @@ test "external_module : squareMeBaby[Tensor]":
     var d0 = nimjl_array_dim(xTensor, 0).int
     var d1 = nimjl_array_dim(xTensor, 1).int
     var d2 = nimjl_array_dim(xTensor, 2).int
-    check @[d0, d1, d2] == orig.shape.toSeq
+    # check @[d0, d1, d2] == orig.shape.toSeq
     echo &"({d0}, {d1}, {d2})"
 
   echo "before call"
   var ret: nimjl_value = nimjl_call1(squareMeBaby, xTensor)
   echo "after call"
-
-  echo &"ret> {ret.repr}"
-  echo &"orig> {orig}"
 
   check not isNil(ret)
   if isNil(ret): 
@@ -229,12 +228,9 @@ test "external_module : squareMeBaby[Tensor]":
   echo rank_ret
 
   var data_ret: nimjl_array = nimjl_array_data(ret)
-  echo data_ret.repr
 
   var tensorData: Tensor[float64] = newTensor[float64](3, 4, 5)
-  echo &"dataRet> {data_ret.repr}"
   copyMem(tensorData.get_data_ptr(), data_ret, len_ret*sizeof(float64))
-  echo &"tensorData> {tensorData}"
   check tensorData == square(orig)
 
 test "external_module : mutateMeByTen[Tensor]":
