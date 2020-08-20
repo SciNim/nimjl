@@ -47,7 +47,7 @@ test "jl_array_1d":
   var array_type: nimjl_value = nimjl_apply_array_type_float64(1)
   var x = nimjl_alloc_array_1d(array_type, ARRAY_LEN.csize_t)
 
-  nimjl_gc_push1(x.addr)
+  nimjl_gc_push1(cast[ptr nimjl_value](x.addr))
   var xData: ptr UncheckedArray[float64] = cast[ptr UncheckedArray[float64]](
       nimjl_array_data(x))
   check ARRAY_LEN == nimjl_array_len(x)
@@ -56,7 +56,7 @@ test "jl_array_1d":
     xData[i] = i.float64
 
   var reverse = nimjl_get_function(jl_base_module, "reverse!")
-  var res = nimjl_call(reverse, x.addr, 1)
+  var res = nimjl_call(reverse, cast[ptr nimjl_value](x.addr), 1)
   check not isNil(res)
 
   var resData = cast[ptr UncheckedArray[float64]](nimjl_array_data(x))
@@ -79,7 +79,7 @@ test "jl_array_1d_own_buffer":
     unchecked_orig[i] = i.float64
 
   var reverse = nimjl_get_function(jl_base_module, "reverse!")
-  var res = nimjl_call(reverse, x.addr, 1)
+  var res = nimjl_call(reverse, cast[ptr nimjl_value](x.addr), 1)
   check not isNil(res)
 
   var resData = cast[ptr UncheckedArray[float64]](nimjl_array_data(x))
@@ -103,7 +103,7 @@ test "dummy":
   check not isNil(ret)
 
 test "external_module : squareMeBaby[Array]":
-  let custom_module : nimjl_module = nimjl_eval_string("custom_module")
+  let custom_module : nimjl_module = cast[nimjl_module](nimjl_eval_string("custom_module"))
   var squareMeBaby = nimjl_get_function(custom_module, "squareMeBaby")
   check not isNil(squareMeBaby)
 
@@ -111,7 +111,8 @@ test "external_module : squareMeBaby[Array]":
   let orig_ptr = cast[ptr UncheckedArray[float64]](orig[0].addr)
   var array_type: nimjl_value = nimjl_apply_array_type_float64(1)
   var xArray = nimjl_ptr_to_array_1d(array_type, orig_ptr, orig.len.csize_t, 0)
-  var ret: nimjl_value = nimjl_call1(squareMeBaby, xArray)
+
+  var ret = cast[nimjl_array](nimjl_call1(squareMeBaby, xArray))
 
   var len_ret = nimjl_array_len(ret)
   check len_ret == orig.len
@@ -163,24 +164,24 @@ test "external_module : rot180[2D_Array]":
 
   var array_type: nimjl_value = nimjl_apply_array_type_float64(2)
   var xDims = nimjl_eval_string("(4, 3)")
-  var xArray = nimjl_ptr_to_array(array_type, orig_tensor.get_data_ptr(), xDims, 0)
+  var xArray = nimjl_ptr_to_array(array_type, orig_tensor.dataArray(), xDims, 0)
 
   var d0 = nimjl_array_dim(xArray, 0).int
   var d1 = nimjl_array_dim(xArray, 1).int
   check d0 == 4
   check d1 == 3
 
-  var ret: nimjl_value = nimjl_call1(rot180, xArray)
+  var ret = cast[nimjl_array](nimjl_call1(rot180, xArray))
   check not isNil(ret)
 
   var data_ret = nimjl_array_data(ret)
   var tensorResData = newTensor[float64](4, 3) 
-  copyMem(tensorResData.get_data_ptr(), data_ret, orig_tensor.size*sizeof(float64))
+  copyMem(tensorResData.dataArray(), data_ret, orig_tensor.size*sizeof(float64))
   check tensorResData == (11.0 -. orig_tensor) 
 
 # WIP TODO : MAKE IT WORK
 test "external_module : squareMeBaby[Tensor]":
-  let custom_module : nimjl_module = nimjl_eval_string("custom_module")
+  let custom_module : nimjl_module = cast[nimjl_module](nimjl_eval_string("custom_module"))
   var squareMeBaby = nimjl_get_function(custom_module, "squareMeBaby")
   check not isNil(squareMeBaby)
 
@@ -212,7 +213,7 @@ test "external_module : squareMeBaby[Tensor]":
     echo &"({d0}, {d1}, {d2})"
 
   echo "before call"
-  var ret: nimjl_value = nimjl_call1(squareMeBaby, xTensor)
+  var ret = cast[nimjl_array](nimjl_call1(squareMeBaby, xTensor))
   echo "after call"
 
   check not isNil(ret)
@@ -227,10 +228,10 @@ test "external_module : squareMeBaby[Tensor]":
   check rank_ret == 3
   echo rank_ret
 
-  var data_ret: nimjl_array = nimjl_array_data(ret)
+  var data_ret = nimjl_array_data(ret)
 
   var tensorData: Tensor[float64] = newTensor[float64](3, 4, 5)
-  copyMem(tensorData.get_data_ptr(), data_ret, len_ret*sizeof(float64))
+  copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
   check tensorData == square(orig)
 
 test "external_module : mutateMeByTen[Tensor]":
@@ -245,7 +246,7 @@ test "external_module : mutateMeByTen[Tensor]":
 
   var array_type: nimjl_value = nimjl_apply_array_type_float64(3)
   var xDims = nimjl_eval_string("(4, 6, 8)")
-  var xTensor = nimjl_ptr_to_array(array_type, orig.get_data_ptr(), xDims, 0)
+  var xTensor = nimjl_ptr_to_array(array_type, orig.dataArray(), xDims, 0)
 
   var ret: nimjl_value = nimjl_call1(mutateMeByTen, xTensor)
   check not isNil(ret)
@@ -256,9 +257,9 @@ test "external_module : mutateMeByTen[Tensor]":
   var rank_ret = nimjl_array_rank(xTensor)
   check rank_ret == 3
 
-  var data_ret: nimjl_array = nimjl_array_data(xTensor)
+  var data_ret = nimjl_array_data(xTensor)
   var tensorData: Tensor[float64] = newTensor[float64](4, 6, 8)
-  copyMem(tensorData.get_data_ptr(), data_ret, len_ret*sizeof(float64))
+  copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
   check tensorData == orig*10
 
 echo "exithook"

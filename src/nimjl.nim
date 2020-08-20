@@ -18,11 +18,15 @@ const JULIA_LINK_FLAG = ["-Wl,-rpath," & JULIA_LIB_PATH, "-Wl,-rpath," &
 
 ##Types
 
-type nimjl_value *{.importc: "jl_value_t*", header: "julia.h".} = pointer
-type nimjl_array* = nimjl_value
-type nimjl_datatype *{.importc: "jl_datatype_t", header: "julia.h".} = pointer
-type nimjl_func *{.importc: "jl_function_t *", header: "julia.h".} = pointer
-type nimjl_module *{.importc: "jl_module_t *", header: "julia.h".} = pointer
+type nimjl_value_t  *{.importc: "jl_value_t",    header: "julia.h", incompleteStruct.} = object of RootObj
+type nimjl_array_t  *{.importc: "jl_array_t",    header: "julia.h", incompleteStruct.} = object of nimjl_value_t 
+type nimjl_func_t   *{.importc: "jl_function_t", header: "julia.h", incompleteStruct.} = object of nimjl_value_t 
+type nimjl_module_t *{.importc: "jl_module_t",   header: "julia.h", incompleteStruct.} = object of nimjl_value_t
+
+type nimjl_value*  = ptr nimjl_value_t
+type nimjl_array*  = ptr nimjl_array_t
+type nimjl_func*   = ptr nimjl_func_t 
+type nimjl_module* = ptr nimjl_module_t
 
 var jl_main_module *{.importc: "jl_main_module",
     header: "julia.h".}: nimjl_module
@@ -69,17 +73,17 @@ proc nimjl_box_uint8*(value: uint8): nimjl_value {.importc.}
 ## Call functions
 proc nimjl_get_function*(module: nimjl_module, name: cstring): nimjl_func {.importc.}
 
-proc nimjl_call*(function: nimjl_func, values: pointer, nargs: cint): pointer {.importc.}
+proc nimjl_call*(function: nimjl_func, values: ptr nimjl_value, nargs: cint): nimjl_value {.importc.}
 
-proc nimjl_call0*(function: nimjl_func): pointer {.importc.}
+proc nimjl_call0*(function: nimjl_func): nimjl_value {.importc.}
 
-proc nimjl_call1*(function: nimjl_func, arg: pointer): pointer {.importc.}
+proc nimjl_call1*(function: nimjl_func, arg: nimjl_value): nimjl_value {.importc.}
 
-proc nimjl_call2*(function: nimjl_func, arg1: pointer,
-    arg2: pointer): pointer {.importc.}
+proc nimjl_call2*(function: nimjl_func, arg1: nimjl_value,
+    arg2: nimjl_value): nimjl_value {.importc.}
 
-proc nimjl_call3*(function: nimjl_func, arg1: pointer, arg2: pointer,
-    arg3: pointer): pointer {.importc.}
+proc nimjl_call3*(function: nimjl_func, arg1: nimjl_value, arg2: nimjl_value,
+    arg3: nimjl_value): nimjl_value {.importc.}
 
 
 ## Array
@@ -153,19 +157,19 @@ proc nimjl_make_array_float64*(data: ptr UncheckedArray[float64], dims: seq[int]
 
 ##GC Functions
 
-proc nimjl_gc_push1*(a: pointer) {.importc.}
+proc nimjl_gc_push1*(a: ptr nimjl_value) {.importc.}
 
-proc nimjl_gc_push2*(a: pointer, b: pointer) {.importc.}
+proc nimjl_gc_push2*(a: ptr nimjl_value, b: ptr nimjl_value) {.importc.}
 
-proc nimjl_gc_push3*(a: pointer, b: pointer, c: pointer) {.importc.}
+proc nimjl_gc_push3*(a: ptr nimjl_value, b: ptr nimjl_value, c: ptr nimjl_value) {.importc.}
 
-proc nimjl_gc_push4*(a: pointer, b: pointer, c: pointer, d: pointer) {.importc.}
+proc nimjl_gc_push4*(a: ptr nimjl_value, b: ptr nimjl_value, c: ptr nimjl_value, d: ptr nimjl_value) {.importc.}
 
-proc nimjl_gc_push5*(a: pointer, b: pointer, c: pointer, d: pointer,
-    e: pointer) {.importc.}
+proc nimjl_gc_push5*(a: ptr nimjl_value, b: ptr nimjl_value, c: ptr nimjl_value, d: ptr nimjl_value,
+    e: ptr nimjl_value) {.importc.}
 
-proc nimjl_gc_push6*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer,
-    f: pointer) {.importc.}
+proc nimjl_gc_push6*(a: nimjl_value, b: nimjl_value, c: nimjl_value, d: nimjl_value, e: nimjl_value,
+    f: nimjl_value) {.importc.}
 
 proc nimjl_gc_pushargs*(a: ptr nimjl_value, n: csize_t) {.importc.}
 
