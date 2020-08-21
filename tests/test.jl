@@ -6,7 +6,7 @@ module custom_module
   end
 
   function squareMeBaby(A)
-    println(typeof(A))
+    # println(typeof(A))
     println("From Julia: ", A)
     B = A .* A
     println("From Julia: ", B)
@@ -14,9 +14,9 @@ module custom_module
   end
 
   function mutateMeByTen!(A)
-    println(typeof(A))
-    println(size(A))
-    println(length(A))
+    # println(typeof(A))
+    # println(size(A))
+    # println(length(A))
     println("From Julia: ", A)
     lmul!(10, A)
     println("From Julia: ", A)
