@@ -5,21 +5,36 @@ module custom_module
     println("Julia says... Hello, world ! Function dummy() from module custom_module has been executed !")
   end
 
-  function squareMeBaby(A)
-    # println(typeof(A))
-    println("From Julia: ", A)
+  function squareMeBaby(A::Array{Float64, 1})::Array{Float64, 1}
+    println("squareMeBaby_1D")
     B = A .* A
-    println("From Julia: ", B)
     return B
   end
-
-  function mutateMeByTen!(A)
-    # println(typeof(A))
-    # println(size(A))
-    # println(length(A))
-    println("From Julia: ", A)
+  function mutateMeByTen!(A::Array{Float64, 1})
+    println("mutateMeBaby_1D")
     lmul!(10, A)
-    println("From Julia: ", A)
+  end
+
+
+  function squareMeBaby(A::Array{Float64, 2})::Array{Float64, 2}
+    println("squareMeBaby_2D")
+    B = A .* A
+    return B
+  end
+  function mutateMeByTen!(A::Array{Float64, 2})
+    println("mutateMeBaby_2D")
+    lmul!(10, A)
+  end
+
+
+  function squareMeBaby(A::Array{Float64, 3})::Array{Float64, 3}
+    println("squareMeBaby_3D")
+    B = A .* A
+    return B
+  end
+  function mutateMeByTen!(A::Array{Float64, 3})
+    println("mutateMeBaby_3D")
+    lmul!(10, A)
   end
 
   export dummy

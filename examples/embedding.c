@@ -163,13 +163,41 @@ void arrays_2D()
   return;
 }
 
+jl_array_t *nimjl_make_2d_array(void *existingArray, int *dimsArray)
+{
+  printf("%s \n", __func__);
+  jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 2);
+  char strDimsBuf[12];
+  snprintf(strDimsBuf, 12, "(%i, %i)", dimsArray[0], dimsArray[1]);
+  printf("%s \n", strDimsBuf);
+
+  jl_value_t *dims = jl_eval_string(strDimsBuf);
+  jl_array_t *xArray = jl_ptr_to_array(array_type, existingArray, dims, 0);
+  return xArray;
+}
+
+jl_array_t *nimjl_make_3d_array(void *existingArray, int *dimsArray)
+{
+  printf("%s \n", __func__);
+  jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 3);
+  char strDimsBuf[12];
+  snprintf(strDimsBuf, 12, "(%i, %i, %i)", dimsArray[0], dimsArray[1], dimsArray[2]);
+
+  printf("%s \n", strDimsBuf);
+  jl_value_t *dims = jl_eval_string(strDimsBuf);
+  jl_array_t *xArray = jl_ptr_to_array(array_type, existingArray, dims, 0);
+  return xArray;
+}
+
+
 static void external_module_dummy()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
   {
     printf("dummy \n");
     // Call easy function
-    jl_function_t *dummy = jl_get_function(jl_main_module, "dummy");
+    jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
+    jl_function_t *dummy = jl_get_function(custom_module, "dummy");
     if (dummy != NULL)
     {
       printf("dummy is not null\n");
@@ -185,6 +213,57 @@ static void external_module_dummy()
   printf("%s -- END \n\n", __FUNCTION__);
   return;
 }
+
+static jl_value_t* external_module_squareMeBaby_3D()
+{
+    printf("%s -- BEGIN \n", __func__);
+    jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
+    jl_function_t *func = jl_get_function(custom_module, "squareMeBaby");
+
+    if (func != NULL)
+    {
+      printf("squareMeBaby is not Null\n");
+    }
+    else
+    {
+      printf("squareMeBaby is null\n");
+    }
+    printf("%s -> make_array \n", __func__);
+    double existingArray0[3][4][5]; 
+    int length = 3*4*5;
+    int dimsArray[3];
+    dimsArray[0] = 3;
+    dimsArray[1] = 4;
+    dimsArray[2] = 5;
+    jl_array_t* xArray = nimjl_make_3d_array(existingArray0, dimsArray);
+
+    double *xData = (double *)jl_array_data(xArray);
+    for (int i = 0; i < length; i++)
+      xData[i] = i / 3.0;
+
+    jl_value_t *ret = jl_call1(func, (jl_value_t *)xArray);
+    printf("%s -> call done \n", __func__);
+    if (!ret)
+    {
+      printf("ret is %p \n\n", ret);
+    }
+    {
+      printf("len(ret)=%li \n", jl_array_len(ret));
+      printf("rank %i = jl_array_rank(x) \n", jl_array_rank((jl_value_t *)ret));
+      int d1 = jl_array_dim(ret, 0);
+      int d2 = jl_array_dim(ret, 1);
+
+      double *xResult = jl_array_data(ret);
+      printf("xResult = [");
+      for (int i = 0; i < d1; i++)
+        for (int j = 0; j < d2; j++)
+          printf("%lf ", xResult[i * d2 + j]);
+      printf("]\n");
+    }
+    printf("%s -- END \n", __func__);
+    return ret;
+} 
+
 
 static void external_module_squareMeBaby()
 {
@@ -208,9 +287,10 @@ static void external_module_squareMeBaby()
     double length = 5 * 6;
     double *existingArray = (double *)malloc(sizeof(double) * length);
 
-    jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 2);
-    jl_value_t *dims = jl_eval_string("(5, 6)");
-    jl_array_t *xArray = jl_ptr_to_array(array_type, existingArray, dims, 0);
+    int dims[3];
+    dims[0] = 5;
+    dims[1] = 6;
+    jl_array_t* xArray = nimjl_make_2d_array(existingArray, dims);
 
     // fill in values
     double *xData = (double *)jl_array_data(xArray);
@@ -278,9 +358,12 @@ static void external_module_mutateMeByTen()
     double length = d1 * d2 * d3;
     double existingArray[3][4][5];
 
-    jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 3);
-    jl_value_t *dims = jl_eval_string("(3, 4, 5)");
-    jl_array_t *xArray = jl_ptr_to_array(array_type, existingArray, dims, 0);
+    int dims[3];
+    dims[0] = d1;
+    dims[1] = d2;
+    dims[2] = d3;
+
+    jl_array_t* xArray = nimjl_make_3d_array(existingArray, dims);
 
     // fill in values
     double *xData = (double *)jl_array_data(xArray);
@@ -345,6 +428,7 @@ void external_module()
   jl_eval_string("include(\"test.jl\")");
   jl_eval_string("using .custom_module");
   external_module_dummy();
+  external_module_squareMeBaby_3D();
   external_module_squareMeBaby();
   external_module_mutateMeByTen();
   return;

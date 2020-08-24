@@ -6,33 +6,38 @@ const JULIA_PATH = getEnv("JULIA_PATH") & "/"
 const JULIA_INCLUDES_PATH = JULIA_PATH & "include/julia"
 const JULIA_LIB_PATH = JULIA_PATH & "lib/"
 const JULIA_DEPLIB_PATH = JULIA_PATH & "lib/julia"
-# const JULIA_LIB = "libjulia.so"
 
 const JULIA_INCLUDE_FLAG = "-I"&JULIA_INCLUDES_PATH
 const JULIA_LINK_FLAG = ["-Wl,-rpath," & JULIA_LIB_PATH, "-Wl,-rpath," &
     JULIA_DEPLIB_PATH, "-lm", "-ljulia"]
 
-{.compile: C_nimjl, passc: JULIA_INCLUDE_FLAG, passL: JULIA_LINK_FLAG[0],
-    passL: JULIA_LINK_FLAG[1], passL: JULIA_LINK_FLAG[2],
-    passL: JULIA_LINK_FLAG[3].}
-# {.link: JULIA_LIB_PATH & JULIA_LIB.}
+{.
+    compile: C_nimjl, 
+    passc: JULIA_INCLUDE_FLAG, 
+    passL: JULIA_LINK_FLAG[0],
+    passL: JULIA_LINK_FLAG[1], 
+    passL: JULIA_LINK_FLAG[2],
+    passL: JULIA_LINK_FLAG[3]
+.}
+
+const jl_header = "julia.h"
 
 ##Types
-type nimjl_value  *{.importc: "jl_value_t",    header: "julia.h".} = object
-type nimjl_array  *{.importc: "jl_array_t",    header: "julia.h".} = object
-type nimjl_func   *{.importc: "jl_function_t", header: "julia.h".} = object
-type nimjl_module *{.importc: "jl_module_t",   header: "julia.h".} = object
+type nimjl_value  *{.importc: "jl_value_t",    header: jl_header.} = object
+type nimjl_array  *{.importc: "jl_array_t",    header: jl_header.} = object
+type nimjl_func   *{.importc: "jl_function_t", header: jl_header.} = object
+type nimjl_module *{.importc: "jl_module_t",   header: jl_header.} = object
 
-var jl_main_module *{.importc: "jl_main_module", header: "julia.h".}: ptr nimjl_module
-var jl_core_module *{.importc: "jl_core_module", header: "julia.h".}: ptr nimjl_module
-var jl_base_module *{.importc: "jl_base_module", header: "julia.h".}: ptr nimjl_module
-var jl_top_module  *{.importc: "jl_top_module",  header: "julia.h".}: ptr nimjl_module
+var jl_main_module *{.importc: "jl_main_module", header: jl_header.}: ptr nimjl_module
+var jl_core_module *{.importc: "jl_core_module", header: jl_header.}: ptr nimjl_module
+var jl_base_module *{.importc: "jl_base_module", header: jl_header.}: ptr nimjl_module
+var jl_top_module  *{.importc: "jl_top_module",  header: jl_header.}: ptr nimjl_module
 
 ## Basic function
 proc nimjl_init*() {.importc.}
 proc nimjl_atexit_hook*(exit_code: cint) {.importc.}
 
-proc nimjl_eval_string*(code: cstring): ptr nimjl_value {.importc.}
+proc nimjl_eval_string*(code: cstring): ptr nimjl_value {.importc: "jl_eval_string", header: jl_header.}
 
 ## Box & Unbox
 proc nimjl_unbox_float64*(value: ptr nimjl_value): float64 {.importc.}
@@ -63,18 +68,17 @@ proc nimjl_box_uint8*(value: uint8): ptr nimjl_value {.importc.}
 
 
 ## Call functions
-proc nimjl_get_function*(module: ptr nimjl_module, name: cstring): ptr nimjl_func {.importc.}
+proc nimjl_get_function*(module: ptr nimjl_module, name: cstring): ptr nimjl_func {.importc: "jl_get_function", header: jl_header.}
 
-proc nimjl_call *(function: ptr nimjl_func, values: pointer, nargs: cint): ptr nimjl_value {.importc.}
+proc nimjl_call *(function: ptr nimjl_func, values: ptr ptr nimjl_value, nargs: cint): ptr nimjl_value {.importc: "jl_call", header: jl_header.}
 
-proc nimjl_call0*(function: ptr nimjl_func): ptr nimjl_value {.importc.}
+proc nimjl_call0*(function: ptr nimjl_func): ptr nimjl_value {.importc: "jl_call0", header: jl_header .}
 
-proc nimjl_call1*(function: ptr nimjl_func, arg: pointer): ptr nimjl_value {.importc.}
+proc nimjl_call1*(function: ptr nimjl_func, arg: ptr nimjl_value): ptr nimjl_value {.importc: "jl_call1", header: jl_header.}
 
-proc nimjl_call2*(function: ptr nimjl_func, arg1: pointer, arg2: pointer): ptr nimjl_value {.importc.}
+proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value): ptr nimjl_value {.importc: "jl_call2", header: jl_header.}
 
-proc nimjl_call3*(function: ptr nimjl_func, arg1: pointer, arg2: pointer, arg3: pointer): ptr nimjl_value {.importc.}
-
+proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.importc, header: jl_header}
 
 ## Array
 # Values will need to be cast
@@ -132,6 +136,12 @@ proc nimjl_apply_array_type_bool*(dim: csize_t): ptr nimjl_value {.importc.}
 proc nimjl_apply_array_type_char*(dim: csize_t): ptr nimjl_value {.importc.}
 
 # proc nimjl_array_size(a: ptr nimjl_array): csize_t {.importc.}
+
+proc nimjl_make_array*(data: pointer, ndim: cint, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
+proc nimjl_make_2d_array*(data: pointer, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
+proc nimjl_make_3d_array*(data: pointer, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
+
+proc external_module*() {.importc.}
 
 proc nimjl_make_array_float64*(data: ptr UncheckedArray[float64], dims: seq[int]): ptr nimjl_array=
     var array_type: ptr nimjl_value = nimjl_apply_array_type_float64(dims.len.csize_t)
