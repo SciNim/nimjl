@@ -20,10 +20,14 @@ How to embed Julia w/ C :
 
 ## TODO List
 
-* Segfault arises when trying to return value from Julia function. While it should be doable in theory, I haven't figured it out yet. 
-* Tuples API
-* Pass complex struct / object from Nim to Julia & vice-versa
+* Segfault arises when trying to return value from Julia function. While it should be doable in theory, I haven't figured it why / when it occurs yet. Best workaround is to work modifying in-place parameters. 
+* Wrap using external Julia module
+* Wrap using tuples from Nim named varargs or object
 * Wrap proc for sequence / Tensor to nijl_array & nimjl_array to seq / Tensor conversion
 * Macro that wrap box / unbox API
-* Wrap using external Julia module
 * Macro for calling julia function without intermediate code
+
+## Next steps 
+
+* Julia Tuples using C-API (no eval_string)
+* Pass complex struct / object from Nim to Julia & vice-versa
