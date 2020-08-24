@@ -229,7 +229,7 @@ static jl_value_t* external_module_squareMeBaby_3D()
 {
     printf("%s -- BEGIN \n", __func__);
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
-    jl_function_t *func = jl_get_function(custom_module, "squareMeBaby");
+    jl_function_t *func = jl_get_function(custom_module, "squareMeBaby!");
 
     if (func != NULL)
     {
@@ -281,7 +281,7 @@ static void external_module_squareMeBaby()
   printf("%s -- BEGIN \n", __FUNCTION__);
   {
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
-    jl_function_t *func = jl_get_function(custom_module, "squareMeBaby");
+    jl_function_t *func = jl_get_function(custom_module, "squareMeBaby!");
 
     if (func != NULL)
     {
@@ -436,8 +436,8 @@ void external_module()
   jl_eval_string("include(\"test.jl\")");
   jl_eval_string("using .custom_module");
   external_module_dummy();
-  external_module_squareMeBaby();
   external_module_mutateMeByTen();
+  external_module_squareMeBaby();
   external_module_squareMeBaby_3D();
 }
 

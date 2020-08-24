@@ -134,7 +134,6 @@ test "external_module : rot180[2D_Array]":
   copyMem(tensorResData.dataArray(), data_ret, orig_tensor.size*sizeof(float64))
   check tensorResData == (11.0 -. orig_tensor) 
 
-# WIP TODO : MAKE IT WORK
 test "external_module :squareMeBaby![Tensor]":
   let custom_module : ptr nimjl_module = cast[ptr nimjl_module](nimjl_eval_string("custom_module"))
   var squareMeBaby = nimjl_get_function(custom_module, "squareMeBaby!")
@@ -146,9 +145,6 @@ test "external_module :squareMeBaby![Tensor]":
     inc(index)
     i = index.float64 / 3.0
 
-  # var array_type = nimjl_apply_array_type_float64(3)
-  # var xDims = nimjl_eval_string("(3, 4, 5)")
-  # var xTensor = nimjl_ptr_to_array(array_type, orig.dataArray(), xDims, 0)
   var xTensor = nimjl_make_array_float64(orig.dataArray(), @[3, 4, 5])
 
   block:

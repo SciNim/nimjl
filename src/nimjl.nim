@@ -142,11 +142,6 @@ proc nimjl_apply_array_type_char*(dim: csize_t): ptr nimjl_value {.importc.}
 
 # proc nimjl_array_size(a: ptr nimjl_array): csize_t {.importc.}
 
-# proc nimjl_make_array*(data: pointer, ndim: cint, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
-# proc nimjl_make_2d_array*(data: pointer, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
-# proc nimjl_make_3d_array*(data: pointer, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
-# proc external_module*() {.importc.}
-
 proc nimjl_make_array_float64*(data: ptr UncheckedArray[float64], dims: seq[int]): ptr nimjl_array=
     var array_type: ptr nimjl_value = nimjl_apply_array_type_float64(dims.len.csize_t)
     var dimStr = "("

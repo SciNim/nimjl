@@ -20,6 +20,7 @@ How to embed Julia w/ C :
 
 ## TODO List
 
+* Segfault arises when trying to return value from Julia function. While it should be doable in theory, I haven't figured it out yet. 
 * Tuples API
 * Pass complex struct / object from Nim to Julia & vice-versa
 * Wrap proc for sequence / Tensor to nijl_array & nimjl_array to seq / Tensor conversion
