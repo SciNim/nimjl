@@ -163,6 +163,19 @@ void arrays_2D()
   return;
 }
 
+jl_array_t *nimjl_make_array(void *existingArray, int ndims, int *dimsArray)
+{
+  printf("%s \n", __func__);
+  jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 3);
+  char strDimsBuf[12];
+  snprintf(strDimsBuf, 12, "(%i, %i, %i)", dimsArray[0], dimsArray[1], dimsArray[2]);
+
+  printf("%s \n", strDimsBuf);
+  jl_value_t *dims = jl_eval_string(strDimsBuf);
+  jl_array_t *xArray = jl_ptr_to_array(array_type, existingArray, dims, 0);
+  return xArray;
+}
+
 jl_array_t *nimjl_make_2d_array(void *existingArray, int *dimsArray)
 {
   printf("%s \n", __func__);
@@ -189,12 +202,10 @@ jl_array_t *nimjl_make_3d_array(void *existingArray, int *dimsArray)
   return xArray;
 }
 
-
 static void external_module_dummy()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
   {
-    printf("dummy \n");
     // Call easy function
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
     jl_function_t *dummy = jl_get_function(custom_module, "dummy");
@@ -269,7 +280,6 @@ static void external_module_squareMeBaby()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
   {
-    printf("\nsquareMeBaby \n");
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
     jl_function_t *func = jl_get_function(custom_module, "squareMeBaby");
 
@@ -338,7 +348,6 @@ static void external_module_mutateMeByTen()
   printf("%s -- BEGIN \n", __FUNCTION__);
   // required: setup the Julia context
   {
-    printf("\nmutateMeByTen\n");
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
     jl_function_t *func = jl_get_function(custom_module, "mutateMeByTen!");
 
@@ -415,7 +424,6 @@ static void external_module_mutateMeByTen()
         }
       }
       printf("\n");
-      printf("\n");
     }
   }
   printf("\n");
@@ -428,19 +436,18 @@ void external_module()
   jl_eval_string("include(\"test.jl\")");
   jl_eval_string("using .custom_module");
   external_module_dummy();
-  external_module_squareMeBaby_3D();
   external_module_squareMeBaby();
   external_module_mutateMeByTen();
-  return;
+  external_module_squareMeBaby_3D();
 }
 
 int main(int argc, char *argv[])
 {
   jl_init();
-  simple_eval_string();
-  simple_call();
-  arrays_1D();
-  arrays_2D();
+  // simple_eval_string();
+  // simple_call();
+  // arrays_1D();
+  // arrays_2D();
   external_module();
   jl_atexit_hook(0);
 }

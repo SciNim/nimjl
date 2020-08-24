@@ -68,17 +68,23 @@ proc nimjl_box_uint8*(value: uint8): ptr nimjl_value {.importc.}
 
 
 ## Call functions
-proc nimjl_get_function*(module: ptr nimjl_module, name: cstring): ptr nimjl_func {.importc: "jl_get_function", header: jl_header.}
+# proc nimjl_get_function*(module: ptr nimjl_module, name: cstring): ptr nimjl_func {.importc: "jl_get_function", header: jl_header.}
+proc nimjl_get_function*(module: ptr nimjl_module, name: cstring): ptr nimjl_func {.importc.}
 
-proc nimjl_call *(function: ptr nimjl_func, values: ptr ptr nimjl_value, nargs: cint): ptr nimjl_value {.importc: "jl_call", header: jl_header.}
+# proc nimjl_call *(function: ptr nimjl_func, values: ptr ptr nimjl_value, nargs: cint): ptr nimjl_value {.importc: "jl_call", header: jl_header.}
+proc nimjl_call *(function: ptr nimjl_func, values: ptr ptr nimjl_value, nargs: cint): ptr nimjl_value {.importc.}
 
-proc nimjl_call0*(function: ptr nimjl_func): ptr nimjl_value {.importc: "jl_call0", header: jl_header .}
+# proc nimjl_call0*(function: ptr nimjl_func): ptr nimjl_value {.importc: "jl_call0", header: jl_header .}
+proc nimjl_call0*(function: ptr nimjl_func): ptr nimjl_value {.importc.}
 
-proc nimjl_call1*(function: ptr nimjl_func, arg: ptr nimjl_value): ptr nimjl_value {.importc: "jl_call1", header: jl_header.}
+# proc nimjl_call1*(function: ptr nimjl_func, arg: ptr nimjl_value): ptr nimjl_value {.importc: "jl_call1", header: jl_header.}
+proc nimjl_call1*(function: ptr nimjl_func, arg: ptr nimjl_value): ptr nimjl_value {.importc.}
 
-proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value): ptr nimjl_value {.importc: "jl_call2", header: jl_header.}
+# proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value): ptr nimjl_value {.importc: "jl_call2", header: jl_header.}
+proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value): ptr nimjl_value {.importc.}
 
-proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.importc, header: jl_header}
+# proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.importc, header: jl_header}
+proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.importc.}
 
 ## Array
 # Values will need to be cast
@@ -140,7 +146,6 @@ proc nimjl_apply_array_type_char*(dim: csize_t): ptr nimjl_value {.importc.}
 proc nimjl_make_array*(data: pointer, ndim: cint, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
 proc nimjl_make_2d_array*(data: pointer, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
 proc nimjl_make_3d_array*(data: pointer, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
-
 proc external_module*() {.importc.}
 
 proc nimjl_make_array_float64*(data: ptr UncheckedArray[float64], dims: seq[int]): ptr nimjl_array=

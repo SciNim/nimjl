@@ -39,35 +39,35 @@ jl_value_t *nimjl_box_float32(float value) { return jl_box_float32(value); }
 jl_value_t *nimjl_box_float64(double value) { return jl_box_float64(value); }
 
 // Call function
-// jl_function_t *nimjl_get_function(jl_module_t *module, const char *name)
-// {
-//   return jl_get_function(module, name);
-// }
+jl_function_t *nimjl_get_function(jl_module_t *module, const char *name)
+{
+  return jl_get_function(module, name);
+}
 
-// jl_value_t *nimjl_call(jl_function_t *f, jl_value_t **args, int32_t nargs)
-// {
-//   return jl_call(f, args, nargs);
-// }
+jl_value_t *nimjl_call(jl_function_t *f, jl_value_t **args, int32_t nargs)
+{
+  return jl_call(f, args, nargs);
+}
 
-// jl_value_t *nimjl_call0(jl_function_t *f)
-// {
-//   return jl_call0(f);
-// }
+jl_value_t *nimjl_call0(jl_function_t *f)
+{
+  return jl_call0(f);
+}
 
-// jl_value_t *nimjl_call1(jl_function_t *f, jl_value_t *args1)
-// {
-//   return jl_call1(f, args1);
-// }
+jl_value_t *nimjl_call1(jl_function_t *f, jl_value_t *args1)
+{
+  return jl_call1(f, args1);
+}
 
-// jl_value_t *nimjl_call2(jl_function_t *f, jl_value_t *args1, jl_value_t *args2)
-// {
-//   return jl_call2(f, args1, args2);
-// }
+jl_value_t *nimjl_call2(jl_function_t *f, jl_value_t *args1, jl_value_t *args2)
+{
+  return jl_call2(f, args1, args2);
+}
 
-// jl_value_t *nimjl_call3(jl_function_t *f, jl_value_t *args1, jl_value_t *args2, jl_value_t *args3)
-// {
-//   return jl_call3(f, args1, args2, args3);
-// }
+jl_value_t *nimjl_call3(jl_function_t *f, jl_value_t *args1, jl_value_t *args2, jl_value_t *args3)
+{
+  return jl_call3(f, args1, args2, args3);
+}
 
 // Array
 void *nimjl_array_data(jl_array_t *a)
@@ -281,7 +281,6 @@ static void external_module_dummy()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
   {
-    printf("dummy \n");
     // Call easy function
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
     jl_function_t *dummy = jl_get_function(custom_module, "dummy");
@@ -356,7 +355,6 @@ static void external_module_squareMeBaby()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
   {
-    printf("\nsquareMeBaby \n");
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
     jl_function_t *func = jl_get_function(custom_module, "squareMeBaby");
 
@@ -425,7 +423,6 @@ static void external_module_mutateMeByTen()
   printf("%s -- BEGIN \n", __FUNCTION__);
   // required: setup the Julia context
   {
-    printf("\nmutateMeByTen\n");
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
     jl_function_t *func = jl_get_function(custom_module, "mutateMeByTen!");
 
@@ -511,11 +508,11 @@ static void external_module_mutateMeByTen()
 
 void external_module()
 {
+  // jl_eval_string("println(sqrt(4.0))");
   jl_eval_string("include(\"test.jl\")");
-  jl_eval_string("using .custom_module");
+  // jl_eval_string("using .custom_module");
   external_module_dummy();
   external_module_squareMeBaby();
   external_module_mutateMeByTen();
   external_module_squareMeBaby_3D();
-  // return;
 }

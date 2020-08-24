@@ -92,11 +92,6 @@ test "external_module":
   var res_eval_include = nimjl_eval_string("include(\"tests/test.jl\")")
   check not isNil(res_eval_include)
 
-  # block:
-    # var res_eval_include = nimjl_eval_string("include(\"test.jl\")")
-    # check not isNil(res_eval_include)
-
-  #Not necessary if you use module in eval string
   var res_eval_using = nimjl_eval_string("using .custom_module")
   check not isNil(res_eval_using)
 
