@@ -250,7 +250,7 @@ static jl_value_t* external_module_squareMeBaby_3D()
 
     double *xData = (double *)jl_array_data(xArray);
     for (int i = 0; i < length; i++)
-      xData[i] = i / 3.0;
+      xData[i] = i ;
 
     jl_value_t *ret = jl_call1(func, (jl_value_t *)xArray);
     printf("%s -> call done \n", __func__);

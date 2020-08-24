@@ -95,9 +95,6 @@ test "external_module":
   var res_eval_using = nimjl_eval_string("using .custom_module")
   check not isNil(res_eval_using)
 
-# test "externalCallFromC":
-  # external_module()
-
 test "dummy":
   let custom_module : ptr nimjl_module = cast[ptr nimjl_module](nimjl_eval_string("custom_module"))
   var dummy = nimjl_get_function(custom_module, "dummy")
@@ -161,8 +158,6 @@ test "external_module :squareMeBaby![Tensor]":
 
   var ret = cast[ptr nimjl_array](nimjl_call1(squareMeBaby, cast[ptr nimjl_value](xTensor)))
   check not isNil(ret)
-  if isNil(ret): 
-    assert false
 
   var len_ret = nimjl_array_len(ret)
   check len_ret == orig.size
@@ -171,9 +166,9 @@ test "external_module :squareMeBaby![Tensor]":
   check rank_ret == 3
 
   var data_ret = nimjl_array_data(ret)
-
   var tensorData: Tensor[float64] = newTensor[float64](3, 4, 5)
   copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
+
   check tensorData == orig
   index = 0
   for i in tensorData.items:
@@ -196,16 +191,16 @@ test "external_module : mutateMeByTen[Tensor]":
   var xDims = nimjl_eval_string("(4, 6, 8)")
   var xTensor = nimjl_ptr_to_array(array_type, orig.dataArray(), xDims, 0)
 
-  var ret = nimjl_call1(mutateMeByTen, cast[ptr nimjl_value](xTensor))
+  var ret = cast[ptr nimjl_array](nimjl_call1(mutateMeByTen, cast[ptr nimjl_value](xTensor)))
   check not isNil(ret)
 
-  var len_ret = nimjl_array_len(xTensor)
+  var len_ret = nimjl_array_len(ret)
   check len_ret == orig.size
 
-  var rank_ret = nimjl_array_rank(xTensor)
+  var rank_ret = nimjl_array_rank(ret)
   check rank_ret == 3
 
-  var data_ret = nimjl_array_data(xTensor)
+  var data_ret = nimjl_array_data(ret)
   var tensorData: Tensor[float64] = newTensor[float64](4, 6, 8)
   copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
   check tensorData == orig
