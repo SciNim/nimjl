@@ -36,8 +36,7 @@ var jl_top_module  *{.importc: "jl_top_module",  header: jl_header.}: ptr nimjl_
 ## Basic function
 proc nimjl_init*() {.importc.}
 proc nimjl_atexit_hook*(exit_code: cint) {.importc.}
-
-proc nimjl_eval_string*(code: cstring): ptr nimjl_value {.importc: "jl_eval_string", header: jl_header.}
+proc nimjl_eval_string*(code: cstring): ptr nimjl_value {.importc.}
 
 ## Box & Unbox
 proc nimjl_unbox_float64*(value: ptr nimjl_value): float64 {.importc.}
@@ -143,10 +142,10 @@ proc nimjl_apply_array_type_char*(dim: csize_t): ptr nimjl_value {.importc.}
 
 # proc nimjl_array_size(a: ptr nimjl_array): csize_t {.importc.}
 
-proc nimjl_make_array*(data: pointer, ndim: cint, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
-proc nimjl_make_2d_array*(data: pointer, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
-proc nimjl_make_3d_array*(data: pointer, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
-proc external_module*() {.importc.}
+# proc nimjl_make_array*(data: pointer, ndim: cint, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
+# proc nimjl_make_2d_array*(data: pointer, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
+# proc nimjl_make_3d_array*(data: pointer, dims: ptr UncheckedArray[cint]): ptr nimjl_array  {.importc.}
+# proc external_module*() {.importc.}
 
 proc nimjl_make_array_float64*(data: ptr UncheckedArray[float64], dims: seq[int]): ptr nimjl_array=
     var array_type: ptr nimjl_value = nimjl_apply_array_type_float64(dims.len.csize_t)
@@ -156,7 +155,7 @@ proc nimjl_make_array_float64*(data: ptr UncheckedArray[float64], dims: seq[int]
         if d != dims[^1]:
             dimStr = dimStr & ","
     dimStr = dimStr & ")"
-    echo dimStr
+    # echo dimStr
     var xDims = nimjl_eval_string(dimStr)
     result = nimjl_ptr_to_array(array_type, data, xDims, 0)
 

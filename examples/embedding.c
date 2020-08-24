@@ -444,10 +444,10 @@ void external_module()
 int main(int argc, char *argv[])
 {
   jl_init();
-  // simple_eval_string();
-  // simple_call();
-  // arrays_1D();
-  // arrays_2D();
+  simple_eval_string();
+  simple_call();
+  arrays_1D();
+  arrays_2D();
   external_module();
   jl_atexit_hook(0);
 }

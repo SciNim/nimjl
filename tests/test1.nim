@@ -95,8 +95,8 @@ test "external_module":
   var res_eval_using = nimjl_eval_string("using .custom_module")
   check not isNil(res_eval_using)
 
-test "externalCallFromC":
-  external_module()
+# test "externalCallFromC":
+  # external_module()
 
 test "dummy":
   let custom_module : ptr nimjl_module = cast[ptr nimjl_module](nimjl_eval_string("custom_module"))
@@ -135,9 +135,9 @@ test "external_module : rot180[2D_Array]":
   check tensorResData == (11.0 -. orig_tensor) 
 
 # WIP TODO : MAKE IT WORK
-test "external_module : squareMeBaby[Tensor]":
+test "external_module :squareMeBaby![Tensor]":
   let custom_module : ptr nimjl_module = cast[ptr nimjl_module](nimjl_eval_string("custom_module"))
-  var squareMeBaby = nimjl_get_function(custom_module, "squareMeBaby")
+  var squareMeBaby = nimjl_get_function(custom_module, "squareMeBaby!")
   check not isNil(squareMeBaby)
 
   var orig: Tensor[float64] = ones[float64](3, 4, 5)
@@ -149,9 +149,7 @@ test "external_module : squareMeBaby[Tensor]":
   # var array_type = nimjl_apply_array_type_float64(3)
   # var xDims = nimjl_eval_string("(3, 4, 5)")
   # var xTensor = nimjl_ptr_to_array(array_type, orig.dataArray(), xDims, 0)
-  var mydims : seq[int32] = @[3.int32, 4.int32, 5.int32]
-  var xTensor = nimjl_make_array(orig.get_data_ptr(), 3, cast[ptr UncheckedArray[int32]](mydims[0].addr))
-  # var xTensor = nimjl_make_array_float64(orig.dataArray(), @[3, 4, 5])
+  var xTensor = nimjl_make_array_float64(orig.dataArray(), @[3, 4, 5])
 
   block:
     var len_ret = nimjl_array_len(xTensor)
@@ -180,7 +178,12 @@ test "external_module : squareMeBaby[Tensor]":
 
   var tensorData: Tensor[float64] = newTensor[float64](3, 4, 5)
   copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
-  check tensorData == orig.map(x => x*x)
+  check tensorData == orig
+  index = 0
+  for i in tensorData.items:
+    inc(index)
+    let value = index.float64 / 3.0
+    check i == value*value
 
 test "external_module : mutateMeByTen[Tensor]":
   let custom_module : ptr nimjl_module = cast[ptr nimjl_module](nimjl_eval_string("custom_module"))
@@ -211,17 +214,17 @@ test "external_module : mutateMeByTen[Tensor]":
   copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
   check tensorData == orig
 
-test "external_module : squareMeBaby[Array]":
+test "external_module :squareMeBaby![Array]":
   let custom_module : ptr nimjl_module = cast[ptr nimjl_module](nimjl_eval_string("custom_module"))
-  var squareMeBaby1 = nimjl_get_function(custom_module, "squareMeBaby")
-  check not isNil(squareMeBaby1)
+  var squareMeBaby = nimjl_get_function(custom_module, "squareMeBaby!")
+  check not isNil(squareMeBaby)
 
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
   let orig_ptr = cast[ptr UncheckedArray[float64]](orig[0].addr)
   var array_type: ptr nimjl_value = nimjl_apply_array_type_float64(1)
   var xArray = nimjl_ptr_to_array_1d(array_type, orig_ptr, orig.len.csize_t, 0)
 
-  var ret = cast[ptr nimjl_array](nimjl_call1(squareMeBaby1, cast[ptr nimjl_value](xArray)))
+  var ret = cast[ptr nimjl_array](nimjl_call1(squareMeBaby, cast[ptr nimjl_value](xArray)))
 
   var len_ret = nimjl_array_len(ret)
   check len_ret == orig.len
@@ -232,12 +235,13 @@ test "external_module : squareMeBaby[Array]":
   var data_ret = nimjl_array_data(ret)
   let unchecked_array_data_ret = cast[ptr UncheckedArray[float64]](data_ret) 
   for i in 0..<orig.len:
-    check unchecked_array_data_ret[i] == orig[i]*orig[i]
+    check unchecked_array_data_ret[i] == orig[i]#*orig[i]
+    check unchecked_array_data_ret[i] == (i*i).float64 
 
   var seqData: seq[float64] = newSeq[float64](len_ret)
   copyMem(seqData[0].unsafeAddr, data_ret, len_ret*sizeof(float64))
   check seqData == @[0.0, 1.0, 4.0, 9.0, 16.0, 25.0, 36.0, 49.0, 64.0, 81.0]
-  check orig == @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+  check orig == @[0.0, 1.0, 4.0, 9.0, 16.0, 25.0, 36.0, 49.0, 64.0, 81.0]
 
 test "external_module : mutateMeByTen[Array]":
   let custom_module : ptr nimjl_module = cast[ptr nimjl_module](nimjl_eval_string("custom_module"))
