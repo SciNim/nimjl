@@ -8,6 +8,7 @@ module custom_module
   function squareMeBaby!(A)
     A[:]=[i*i for i in A]
   end
+
   function mutateMeByTen!(A)
     lmul!(10, A)
   end

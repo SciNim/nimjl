@@ -22,11 +22,9 @@ jl_value_t *checked_eval_string(const char *code)
 void simple_eval_string()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
-  // jl_init();
   // run Julia commands
   jl_value_t *ret1 = jl_eval_string("println(sqrt(2.0))");
   printf("ret1 = %p (should be nil)\n", ret1);
-  // jl_atexit_hook(0);
   printf("%s -- END \n\n", __FUNCTION__);
   return;
 }
@@ -34,7 +32,6 @@ void simple_eval_string()
 void simple_call()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
-  // jl_init();
   {
     jl_function_t *func = jl_get_function(jl_base_module, "sqrt");
     jl_value_t *argument = jl_box_float64(2.0);
@@ -49,7 +46,6 @@ void simple_call()
     double cret = jl_unbox_float64(ret);
     printf("cret=%f \n", cret);
   }
-  // jl_atexit_hook(0);
   printf("%s -- END \n\n", __FUNCTION__);
   return;
 }
@@ -57,7 +53,6 @@ void simple_call()
 void arrays_1D()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
-  // // jl_init();
 
   jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
   jl_array_t *x = jl_alloc_array_1d(array_type, 10);
@@ -93,7 +88,6 @@ void arrays_1D()
   printf("]\n");
 
   printf("\n");
-  // jl_atexit_hook(0);
   printf("%s -- END \n\n", __FUNCTION__);
   return;
 }
@@ -101,7 +95,6 @@ void arrays_1D()
 void arrays_2D()
 {
   printf("%s -- BEGIN \n", __FUNCTION__);
-  // jl_init();
   // 2D arrays
   double xData[5][5];
   for (int i = 0; i < 5; ++i)
@@ -158,7 +151,6 @@ void arrays_2D()
   }
   printf("]\n");
   printf("\n");
-  // jl_atexit_hook(0);
   printf("%s -- END \n\n", __FUNCTION__);
   return;
 }
