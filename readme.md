@@ -34,3 +34,4 @@ How to embed Julia w/ C :
 
 * Julia Tuples using C-API (no eval_string)
 * Pass complex struct / object from Nim to Julia & vice-versa
+* Generate the wrapper using c2nim / nimterop

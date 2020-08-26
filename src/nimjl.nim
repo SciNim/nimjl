@@ -1,6 +1,7 @@
 import os
 import arraymancer
 import strutils
+import strformat
 
 # Const julia path
 const C_nimjl = "c/nimjl.c"
@@ -125,6 +126,31 @@ proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nim
 
 proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.importc.}
 
+proc nimjl_include_file*(file_name: string): ptr nimjl_value=
+  result = nimjl_eval_string(&"include(\"{file_name}\")")
+  assert not isNil(result)
+
+proc nimjl_using_module*(module_name: string): ptr nimjl_value=
+  result = nimjl_eval_string(&"using {module_name}")
+  assert not isNil(result)
+
+proc nimjl_get_module*(module_name: string):ptr nimjl_module=
+  result = cast[ptr nimjl_module](nimjl_eval_string(module_name))
+
+proc nimjl_exec_func*(module:ptr nimjl_module, func_name: string, va: varargs[ptr nimjl_value]): ptr nimjl_value=
+    let f = nimjl_get_function(module, func_name)
+    if va.len == 0:
+        result = nimjl_call0(f)
+    else:
+        result = nimjl_call(f, unsafeAddr(va[0]), va.len.cint)
+
+proc nimjl_exec_func*(func_name: string, va: varargs[ptr nimjl_value]): ptr nimjl_value=
+    let f = nimjl_get_function(jl_main_module, func_name)
+    if va.len == 0:
+        result = nimjl_call0(f)
+    else:
+        result = nimjl_call(f, unsafeAddr(va[0]), va.len.cint)
+
 ## Array
 # Values will need to be cast
 proc nimjl_array_data*(values: ptr nimjl_array): pointer {.importc.}
@@ -225,7 +251,17 @@ proc nimjl_make_array*[T](data: Tensor[T]): ptr nimjl_array=
     var xDims = nimjl_eval_string(dimStr)
     result = nimjl_ptr_to_array(array_type, data.dataArray(), xDims, 0)
 
-# proc nimjl_array_size(a: ptr nimjl_array): csize_t {.importc.}
+proc nimjl_make_tuple*(v: tuple): ptr nimjl_value=
+    var tupleStr = $v
+    tupleStr = tupleStr.replace(":", "=")
+    echo tupleStr
+    result = nimjl_eval_string(tupleStr)
+
+proc nimjl_make_tuple*(v: object): ptr nimjl_value=
+    var tupleStr = $v
+    tupleStr = tupleStr.replace(":", "=")
+    echo tupleStr
+    result = nimjl_eval_string(tupleStr)
 
 ##GC Functions
 
