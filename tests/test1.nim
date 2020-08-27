@@ -217,7 +217,7 @@ test "external_module :squareMeBaby![Array]":
   var data_ret = nimjl_array_data(ret)
   let unchecked_array_data_ret = cast[ptr UncheckedArray[float64]](data_ret) 
   for i in 0..<orig.len:
-    check unchecked_array_data_ret[i] == orig[i]#*orig[i]
+    check unchecked_array_data_ret[i] == orig[i]
     check unchecked_array_data_ret[i] == (i*i).float64 
 
   var seqData: seq[float64] = newSeq[float64](len_ret)
