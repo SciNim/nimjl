@@ -130,7 +130,7 @@ proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nim
 
 proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.importc.}
 
-##Check for nil result
+## Check for nil result
 proc nimjl_include_file*(file_name: string): ptr nimjl_value=
   result = nimjl_eval_string(&"include(\"{file_name}\")")
 
@@ -162,7 +162,7 @@ proc nimjl_exec_func*(func_name: string, va: varargs[ptr nimjl_value]): ptr nimj
         result = nimjl_call(f, unsafeAddr(va[0]), va.len.cint)
 
 ## Array
-# Values will need to be cast
+# Values will need to be cast from nimjl_value to nimjl_array back and forth
 proc nimjl_array_data*(values: ptr nimjl_array): pointer {.importc.}
 
 proc nimjl_array_dim*(a: ptr nimjl_array, dim: cint): cint {.importc.}
