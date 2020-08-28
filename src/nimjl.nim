@@ -89,6 +89,8 @@ proc nimjl_unbox*[T](value: ptr nimjl_value): T=
         result = nimjl_unbox_float32(value)
     elif T is float64:
         result = nimjl_unbox_float64(value)
+    else:
+        assert(false, "Type not supported")
 
 proc nimjl_box*[T](value: T): ptr nimjl_value=
     when T is int8:
@@ -111,6 +113,8 @@ proc nimjl_box*[T](value: T): ptr nimjl_value=
         result = nimjl_box_float32(value)
     elif T is float64:
         result = nimjl_box_float64(value)
+    else:
+        assert(false, "Type not supported")
 
 
 ## Call functions
@@ -126,13 +130,12 @@ proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nim
 
 proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.importc.}
 
+##Check for nil result
 proc nimjl_include_file*(file_name: string): ptr nimjl_value=
   result = nimjl_eval_string(&"include(\"{file_name}\")")
-  assert not isNil(result)
 
 proc nimjl_using_module*(module_name: string): ptr nimjl_value=
   result = nimjl_eval_string(&"using {module_name}")
-  assert not isNil(result)
 
 proc nimjl_get_module*(module_name: string):ptr nimjl_module=
   result = cast[ptr nimjl_module](nimjl_eval_string(module_name))
@@ -146,8 +149,15 @@ proc nimjl_exec_func*(module:ptr nimjl_module, func_name: string, va: varargs[pt
 
 proc nimjl_exec_func*(func_name: string, va: varargs[ptr nimjl_value]): ptr nimjl_value=
     let f = nimjl_get_function(jl_main_module, func_name)
+    result = nil
     if va.len == 0:
         result = nimjl_call0(f)
+    elif va.len == 1:
+        result = nimjl_call1(f, va[0])
+    elif va.len == 2:
+        result = nimjl_call2(f, va[0], va[1])
+    elif va.len == 3:
+        result = nimjl_call3(f, va[0], va[1], va[2])
     else:
         result = nimjl_call(f, unsafeAddr(va[0]), va.len.cint)
 
@@ -231,6 +241,8 @@ proc nimjl_apply_array_type*[T](dim: int): ptr nimjl_value=
         result = nimjl_apply_array_type_bool(dim.csize_t)
     elif T is char:
         result = nimjl_apply_array_type_char(dim.csize_t)
+    else:
+        assert(false, "Type not supported")
 
 proc nimjl_make_array*[T](data: ptr UncheckedArray[T], dims: seq[int]): ptr nimjl_array=
     var array_type: ptr nimjl_value = nimjl_apply_array_type[T](dims.len)
@@ -254,13 +266,17 @@ proc nimjl_make_array*[T](data: Tensor[T]): ptr nimjl_array=
 proc nimjl_make_tuple*(v: tuple): ptr nimjl_value=
     var tupleStr = $v
     tupleStr = tupleStr.replace(":", "=")
-    echo tupleStr
+    # This make tuple of a single element valid
+    # (1) won't create a valid tuple -> (1,) is a valid tuple
+    tupleStr = tupleStr.replace(")", ",)")
     result = nimjl_eval_string(tupleStr)
 
 proc nimjl_make_tuple*(v: object): ptr nimjl_value=
     var tupleStr = $v
     tupleStr = tupleStr.replace(":", "=")
-    echo tupleStr
+    # This make tuple of a single element valid
+    # (1) won't create a valid tuple -> (1,) is a valid tuple
+    tupleStr = tupleStr.replace(")", ",)")
     result = nimjl_eval_string(tupleStr)
 
 ##GC Functions

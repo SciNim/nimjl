@@ -11,7 +11,7 @@ void nimjl_atexit_hook(int code) { jl_atexit_hook(code); }
 // eval_string
 jl_value_t *nimjl_eval_string(char *code) { return jl_eval_string(code); }
 
-// box & unbox
+// Unbox func
 uint8_t nimjl_unbox_uint8(jl_value_t *value) { return jl_unbox_uint8(value); }
 uint16_t nimjl_unbox_uint16(jl_value_t *value) { return jl_unbox_uint16(value); }
 uint32_t nimjl_unbox_uint32(jl_value_t *value) { return jl_unbox_uint32(value); }
@@ -25,6 +25,7 @@ int64_t nimjl_unbox_int64(jl_value_t *value) { return jl_unbox_int64(value); }
 float nimjl_unbox_float32(jl_value_t *value) { return jl_unbox_float32(value); }
 double nimjl_unbox_float64(jl_value_t *value) { return jl_unbox_float64(value); }
 
+// Box func
 jl_value_t *nimjl_box_uint8(uint8_t value) { return jl_box_uint8(value); }
 jl_value_t *nimjl_box_uint16(uint16_t value) { return jl_box_uint16(value); }
 jl_value_t *nimjl_box_uint32(uint32_t value) { return jl_box_uint32(value); }

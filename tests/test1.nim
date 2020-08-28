@@ -99,20 +99,39 @@ test "dummy":
   check not isNil(ret)
 
 test "tupleTest":
+  block:
+    var jl_tuple = nimjl_make_tuple((a:124, c: 67.32147))
+    check not isNil(jl_tuple)
+
+    nimjl_gc_push1(jl_tuple.addr)
+    var ret = nimjl_exec_func("tupleTest", jl_tuple) 
+
+    check not isNil(ret)
+    if not isNil(ret):
+      var bres = nimjl_unbox[uint8](ret)
+      check bres == 255 
+
+    nimjl_gc_pop()
+
   type TT = object
     a: int
-    b: string
     c: float
 
-  var jl_tuple = nimjl_make_tuple((a:124, b: "hello world", c: 67.32147))
-  check not isNil(jl_tuple)
+  block:
+    var tt: TT = TT(a: 124, c: 67.32147)
+    var jl_tuple_fromobj = nimjl_make_tuple(tt)
+    check not isNil(jl_tuple_fromobj)
 
-  var jl_unnamed_tuple = nimjl_make_tuple((124, "hello world", 67.32147))
-  check not isNil(jl_unnamed_tuple)
+    nimjl_gc_push1(jl_tuple_fromobj.addr)
 
-  var tt: TT = TT(a: 124, b: "hi world", c: 67.32147)
-  var jl_tuple_fromobj = nimjl_make_tuple(tt)
-  check not isNil(jl_tuple_fromobj)
+    var ret = nimjl_exec_func("tupleTest", jl_tuple_fromobj) 
+    check not isNil(ret)
+    if not isNil(ret):
+      var bres = nimjl_unbox[uint8](ret)
+      check bres == 255 
+
+    nimjl_gc_pop()
+
 
 test "external_module : rot180[2D_Array]":
   var orig_tensor = newTensor[float64](4, 3) 

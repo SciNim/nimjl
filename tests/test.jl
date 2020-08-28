@@ -13,7 +13,15 @@ module custom_module
     lmul!(10, A)
   end
 
+  function tupleTest(tt)
+    if (tt.a == 124) && (tt.c - 67.32147 < 1e-8)
+      return 255 
+    end
+    return 0
+  end
+
   export dummy
+  export tupleTest
   export squareMeBaby!
   export mutateMeByTen!
 end
