@@ -116,6 +116,29 @@ proc nimjl_box*[T](value: T): ptr nimjl_value=
     else:
         assert(false, "Type not supported")
 
+##GC Functions
+
+proc nimjl_gc_push1*(a: pointer) {.importc.}
+
+proc nimjl_gc_push2*(a: pointer, b: pointer) {.importc.}
+
+proc nimjl_gc_push3*(a: pointer, b: pointer, c: pointer) {.importc.}
+
+proc nimjl_gc_push4*(a: pointer, b: pointer, c: pointer, d: pointer) {.importc.}
+
+proc nimjl_gc_push5*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer) {.importc.}
+
+proc nimjl_gc_push6*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer, f: pointer) {.importc.}
+
+proc nimjl_gc_pushargs*(a: pointer, n: csize_t) {.importc.}
+
+proc nimjl_gc_pop*() {.importc.}
+
+proc nimjl_exception_occurred*(): ptr nimjl_value {.importc.}
+
+proc nimjl_typeof_str*(v: ptr nimjl_value): cstring {.importc.}
+
+proc nimjl_string_ptr*(v: ptr nimjl_value): cstring {.importc.}
 
 ## Call functions
 proc nimjl_get_function*(module: ptr nimjl_module, name: cstring): ptr nimjl_func {.importc.}
@@ -253,7 +276,9 @@ proc nimjl_make_array*[T](data: ptr UncheckedArray[T], dims: seq[int]): ptr nimj
             dimStr = dimStr & ","
     dimStr = dimStr & ")"
     var xDims = nimjl_eval_string(dimStr)
+    nimjl_gc_push1(xDims.addr)
     result = nimjl_ptr_to_array(array_type, data, xDims, 0)
+    nimjl_gc_pop()
 
 proc nimjl_make_array*[T](data: Tensor[T]): ptr nimjl_array=
     var array_type: ptr nimjl_value = nimjl_apply_array_type[T](data.rank)
@@ -261,7 +286,9 @@ proc nimjl_make_array*[T](data: Tensor[T]): ptr nimjl_array=
     dimStr = dimStr.replace("[", "(")
     dimStr = dimStr.replace("]", ")")
     var xDims = nimjl_eval_string(dimStr)
+    nimjl_gc_push1(xDims.addr)
     result = nimjl_ptr_to_array(array_type, data.dataArray(), xDims, 0)
+    nimjl_gc_pop()
 
 proc nimjl_make_tuple*(v: tuple): ptr nimjl_value=
     var tupleStr = $v
@@ -278,27 +305,3 @@ proc nimjl_make_tuple*(v: object): ptr nimjl_value=
     # (1) won't create a valid tuple -> (1,) is a valid tuple
     tupleStr = tupleStr.replace(")", ",)")
     result = nimjl_eval_string(tupleStr)
-
-##GC Functions
-
-proc nimjl_gc_push1*(a: pointer) {.importc.}
-
-proc nimjl_gc_push2*(a: pointer, b: pointer) {.importc.}
-
-proc nimjl_gc_push3*(a: pointer, b: pointer, c: pointer) {.importc.}
-
-proc nimjl_gc_push4*(a: pointer, b: pointer, c: pointer, d: pointer) {.importc.}
-
-proc nimjl_gc_push5*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer) {.importc.}
-
-proc nimjl_gc_push6*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer, f: pointer) {.importc.}
-
-proc nimjl_gc_pushargs*(a: pointer, n: csize_t) {.importc.}
-
-proc nimjl_gc_pop*() {.importc.}
-
-proc nimjl_exception_occurred*(): ptr nimjl_value {.importc.}
-
-proc nimjl_typeof_str*(v: ptr nimjl_value): cstring {.importc.}
-
-proc nimjl_string_ptr*(v: ptr nimjl_value): cstring {.importc.}
