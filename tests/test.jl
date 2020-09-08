@@ -7,6 +7,9 @@ module custom_module
 
   function squareMeBaby!(A)
     A[:]=[i*i for i in A]
+    # B = A.*A
+    # B = A * A
+    # return B
   end
 
   function mutateMeByTen!(A)

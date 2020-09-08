@@ -1,6 +1,7 @@
 #include "julia.h"
 #include "stdio.h"
-
+#include "stdbool.h"
+#include "unistd.h"
 // JULIA_DEFINE_FAST_TLS() // only define this once, in an executable (not in a shared library) if you want fast code.
 jl_value_t *checked_eval_string(const char *code)
 {
@@ -217,7 +218,7 @@ static void external_module_dummy()
   return;
 }
 
-static jl_value_t* external_module_squareMeBaby_3D()
+static void external_module_squareMeBaby_3D()
 {
     printf("%s -- BEGIN \n", __func__);
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
@@ -239,18 +240,25 @@ static jl_value_t* external_module_squareMeBaby_3D()
     dimsArray[1] = 4;
     dimsArray[2] = 5;
     jl_array_t* xArray = nimjl_make_3d_array(existingArray0, dimsArray);
+    // Is this necessary ?
+    // JL_GC_PUSH1(&xArray);
 
     double *xData = (double *)jl_array_data(xArray);
     for (int i = 0; i < length; i++)
       xData[i] = i ;
 
     jl_value_t *ret = jl_call1(func, (jl_value_t *)xArray);
+    // JL_GC_POP();
     printf("%s -> call done \n", __func__);
+    printf("ret is %p \n\n", ret);
     if (!ret)
     {
-      printf("ret is %p \n\n", ret);
+      assert(false);
+      return;
     }
     {
+      // Is this necessary ?
+      // JL_GC_PUSH1(&ret);
       printf("len(ret)=%li \n", jl_array_len(ret));
       printf("rank %i = jl_array_rank(x) \n", jl_array_rank((jl_value_t *)ret));
       int d1 = jl_array_dim(ret, 0);
@@ -262,9 +270,11 @@ static jl_value_t* external_module_squareMeBaby_3D()
         for (int j = 0; j < d2; j++)
           printf("%lf ", xResult[i * d2 + j]);
       printf("]\n");
+      // Is this necessary ?
+      // JL_GC_POP();
     }
     printf("%s -- END \n", __func__);
-    return ret;
+    return;
 } 
 
 
@@ -310,9 +320,10 @@ static void external_module_squareMeBaby()
 
     printf("\n");
     jl_value_t *ret = jl_call1(func, (jl_value_t *)xArray);
+    printf("ret is %p \n\n", ret);
     if (!ret)
     {
-      printf("ret is %p \n\n", ret);
+      assert(false);
       return;
     }
     {
@@ -389,9 +400,10 @@ static void external_module_mutateMeByTen()
     printf("\n");
 
     jl_value_t *ret = jl_call1(func, (jl_value_t *)xArray);
+    printf("ret is %p \n\n", ret);
     if (!ret)
     {
-      printf("ret is %p \n\n", ret);
+      assert(false);
       return;
     }
     {
@@ -429,8 +441,8 @@ void external_module()
   jl_eval_string("using .custom_module");
   external_module_dummy();
   external_module_mutateMeByTen();
-  external_module_squareMeBaby();
   external_module_squareMeBaby_3D();
+  external_module_squareMeBaby();
 }
 
 int main(int argc, char *argv[])

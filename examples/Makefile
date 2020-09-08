@@ -5,12 +5,12 @@
 #   JULIA: path to julia[.exe] executable
 #   BIN:   binary build directory
 
-JULIA=~/julia-1.4.2/bin/julia
-BIN=.
+#JULIA=~/julia-1.5.1/bin/julia
 
 ifndef JULIA
   $(error "Please pass JULIA=[path of target julia binary], or set as environment variable!")
 endif
+
 BIN = .
 ifndef BIN
   $(error "Please pass BIN=[path of build directory], or set as environment variable!")

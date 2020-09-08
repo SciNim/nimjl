@@ -134,9 +134,11 @@ test "tupleTest":
 
 
 test "external_module : rot180[2D_Array]":
-  var orig_tensor = newTensor[float64](4, 3) 
+  var orig_tensor : ref Tensor[float64]
+  new(orig_tensor)
+  orig_tensor[] = newTensor[float64](4, 3) 
   var index = 0
-  for i in orig_tensor.mitems:
+  for i in orig_tensor[].mitems:
     i = index.float64 
     inc(index)
 
@@ -152,13 +154,15 @@ test "external_module : rot180[2D_Array]":
 
   var data_ret = nimjl_array_data(ret)
   var tensorResData = newTensor[float64](4, 3) 
-  copyMem(tensorResData.dataArray(), data_ret, orig_tensor.size*sizeof(float64))
-  check tensorResData == (11.0 -. orig_tensor) 
+  copyMem(tensorResData.dataArray(), data_ret, orig_tensor[].size*sizeof(float64))
+  check tensorResData == (11.0 -. orig_tensor[]) 
 
 test "external_module :squareMeBaby![Tensor]":
-  var orig: Tensor[float64] = ones[float64](3, 4, 5)
+  var orig: ref Tensor[float64]
+  new(orig)
+  orig[] = ones[float64](3, 4, 5)
   var index = 0
-  for i in orig.mitems:
+  for i in orig[].mitems:
     inc(index)
     i = index.float64 / 3.0
 
@@ -166,21 +170,21 @@ test "external_module :squareMeBaby![Tensor]":
 
   block:
     var len_ret = nimjl_array_len(xTensor)
-    check len_ret == orig.size
+    check len_ret == orig[].size
 
     var rank_ret = nimjl_array_rank(xTensor)
-    check rank_ret == orig.rank
+    check rank_ret == orig[].rank
 
     var d0 = nimjl_array_dim(xTensor, 0).int
     var d1 = nimjl_array_dim(xTensor, 1).int
     var d2 = nimjl_array_dim(xTensor, 2).int
-    check @[d0, d1, d2] == orig.shape.toSeq
+    check @[d0, d1, d2] == orig[].shape.toSeq
 
   var ret = cast[ptr nimjl_array](nimjl_exec_func("squareMeBaby!", cast[ptr nimjl_value](xTensor)))
   check not isNil(ret)
 
   var len_ret = nimjl_array_len(ret)
-  check len_ret == orig.size
+  check len_ret == orig[].size
 
   var rank_ret = nimjl_array_rank(ret)
   check rank_ret == 3
@@ -189,7 +193,7 @@ test "external_module :squareMeBaby![Tensor]":
   var tensorData: Tensor[float64] = newTensor[float64](3, 4, 5)
   copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
 
-  check tensorData == orig
+  check tensorData == orig[]
   index = 0
   for i in tensorData.items:
     inc(index)
@@ -197,9 +201,11 @@ test "external_module :squareMeBaby![Tensor]":
     check i == value*value
 
 test "external_module : mutateMeByTen[Tensor]":
-  var orig: Tensor[float64] = ones[float64](4, 6, 8)
+  var orig : ref Tensor[float64]
+  new(orig)
+  orig[] = ones[float64](4, 6, 8)
   var index = 0
-  for i in orig.mitems:
+  for i in orig[].mitems:
     inc(index)
     i = index.float64 / 3.0
 
@@ -209,7 +215,7 @@ test "external_module : mutateMeByTen[Tensor]":
   check not isNil(ret)
 
   var len_ret = nimjl_array_len(ret)
-  check len_ret == orig.size
+  check len_ret == orig[].size
 
   var rank_ret = nimjl_array_rank(ret)
   check rank_ret == 3
@@ -217,7 +223,7 @@ test "external_module : mutateMeByTen[Tensor]":
   var data_ret = nimjl_array_data(ret)
   var tensorData: Tensor[float64] = newTensor[float64](4, 6, 8)
   copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
-  check tensorData == orig
+  check tensorData == orig[]
 
 test "external_module :squareMeBaby![Array]":
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
