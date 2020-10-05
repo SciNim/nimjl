@@ -15,25 +15,29 @@ const JULIA_LINK_FLAG = ["-Wl,-rpath," & JULIA_LIB_PATH, "-Wl,-rpath," &
     JULIA_DEPLIB_PATH, "-lm", "-ljulia"]
 
 {.
-    compile: C_nimjl, 
-    passc: JULIA_INCLUDE_FLAG, 
+    compile: C_nimjl,
+    passc: JULIA_INCLUDE_FLAG,
     passL: JULIA_LINK_FLAG[0],
-    passL: JULIA_LINK_FLAG[1], 
+    passL: JULIA_LINK_FLAG[1],
     passL: JULIA_LINK_FLAG[2],
     passL: JULIA_LINK_FLAG[3]
 .}
 const jl_header = "julia.h"
 
 ##Types
-type nimjl_value  *{.importc: "jl_value_t",    header: jl_header.} = object
-type nimjl_array  *{.importc: "jl_array_t",    header: jl_header.} = object
-type nimjl_func   *{.importc: "jl_function_t", header: jl_header.} = object
-type nimjl_module *{.importc: "jl_module_t",   header: jl_header.} = object
+type nimjl_value *{.importc: "jl_value_t", header: jl_header.} = object
+type nimjl_array *{.importc: "jl_array_t", header: jl_header.} = object
+type nimjl_func *{.importc: "jl_function_t", header: jl_header.} = object
+type nimjl_module *{.importc: "jl_module_t", header: jl_header.} = object
 
-var jl_main_module *{.importc: "jl_main_module", header: jl_header.}: ptr nimjl_module
-var jl_core_module *{.importc: "jl_core_module", header: jl_header.}: ptr nimjl_module
-var jl_base_module *{.importc: "jl_base_module", header: jl_header.}: ptr nimjl_module
-var jl_top_module  *{.importc: "jl_top_module",  header: jl_header.}: ptr nimjl_module
+var jl_main_module *{.importc: "jl_main_module",
+        header: jl_header.}: ptr nimjl_module
+var jl_core_module *{.importc: "jl_core_module",
+        header: jl_header.}: ptr nimjl_module
+var jl_base_module *{.importc: "jl_base_module",
+        header: jl_header.}: ptr nimjl_module
+var jl_top_module *{.importc: "jl_top_module",
+        header: jl_header.}: ptr nimjl_module
 
 ## Basic function
 proc nimjl_init*() {.cdecl, importc.}
@@ -67,14 +71,14 @@ proc nimjl_box_uint32(value: uint32): ptr nimjl_value {.cdecl, importc.}
 proc nimjl_box_uint16(value: uint16): ptr nimjl_value {.cdecl, importc.}
 proc nimjl_box_uint8(value: uint8): ptr nimjl_value {.cdecl, importc.}
 
-proc nimjl_unbox*[T](value: ptr nimjl_value): T=
+proc nimjl_unbox*[T](value: ptr nimjl_value): T =
     when T is int8:
         result = nimjl_unbox_int8(value)
     elif T is int16:
         result = nimjl_unbox_int16(value)
     elif T is int32:
         result = nimjl_unbox_int32(value)
-    elif  T is int64:
+    elif T is int64:
         result = nimjl_unbox_int64(value)
     elif T is uint8:
         result = nimjl_unbox_uint8(value)
@@ -91,7 +95,7 @@ proc nimjl_unbox*[T](value: ptr nimjl_value): T=
     else:
         assert(false, "Type not supported")
 
-proc nimjl_box*[T](value: T): ptr nimjl_value=
+proc nimjl_box*[T](value: T): ptr nimjl_value =
     when T is int8:
         result = nimjl_box_int8(value)
     elif T is int16:
@@ -125,9 +129,11 @@ proc nimjl_gc_push3*(a: pointer, b: pointer, c: pointer) {.cdecl, importc.}
 
 proc nimjl_gc_push4*(a: pointer, b: pointer, c: pointer, d: pointer) {.cdecl, importc.}
 
-proc nimjl_gc_push5*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer) {.cdecl, importc.}
+proc nimjl_gc_push5*(a: pointer, b: pointer, c: pointer, d: pointer,
+        e: pointer) {.cdecl, importc.}
 
-proc nimjl_gc_push6*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer, f: pointer) {.cdecl, importc.}
+proc nimjl_gc_push6*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer,
+        f: pointer) {.cdecl, importc.}
 
 proc nimjl_gc_pushargs*(a: pointer, n: csize_t) {.cdecl, importc.}
 
@@ -140,36 +146,43 @@ proc nimjl_typeof_str*(v: ptr nimjl_value): cstring {.cdecl, importc.}
 proc nimjl_string_ptr*(v: ptr nimjl_value): cstring {.cdecl, importc.}
 
 ## Call functions
-proc nimjl_get_function*(module: ptr nimjl_module, name: cstring): ptr nimjl_func {.cdecl, importc.}
+proc nimjl_get_function*(module: ptr nimjl_module,
+        name: cstring): ptr nimjl_func {.cdecl, importc.}
 
-proc nimjl_call *(function: ptr nimjl_func, values: ptr ptr nimjl_value, nargs: cint): ptr nimjl_value {.cdecl, importc.}
+proc nimjl_call *(function: ptr nimjl_func, values: ptr ptr nimjl_value,
+        nargs: cint): ptr nimjl_value {.cdecl, importc.}
 
 proc nimjl_call0*(function: ptr nimjl_func): ptr nimjl_value {.cdecl, importc.}
 
-proc nimjl_call1*(function: ptr nimjl_func, arg: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
+proc nimjl_call1*(function: ptr nimjl_func,
+        arg: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
 
-proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
+proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value,
+        arg2: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
 
-proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
+proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value,
+        arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
 
 ## Check for nil result
-proc nimjl_include_file*(file_name: string): ptr nimjl_value=
-  result = nimjl_eval_string(&"include(\"{file_name}\")")
+proc nimjl_include_file*(file_name: string): ptr nimjl_value =
+    result = nimjl_eval_string(&"include(\"{file_name}\")")
 
-proc nimjl_using_module*(module_name: string): ptr nimjl_value=
-  result = nimjl_eval_string(&"using {module_name}")
+proc nimjl_using_module*(module_name: string): ptr nimjl_value =
+    result = nimjl_eval_string(&"using {module_name}")
 
-proc nimjl_get_module*(module_name: string):ptr nimjl_module=
-  result = cast[ptr nimjl_module](nimjl_eval_string(module_name))
+proc nimjl_get_module*(module_name: string): ptr nimjl_module =
+    result = cast[ptr nimjl_module](nimjl_eval_string(module_name))
 
-proc nimjl_exec_func*(module:ptr nimjl_module, func_name: string, va: varargs[ptr nimjl_value]): ptr nimjl_value=
+proc nimjl_exec_func*(module: ptr nimjl_module, func_name: string, va: varargs[
+        ptr nimjl_value]): ptr nimjl_value =
     let f = nimjl_get_function(module, func_name)
     if va.len == 0:
         result = nimjl_call0(f)
     else:
         result = nimjl_call(f, unsafeAddr(va[0]), va.len.cint)
 
-proc nimjl_exec_func*(func_name: string, va: varargs[ptr nimjl_value]): ptr nimjl_value=
+proc nimjl_exec_func*(func_name: string, va: varargs[
+        ptr nimjl_value]): ptr nimjl_value =
     let f = nimjl_get_function(jl_main_module, func_name)
     result = nil
     if va.len == 0:
@@ -193,7 +206,8 @@ proc nimjl_array_len*(a: ptr nimjl_array): cint {.cdecl, importc.}
 
 proc nimjl_array_rank*(a: ptr nimjl_array): cint {.cdecl, importc.}
 
-proc nimjl_new_array*(atype: ptr nimjl_value, dims: ptr nimjl_value): ptr nimjl_array {.cdecl, importc.}
+proc nimjl_new_array*(atype: ptr nimjl_value,
+        dims: ptr nimjl_value): ptr nimjl_array {.cdecl, importc.}
 
 proc nimjl_reshape_array*(atype: ptr nimjl_value, data: ptr nimjl_array,
     dims: ptr nimjl_value): ptr nimjl_array {.cdecl, importc.}
@@ -201,10 +215,12 @@ proc nimjl_reshape_array*(atype: ptr nimjl_value, data: ptr nimjl_array,
 proc nimjl_ptr_to_array_1d*(atype: ptr nimjl_value, data: pointer, nel: csize_t,
     own_buffer: cint): ptr nimjl_array {.cdecl, importc.}
 
-proc nimjl_ptr_to_array*(atype: ptr nimjl_value, data: pointer, dims: ptr nimjl_value,
+proc nimjl_ptr_to_array*(atype: ptr nimjl_value, data: pointer,
+        dims: ptr nimjl_value,
     own_buffer: cint): ptr nimjl_array {.cdecl, importc.}
 
-proc nimjl_alloc_array_1d*(atype: ptr nimjl_value, nr: csize_t): ptr nimjl_array {.cdecl, importc.}
+proc nimjl_alloc_array_1d*(atype: ptr nimjl_value,
+        nr: csize_t): ptr nimjl_array {.cdecl, importc.}
 
 proc nimjl_alloc_array_2d*(atype: ptr nimjl_value, nr: csize_t,
     nc: csize_t): ptr nimjl_array {.cdecl, importc.}
@@ -238,7 +254,7 @@ proc nimjl_apply_array_type_bool(dim: csize_t): ptr nimjl_value {.cdecl, importc
 
 proc nimjl_apply_array_type_char(dim: csize_t): ptr nimjl_value {.cdecl, importc.}
 
-proc nimjl_apply_array_type*[T](dim: int): ptr nimjl_value=
+proc nimjl_apply_array_type*[T](dim: int): ptr nimjl_value =
     when T is int8:
         result = nimjl_apply_array_type_int8(dim.csize_t)
     elif T is int16:
@@ -266,7 +282,8 @@ proc nimjl_apply_array_type*[T](dim: int): ptr nimjl_value=
     else:
         assert(false, "Type not supported")
 
-proc nimjl_make_array*[T](data: ptr UncheckedArray[T], dims: seq[int]): ptr nimjl_array=
+proc nimjl_make_array*[T](data: ptr UncheckedArray[T], dims: seq[
+        int]): ptr nimjl_array =
     var array_type: ptr nimjl_value = nimjl_apply_array_type[T](dims.len)
     var dimStr = "("
     for d in dims:
@@ -279,7 +296,7 @@ proc nimjl_make_array*[T](data: ptr UncheckedArray[T], dims: seq[int]): ptr nimj
     result = nimjl_ptr_to_array(array_type, data, xDims, 0)
     nimjl_gc_pop()
 
-proc nimjl_make_array*[T](data: ref Tensor[T]): ptr nimjl_array=
+proc nimjl_make_array*[T](data: ref Tensor[T]): ptr nimjl_array =
     var array_type: ptr nimjl_value = nimjl_apply_array_type[T](data[].rank)
     var dimStr = $(data[].shape)
     dimStr = dimStr.replace("[", "(")
@@ -289,7 +306,7 @@ proc nimjl_make_array*[T](data: ref Tensor[T]): ptr nimjl_array=
     result = nimjl_ptr_to_array(array_type, data[].dataArray(), xDims, 0)
     nimjl_gc_pop()
 
-proc nimjl_make_tuple*(v: tuple): ptr nimjl_value=
+proc nimjl_make_tuple*(v: tuple): ptr nimjl_value =
     var tupleStr = $v
     tupleStr = tupleStr.replace(":", "=")
     # This make tuple of a single element valid
@@ -297,7 +314,7 @@ proc nimjl_make_tuple*(v: tuple): ptr nimjl_value=
     tupleStr = tupleStr.replace(")", ",)")
     result = nimjl_eval_string(tupleStr)
 
-proc nimjl_make_tuple*(v: object): ptr nimjl_value=
+proc nimjl_make_tuple*(v: object): ptr nimjl_value =
     var tupleStr = $v
     tupleStr = tupleStr.replace(":", "=")
     # This make tuple of a single element valid
