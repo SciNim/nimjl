@@ -5,39 +5,41 @@ import strformat
 
 # Const julia path
 const C_nimjl = "c/nimjl.c"
-const JULIA_PATH = getEnv("JULIA_PATH") & "/"
-const JULIA_INCLUDES_PATH = JULIA_PATH & "include/julia"
-const JULIA_LIB_PATH = JULIA_PATH & "lib/"
-const JULIA_DEPLIB_PATH = JULIA_PATH & "lib/julia"
+const JULIA_PATH = getEnv("JULIA_PATH")
+const JULIA_INCLUDES_PATH = JULIA_PATH / "include" / "julia"
+const JULIA_LIB_PATH = JULIA_PATH / "lib"
+const JULIA_DEPLIB_PATH = JULIA_PATH / "lib" / "julia"
+const JL_HEADER = "julia.h"
 
-const JULIA_INCLUDE_FLAG = "-I"&JULIA_INCLUDES_PATH
-const JULIA_LINK_FLAG = ["-Wl,-rpath," & JULIA_LIB_PATH, "-Wl,-rpath," &
-    JULIA_DEPLIB_PATH, "-lm", "-ljulia"]
-
-{.
-    compile: C_nimjl,
-    passc: JULIA_INCLUDE_FLAG,
-    passL: JULIA_LINK_FLAG[0],
-    passL: JULIA_LINK_FLAG[1],
-    passL: JULIA_LINK_FLAG[2],
-    passL: JULIA_LINK_FLAG[3]
-.}
-const jl_header = "julia.h"
+{.passC: "-fPIC".}
+{.passC: " -DJULIA_ENABLE_THREADING=1".}
+{.passC: "-I" & JULIA_INCLUDES_PATH.}
+{.passL: "-L" & JULIA_LIB_PATH.}
+{.passL: "-Wl,-rpath," & JULIA_LIB_PATH.}
+{.passL: "-L" & JULIA_DEPLIB_PATH.}
+{.passL: "-Wl,-rpath," & JULIA_DEPLIB_PATH.}
+{.passL: "-ljulia".}
+{.compile: C_nimjl.}
+static:
+  echo "JULIA_PATH> ", JULIA_PATH
+  echo "JULIA_INCLUDES_PATH> ", JULIA_INCLUDES_PATH
+  echo "JULIA_LIB_PATH> ", JULIA_LIB_PATH
+# {.push header: JL_HEADER.}
 
 ##Types
-type nimjl_value *{.importc: "jl_value_t", header: jl_header.} = object
-type nimjl_array *{.importc: "jl_array_t", header: jl_header.} = object
-type nimjl_func *{.importc: "jl_function_t", header: jl_header.} = object
-type nimjl_module *{.importc: "jl_module_t", header: jl_header.} = object
+type nimjl_value *{.importc: "jl_value_t", header: JL_HEADER.} = object
+type nimjl_array *{.importc: "jl_array_t", header: JL_HEADER.} = object
+type nimjl_func *{.importc: "jl_function_t", header: JL_HEADER.} = object
+type nimjl_module *{.importc: "jl_module_t", header: JL_HEADER.} = object
 
 var jl_main_module *{.importc: "jl_main_module",
-        header: jl_header.}: ptr nimjl_module
+        header: JL_HEADER.}: ptr nimjl_module
 var jl_core_module *{.importc: "jl_core_module",
-        header: jl_header.}: ptr nimjl_module
+        header: JL_HEADER.}: ptr nimjl_module
 var jl_base_module *{.importc: "jl_base_module",
-        header: jl_header.}: ptr nimjl_module
+        header: JL_HEADER.}: ptr nimjl_module
 var jl_top_module *{.importc: "jl_top_module",
-        header: jl_header.}: ptr nimjl_module
+        header: JL_HEADER.}: ptr nimjl_module
 
 ## Basic function
 proc nimjl_init*() {.cdecl, importc.}
@@ -296,14 +298,14 @@ proc nimjl_make_array*[T](data: ptr UncheckedArray[T], dims: seq[
     result = nimjl_ptr_to_array(array_type, data, xDims, 0)
     nimjl_gc_pop()
 
-proc nimjl_make_array*[T](data: ref Tensor[T]): ptr nimjl_array =
-    var array_type: ptr nimjl_value = nimjl_apply_array_type[T](data[].rank)
-    var dimStr = $(data[].shape)
+proc nimjl_make_array*[T](data: Tensor[T]): ptr nimjl_array =
+    var array_type: ptr nimjl_value = nimjl_apply_array_type[T](data.rank)
+    var dimStr = $(data.shape)
     dimStr = dimStr.replace("[", "(")
     dimStr = dimStr.replace("]", ")")
     var xDims = nimjl_eval_string(dimStr)
     nimjl_gc_push1(xDims.addr)
-    result = nimjl_ptr_to_array(array_type, data[].dataArray(), xDims, 0)
+    result = nimjl_ptr_to_array(array_type, data.dataArray(), xDims, 0)
     nimjl_gc_pop()
 
 proc nimjl_make_tuple*(v: tuple): ptr nimjl_value =
