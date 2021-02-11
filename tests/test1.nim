@@ -155,6 +155,8 @@ suite "Array":
     var xArray = nimjl_ptr_to_array_1d(array_type, orig_ptr, orig.len.csize_t, 0)
 
     var ret = cast[ptr nimjl_array](nimjl_exec_func("squareMeBaby!", cast[ptr nimjl_value](xArray)))
+    ### ???
+    # nimjl_gc_push1(ret.addr)
 
     var len_ret = nimjl_array_len(ret)
     check len_ret == orig.len
@@ -165,13 +167,13 @@ suite "Array":
     var data_ret = nimjl_array_data(ret)
     let unchecked_array_data_ret = cast[ptr UncheckedArray[float64]](data_ret)
     for i in 0..<orig.len:
-      check unchecked_array_data_ret[i] == orig[i]
       check unchecked_array_data_ret[i] == (i*i).float64
 
     var seqData: seq[float64] = newSeq[float64](len_ret)
     copyMem(seqData[0].unsafeAddr, data_ret, len_ret*sizeof(float64))
     check seqData == @[0.0, 1.0, 4.0, 9.0, 16.0, 25.0, 36.0, 49.0, 64.0, 81.0]
-    check orig == @[0.0, 1.0, 4.0, 9.0, 16.0, 25.0, 36.0, 49.0, 64.0, 81.0]
+    ## ???
+    # nimjl_gc_pop()
 
   test "external_module : mutateMeByTen[Array]":
     echo "test external_module : mutateMeByTen[Array]"
@@ -181,6 +183,9 @@ suite "Array":
     let data_ptr = cast[ptr UncheckedArray[float64]](data[0].addr)
     var array_type: ptr nimjl_value = nimjl_apply_array_type[float64](1)
     var xArray = nimjl_ptr_to_array_1d(array_type, data_ptr, data.len.csize_t, 0)
+    check not isNil(xArray)
+
+
     var ret: ptr nimjl_value = nimjl_exec_func("mutateMeByTen!", cast[ptr nimjl_value](xArray))
     check not isNil(ret)
 
@@ -201,8 +206,8 @@ suite "Tensor":
     orig = ones[float64](3, 4, 5)
     var index = 0
     for i in orig.mitems:
-      inc(index)
       i = index.float64 / 3.0
+      inc(index)
 
     var xTensor = nimjl_make_array[float64](orig)
 
@@ -219,6 +224,7 @@ suite "Tensor":
       check @[d0, d1, d2] == orig.shape.toSeq
 
     var ret = cast[ptr nimjl_array](nimjl_exec_func("squareMeBaby!", cast[ptr nimjl_value](xTensor)))
+    nimjl_gc_push1(ret.addr)
     check not isNil(ret)
 
     var len_ret = nimjl_array_len(ret)
@@ -231,12 +237,10 @@ suite "Tensor":
     var tensorData: Tensor[float64] = newTensor[float64](3, 4, 5)
     copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
 
-    check tensorData == orig
-    index = 0
-    for i in tensorData.items:
-      inc(index)
-      let value = index.float64 / 3.0
-      check i == value*value
+    for i, v in enumerate(tensorData):
+      check v == (i/3)*(i/3)
+    nimjl_gc_pop()
+
 
   test "external_module : mutateMeByTen[Tensor]":
     echo "test external_module : mutateMeByTen[Tensor]"

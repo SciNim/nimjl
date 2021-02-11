@@ -6,17 +6,19 @@ module custom_module
   end
 
   function squareMeBaby!(A)
+    ## Square array and return the result
     A[:]=[i*i for i in A]
-    # B = A.*A
-    # B = A * A
-    # return B
+    #  A = A * A
+    #  return A
   end
 
   function mutateMeByTen!(A)
+    ## Multiple array in place by ten
     lmul!(10, A)
   end
 
   function tupleTest(tt)
+    ## test tuple creation with specific values
     if (tt.a == 124) && (tt.c - 67.32147 < 1e-8)
       return 255
     end
