@@ -222,7 +222,7 @@ static void external_module_squareMeBaby_3D()
 {
     printf("%s -- BEGIN \n", __func__);
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
-    jl_function_t *func = jl_get_function(custom_module, "squareMeBaby!");
+    jl_function_t *func = jl_get_function(custom_module, "squareMeBaby");
 
     if (func != NULL)
     {
@@ -233,7 +233,7 @@ static void external_module_squareMeBaby_3D()
       printf("squareMeBaby is null\n");
     }
     printf("%s -> make_array \n", __func__);
-    double existingArray0[3][4][5]; 
+    double existingArray0[3][4][5];
     int length = 3*4*5;
     int dimsArray[3];
     dimsArray[0] = 3;
@@ -248,7 +248,8 @@ static void external_module_squareMeBaby_3D()
       xData[i] = i ;
 
     jl_value_t *ret = jl_call1(func, (jl_value_t *)xArray);
-    // JL_GC_POP();
+    // Is this necessary ?
+    JL_GC_PUSH1(&ret);
     printf("%s -> call done \n", __func__);
     printf("ret is %p \n\n", ret);
     if (!ret)
@@ -257,8 +258,6 @@ static void external_module_squareMeBaby_3D()
       return;
     }
     {
-      // Is this necessary ?
-      // JL_GC_PUSH1(&ret);
       printf("len(ret)=%li \n", jl_array_len(ret));
       printf("rank %i = jl_array_rank(x) \n", jl_array_rank((jl_value_t *)ret));
       int d1 = jl_array_dim(ret, 0);
@@ -270,12 +269,12 @@ static void external_module_squareMeBaby_3D()
         for (int j = 0; j < d2; j++)
           printf("%lf ", xResult[i * d2 + j]);
       printf("]\n");
-      // Is this necessary ?
-      // JL_GC_POP();
     }
+    // Is this necessary ?
+    JL_GC_POP();
     printf("%s -- END \n", __func__);
     return;
-} 
+}
 
 
 static void external_module_squareMeBaby()
@@ -283,7 +282,7 @@ static void external_module_squareMeBaby()
   printf("%s -- BEGIN \n", __FUNCTION__);
   {
     jl_module_t *custom_module = (jl_module_t *)jl_eval_string("custom_module");
-    jl_function_t *func = jl_get_function(custom_module, "squareMeBaby!");
+    jl_function_t *func = jl_get_function(custom_module, "squareMeBaby");
 
     if (func != NULL)
     {

@@ -147,14 +147,14 @@ suite "external module":
 
 suite "Array":
 
-  test "external_module : squareMeBaby![Array]":
-    echo "test external_module : squareMeBaby![Array]"
+  test "external_module : squareMeBaby[Array]":
+    echo "test external_module : squareMeBaby[Array]"
     var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
     let orig_ptr = cast[ptr UncheckedArray[float64]](orig[0].addr)
     var array_type: ptr nimjl_value = nimjl_apply_array_type[float64](1)
     var xArray = nimjl_ptr_to_array_1d(array_type, orig_ptr, orig.len.csize_t, 0)
 
-    var ret = cast[ptr nimjl_array](nimjl_exec_func("squareMeBaby!", cast[ptr nimjl_value](xArray)))
+    var ret = cast[ptr nimjl_array](nimjl_exec_func("squareMeBaby", cast[ptr nimjl_value](xArray)))
     ### ???
     # nimjl_gc_push1(ret.addr)
 
@@ -200,8 +200,8 @@ suite "Array":
 
 suite "Tensor":
 
-  test "external_module : squareMeBaby![Tensor]":
-    echo "test external_module : squareMeBaby![Tensor]"
+  test "external_module : squareMeBaby[Tensor]":
+    echo "test external_module : squareMeBaby[Tensor]"
     var orig: Tensor[float64]
     orig = ones[float64](3, 4, 5)
     var index = 0
@@ -223,7 +223,7 @@ suite "Tensor":
       var d2 = nimjl_array_dim(xTensor, 2).int
       check @[d0, d1, d2] == orig.shape.toSeq
 
-    var ret = cast[ptr nimjl_array](nimjl_exec_func("squareMeBaby!", cast[ptr nimjl_value](xTensor)))
+    var ret = cast[ptr nimjl_array](nimjl_exec_func("squareMeBaby", cast[ptr nimjl_value](xTensor)))
     nimjl_gc_push1(ret.addr)
     check not isNil(ret)
 

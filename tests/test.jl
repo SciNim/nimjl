@@ -5,11 +5,11 @@ module custom_module
     println("Julia says... Hello, world ! Function dummy() from module custom_module has been executed !")
   end
 
-  function squareMeBaby!(A)
+  function squareMeBaby(A)
     ## Square array and return the result
-    A[:]=[i*i for i in A]
-    #  A = A * A
-    #  return A
+    #  A[:]=[i*i for i in A]
+    B = A * A
+    return B
   end
 
   function mutateMeByTen!(A)
@@ -27,6 +27,6 @@ module custom_module
 
   export dummy
   export tupleTest
-  export squareMeBaby!
+  export squareMeBaby
   export mutateMeByTen!
 end
