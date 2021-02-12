@@ -1,3 +1,5 @@
+#define JULIA_ENABLE_THREADING 1
+
 #include "julia.h"
 #include "stdio.h"
 #include "stdbool.h"
@@ -59,7 +61,10 @@ void arrays_1D()
   jl_array_t *x = jl_alloc_array_1d(array_type, 10);
   // JL_GC_PUSH* is required here to ensure that `x` is not deleted before
   // (aka, is gc-rooted until) the program reaches the corresponding JL_GC_POP()
-  JL_GC_PUSH1(&x);
+  JL_GC_PUSH1(x);
+  // Or is it ?
+  // JL_GC_PUSH1(&x);
+
 
   double *xData = jl_array_data(x);
 
@@ -240,8 +245,6 @@ static void external_module_squareMeBaby_3D()
     dimsArray[1] = 4;
     dimsArray[2] = 5;
     jl_array_t* xArray = nimjl_make_3d_array(existingArray0, dimsArray);
-    // Is this necessary ?
-    // JL_GC_PUSH1(&xArray);
 
     double *xData = (double *)jl_array_data(xArray);
     for (int i = 0; i < length; i++)

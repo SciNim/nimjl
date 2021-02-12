@@ -7,8 +7,10 @@ module custom_module
 
   function squareMeBaby(A)
     ## Square array and return the result
+    # in-place modification
     #  A[:]=[i*i for i in A]
-    B = A * A
+    println(typeof(A))
+    B = A .* A
     return B
   end
 
