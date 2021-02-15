@@ -4,8 +4,10 @@ import sequtils
 import arraymancer
 import sugar
 
+
 echo "init"
 nimjl_init()
+
 
 suite "Basic stuff":
   test "nim_eval_string":
@@ -53,7 +55,7 @@ suite "Array 1D":
     var array_type = nimjl_apply_array_type[float64](1)
     var x = nimjl_alloc_array_1d(array_type, ARRAY_LEN.csize_t)
 
-    nimjl_gc_push1((x))
+    nimjl_gc_push1(addr(x))
     var xData: ptr UncheckedArray[float64] = cast[ptr UncheckedArray[float64]](
       nimjl_array_data(x))
     check ARRAY_LEN == nimjl_array_len(x)
@@ -116,7 +118,7 @@ suite "external module":
       var jl_tuple = nimjl_make_tuple((a:124, c: 67.32147))
       check not isNil(jl_tuple)
 
-      nimjl_gc_push1(jl_tuple)
+      nimjl_gc_push1(jl_tuple.addr)
       var ret = nimjl_exec_func("tupleTest", jl_tuple)
 
       check not isNil(ret)
@@ -135,7 +137,7 @@ suite "external module":
       var jl_tuple_fromobj = nimjl_make_tuple(tt)
       check not isNil(jl_tuple_fromobj)
 
-      nimjl_gc_push1(jl_tuple_fromobj)
+      nimjl_gc_push1(jl_tuple_fromobj.addr)
 
       var ret = nimjl_exec_func("tupleTest", jl_tuple_fromobj)
       check not isNil(ret)
@@ -151,11 +153,10 @@ suite "Array":
     echo "test external_module : squareMeBaby[Array]"
     var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
     let orig_ptr = cast[ptr UncheckedArray[float64]](orig[0].addr)
-    var array_type: ptr nimjl_value = nimjl_apply_array_type[float64](1)
-    var xArray = nimjl_ptr_to_array_1d(array_type, orig_ptr, orig.len.csize_t, 0)
+    var xArray = nimjl_make_array(orig_ptr, @[orig.len])
 
     var ret : ptr nimjl_array = nil
-    nimjl_gc_push1(ret)
+    nimjl_gc_push1(ret.addr)
     ret = cast[ptr nimjl_array](nimjl_exec_func("squareMeBaby", cast[ptr nimjl_value](xArray)))
 
     var len_ret = nimjl_array_len(ret)
@@ -180,10 +181,8 @@ suite "Array":
 
     var data: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
     let data_ptr = cast[ptr UncheckedArray[float64]](data[0].addr)
-    var array_type: ptr nimjl_value = nimjl_apply_array_type[float64](1)
-    var xArray = nimjl_ptr_to_array_1d(array_type, data_ptr, data.len.csize_t, 0)
+    var xArray = nimjl_make_array(data_ptr, @[data.len])
     check not isNil(xArray)
-
 
     var ret: ptr nimjl_value = nimjl_exec_func("mutateMeByTen!", cast[ptr nimjl_value](xArray))
     check not isNil(ret)
@@ -198,6 +197,8 @@ suite "Array":
     check data == orig.map(x => x*10)
 
 suite "Tensor":
+  setup: nimjl_gc_enable(0)
+  teardown: nimjl_gc_enable(1)
 
   test "external_module : squareMeBaby[Tensor]":
     echo "test external_module : squareMeBaby[Tensor]"
@@ -223,7 +224,7 @@ suite "Tensor":
       check @[d0, d1, d2] == orig.shape.toSeq
 
     var ret = cast[ptr nimjl_array](nimjl_exec_func("squareMeBaby", cast[ptr nimjl_value](xTensor)))
-    nimjl_gc_push1(ret)
+    nimjl_gc_push1(ret.addr)
     check not isNil(ret)
 
     var len_ret = nimjl_array_len(ret)
@@ -235,11 +236,10 @@ suite "Tensor":
     var data_ret = nimjl_array_data(ret)
     var tensorData: Tensor[float64] = newTensor[float64](3, 4, 5)
     copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
-
     for i, v in enumerate(tensorData):
       check v == (i/3)*(i/3)
-    nimjl_gc_pop()
 
+    nimjl_gc_pop()
 
   test "external_module : mutateMeByTen[Tensor]":
     echo "test external_module : mutateMeByTen[Tensor]"
@@ -253,6 +253,7 @@ suite "Tensor":
     var xTensor = nimjl_make_array[float64](orig)
 
     var ret = cast[ptr nimjl_array](nimjl_exec_func("mutateMeByTen!", cast[ptr nimjl_value](xTensor)))
+    nimjl_gc_push1(ret.addr)
     check not isNil(ret)
 
     var len_ret = nimjl_array_len(ret)
@@ -265,6 +266,9 @@ suite "Tensor":
     var tensorData: Tensor[float64] = newTensor[float64](4, 6, 8)
     copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
     check tensorData == orig
+    nimjl_gc_pop()
+
+
 
   test "external_module : rot180[Tensor]":
     echo "test external_module : rot180[Tensor]"

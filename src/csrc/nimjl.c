@@ -6,6 +6,7 @@
 
 // eval
 void nimjl_init() { jl_init(); }
+void nimjl_gc_enable(int toggle) { jl_gc_enable(toggle); }
 void nimjl_atexit_hook(int code) { jl_atexit_hook(code); }
 
 // eval_string

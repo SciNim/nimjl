@@ -161,25 +161,25 @@ void arrays_2D()
   return;
 }
 
-jl_array_t *nimjl_make_array(void *existingArray, int ndims, int *dimsArray)
-{
-  printf("%s \n", __func__);
-  jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 3);
-  char strDimsBuf[12];
-  snprintf(strDimsBuf, 12, "(%i, %i, %i)", dimsArray[0], dimsArray[1], dimsArray[2]);
-
-  printf("%s \n", strDimsBuf);
-  jl_value_t *dims = jl_eval_string(strDimsBuf);
-  jl_array_t *xArray = jl_ptr_to_array(array_type, existingArray, dims, 0);
-  return xArray;
-}
+// jl_array_t *nimjl_make_array(void *existingArray, int ndims, int *dimsArray)
+// {
+//   printf("%s \n", __func__);
+//   jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 3);
+//   char strDimsBuf[12];
+//   snprintf(strDimsBuf, 12, "(%i, %i, %i,)", dimsArray[0], dimsArray[1], dimsArray[2]);
+//
+//   printf("%s \n", strDimsBuf);
+//   jl_value_t *dims = jl_eval_string(strDimsBuf);
+//   jl_array_t *xArray = jl_ptr_to_array(array_type, existingArray, dims, 0);
+//   return xArray;
+// }
 
 jl_array_t *nimjl_make_2d_array(void *existingArray, int *dimsArray)
 {
   printf("%s \n", __func__);
   jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 2);
   char strDimsBuf[12];
-  snprintf(strDimsBuf, 12, "(%i, %i)", dimsArray[0], dimsArray[1]);
+  snprintf(strDimsBuf, 12, "(%i, %i,)", dimsArray[0], dimsArray[1]);
   printf("%s \n", strDimsBuf);
 
   jl_value_t *dims = jl_eval_string(strDimsBuf);
@@ -191,8 +191,8 @@ jl_array_t *nimjl_make_3d_array(void *existingArray, int *dimsArray)
 {
   printf("%s \n", __func__);
   jl_value_t *array_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 3);
-  char strDimsBuf[12];
-  snprintf(strDimsBuf, 12, "(%i, %i, %i)", dimsArray[0], dimsArray[1], dimsArray[2]);
+  char strDimsBuf[20];
+  snprintf(strDimsBuf, 20, "(%i, %i, %i,)", dimsArray[0], dimsArray[1], dimsArray[2]);
 
   printf("%s \n", strDimsBuf);
   jl_value_t *dims = jl_eval_string(strDimsBuf);

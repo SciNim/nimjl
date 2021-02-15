@@ -5,7 +5,7 @@ import strformat
 
 # Const julia path
 const csrc_nimjl = "csrc/nimjl.c"
-const juliaPath = getEnv("juliaPath")
+const juliaPath = getEnv("JULIA_PATH")
 const juliaIncludesPath = juliaPath / "include" / "julia"
 const juliaLibPath = juliaPath / "lib"
 const juliaDepPath = juliaPath / "lib" / "julia"
@@ -40,8 +40,12 @@ var jl_top_module *{.importc: "jl_top_module", header: juliaHeader.}: ptr nimjl_
 
 ## Basic function
 proc nimjl_init*() {.cdecl, importc.}
+proc nimjl_gc_enable*(toggle: cint) {.cdecl, importc.}
 proc nimjl_atexit_hook*(exit_code: cint) {.cdecl, importc.}
 proc nimjl_eval_string*(code: cstring): ptr nimjl_value {.cdecl, importc.}
+
+proc nimjl_eval_string*(code: string): ptr nimjl_value =
+  result = nimjl_eval_string(code.cstring)
 
 ## Box & Unbox
 proc nimjl_unbox_float64(value: ptr nimjl_value): float64 {.cdecl, importc.}
@@ -214,8 +218,7 @@ proc nimjl_reshape_array*(atype: ptr nimjl_value, data: ptr nimjl_array,
 proc nimjl_ptr_to_array_1d*(atype: ptr nimjl_value, data: pointer, nel: csize_t,
     own_buffer: cint): ptr nimjl_array {.cdecl, importc.}
 
-proc nimjl_ptr_to_array*(atype: ptr nimjl_value, data: pointer,
-        dims: ptr nimjl_value,
+proc nimjl_ptr_to_array*(atype: ptr nimjl_value, data: pointer, dims: ptr nimjl_value,
     own_buffer: cint): ptr nimjl_array {.cdecl, importc.}
 
 proc nimjl_alloc_array_1d*(atype: ptr nimjl_value,
@@ -281,29 +284,20 @@ proc nimjl_apply_array_type*[T](dim: int): ptr nimjl_value =
   else:
     doAssert(false, "Type not supported")
 
-proc nimjl_make_array*[T](data: ptr UncheckedArray[T], dims: seq[
-        int]): ptr nimjl_array =
+proc nimjl_make_array*[T](data: ptr UncheckedArray[T], dims: openArray[int]): ptr nimjl_array =
   var array_type: ptr nimjl_value = nimjl_apply_array_type[T](dims.len)
   var dimStr = "("
   for d in dims:
-    dimStr = dimStr & $d
-    if d != dims[^1]:
-      dimStr = dimStr & ","
+    dimStr.add $d
+    dimStr.add ","
   dimStr = dimStr & ")"
   var xDims = nimjl_eval_string(dimStr)
-  nimjl_gc_push1(xDims)
+  nimjl_gc_push1(xDims.addr)
   result = nimjl_ptr_to_array(array_type, data, xDims, 0)
   nimjl_gc_pop()
 
 proc nimjl_make_array*[T](data: Tensor[T]): ptr nimjl_array =
-  var array_type: ptr nimjl_value = nimjl_apply_array_type[T](data.rank)
-  var dimStr = $(data.shape)
-  dimStr = dimStr.replace("[", "(")
-  dimStr = dimStr.replace("]", ")")
-  var xDims = nimjl_eval_string(dimStr)
-  nimjl_gc_push1(xDims)
-  result = nimjl_ptr_to_array(array_type, data.dataArray(), xDims, 0)
-  nimjl_gc_pop()
+  result = nimjl_make_array(data.dataArray(), data.shape.toSeq)
 
 proc nimjl_make_tuple*(v: tuple): ptr nimjl_value =
   var tupleStr = $v
