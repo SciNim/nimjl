@@ -197,8 +197,8 @@ suite "Array":
     check data == orig.map(x => x*10)
 
 suite "Tensor":
-  setup: nimjl_gc_enable(0)
-  teardown: nimjl_gc_enable(1)
+  # setup: nimjl_gc_enable(0)
+  # teardown: nimjl_gc_enable(1)
 
   test "external_module : squareMeBaby[Tensor]":
     echo "test external_module : squareMeBaby[Tensor]"
@@ -222,9 +222,10 @@ suite "Tensor":
       var d1 = nimjl_array_dim(xTensor, 1).int
       var d2 = nimjl_array_dim(xTensor, 2).int
       check @[d0, d1, d2] == orig.shape.toSeq
-
-    var ret = cast[ptr nimjl_array](nimjl_exec_func("squareMeBaby", cast[ptr nimjl_value](xTensor)))
-    nimjl_gc_push1(ret.addr)
+    var retVal = nimjl_exec_func("squareMeBaby", cast[ptr nimjl_value](xTensor))
+    nimjl_gc_push1(retVal.addr)
+    var ret = cast[ptr nimjl_array](retVal)
+    # nimjl_gc_push1(ret.addr)
     check not isNil(ret)
 
     var len_ret = nimjl_array_len(ret)
@@ -239,6 +240,7 @@ suite "Tensor":
     for i, v in enumerate(tensorData):
       check v == (i/3)*(i/3)
 
+    echo orig[0, 0, 0]
     nimjl_gc_pop()
 
   test "external_module : mutateMeByTen[Tensor]":
@@ -266,6 +268,8 @@ suite "Tensor":
     var tensorData: Tensor[float64] = newTensor[float64](4, 6, 8)
     copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
     check tensorData == orig
+
+    echo orig[0, 0, 0]
     nimjl_gc_pop()
 
 
