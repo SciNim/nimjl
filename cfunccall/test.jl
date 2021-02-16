@@ -5,7 +5,12 @@ module custom_module
     println("Julia says... Hello, world ! Function dummy() from module custom_module has been executed !")
   end
 
+  function addMeBaby(x, y)
+    return x+y
+  end
+
   function squareMeBaby(A)
+    #  A = unsafe_wrap(Array, data, len)
     ## Square array and return the result
     println(typeof(A))
 
@@ -21,18 +26,18 @@ module custom_module
     lmul!(10, A)
   end
 
-  function tupleTest(tt)
-    ## test tuple creation with specific values
-    if (tt.a == 124) && (tt.c - 67.32147 < 1e-8)
-      return 255
-    end
-    return 0
-  end
-
   export dummy
-  export tupleTest
   export squareMeBaby
   export mutateMeByTen!
+  export addMeBaby
+
   ## TODO Fix this
-  const julia_tupleTest = @cfunction(tupleTest, Cint, (tuple( ??? )))
+  #  const julia_dummy = @cfunction(dummy, Cvoid, (Cvoid,))
+  #  export julia_dummy
+
+  const julia_addMeBabyInt = @cfunction(addMeBaby, Cint, (Cint, Cint,))
+  export julia_addMeBabyInt
+
+  const julia_addMeBabyFloat = @cfunction(addMeBaby, Cfloat, (Cfloat, Cfloat,))
+  export julia_addMeBabyFloat
 end
