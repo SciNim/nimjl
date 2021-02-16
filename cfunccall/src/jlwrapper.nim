@@ -4,6 +4,7 @@ import strformat
 
 # Const julia path
 const csrc_jl = "csrc/jl.c"
+# const csrc_jl = "csrc/cfunctions.c"
 const juliaPath = getEnv("JULIA_PATH")
 const juliaIncludesPath = juliaPath / "include" / "julia"
 const juliaLibPath = juliaPath / "lib"
@@ -40,7 +41,7 @@ var jl_top_module *{.importc: "jl_top_module", header: juliaHeader.}: ptr jl_mod
 
 ## Basic function
 proc nimjl_init*() {.cdecl, importc.}
-proc nimjl_gc_enable*(toggle: cint) {.cdecl, importc.}
+# proc nimjl_gc_enable*(toggle: cint) {.cdecl, importc.}
 proc nimjl_atexit_hook*(exit_code: cint) {.cdecl, importc.}
 proc nimjl_eval_string*(code: cstring): ptr jl_value {.cdecl, importc.}
 
@@ -55,10 +56,11 @@ proc nimjl_using_module*(module_name: string): ptr jl_value =
 
 # Make function pointers
 proc nimjl_get_global*(module: ptr jl_module, name: cstring): ptr jl_value {.cdecl, importc.}
-proc nimjl_unbox_voidpointer(p: pointer): pointer {.cdecl, importc.}
+proc nimjl_unbox_voidpointer*(p: pointer): pointer {.cdecl, importc.}
 # proc nimjl_get_global*(module: ptr jl_module, sym: ptr jl_sym): ptr jl_sym{.cdecl, importc.}
 # proc nimjl_symbol(name: cstring) : ptr jl_sym {.cdecl, importc.}
-
+# proc get_cfunction_pointer*(name: cstring): pointer {.cdecl, importc.}
+#
 proc get_cfunction_pointer*(name: cstring): pointer =
   var p: pointer = nil
   # var boxed_pointer: ptr jl_value_t = nimjl_get_global(jl_main_module, nimjl_symbol(name))
@@ -67,7 +69,7 @@ proc get_cfunction_pointer*(name: cstring): pointer =
   if isNil(p): stderr.write(&"cfunction pointer {name} not available.\n")
   return p
 
-# Array type
+## Array type
 proc nimjl_apply_array_type_int8(dim: csize_t): ptr jl_value {.cdecl, importc.}
 
 proc nimjl_apply_array_type_int16(dim: csize_t): ptr jl_value {.cdecl, importc.}
@@ -120,7 +122,7 @@ proc nimjl_apply_array_type*[T](dim: int): ptr jl_value =
   else:
     doAssert(false, "Type not supported")
 
-# Array
+## Array Utils
 # Values will need to be cast from nimjl_value to nimjl_array back and forth
 proc nimjl_array_data*(values: ptr jl_array): pointer {.cdecl, importc.}
 

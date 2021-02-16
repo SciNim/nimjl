@@ -29,14 +29,28 @@ jl_function_t *nimjl_get_function(jl_module_t *module, const char *name)
   return jl_get_function(module, name);
 }
 
-jl_value_t* nimjl_get_global(jl_module_t *module, const char *name) {
+jl_value_t* nimjl_get_global(jl_module_t *module, char *name) {
   return jl_get_global(module, jl_symbol(name));
 }
+
+// void *get_cfunction_pointer(const char *name)
+// {
+//     void *p = 0;
+//     jl_value_t *boxed_pointer = jl_get_global(jl_main_module, jl_symbol(name));
+//     if (boxed_pointer != 0) {
+//         p = jl_unbox_voidpointer(boxed_pointer);
+//     }
+//     if (!p) {
+//         fprintf(stderr, "cfunction pointer %s not available.\n", name);
+//     }
+//     return p;
+// }
 
 // TODO : Do we need the sym ?
 // jl_value_t* nimjl_get_global(jl_module_t *module, jl_sym_t *sym) {
 //   return jl_get_global(module, sym)
 // }
+//
 
 // ##################################
 // Array type

@@ -1,14 +1,6 @@
 module custom_module
   using LinearAlgebra
 
-  function dummy()
-    println("Julia says... Hello, world ! Function dummy() from module custom_module has been executed !")
-  end
-
-  function addMeBaby(x, y)
-    return x+y
-  end
-
   function squareMeBaby(A)
     #  A = unsafe_wrap(Array, data, len)
     ## Square array and return the result
@@ -31,13 +23,19 @@ module custom_module
   export mutateMeByTen!
   export addMeBaby
 
+  function dummy()
+    println("Julia says... Hello, world ! Function dummy() from module custom_module has been executed !")
+  end
   ## TODO Fix this
   #  const julia_dummy = @cfunction(dummy, Cvoid, (Cvoid,))
   #  export julia_dummy
-
-  const julia_addMeBabyInt = @cfunction(addMeBaby, Cint, (Cint, Cint,))
-  export julia_addMeBabyInt
-
-  const julia_addMeBabyFloat = @cfunction(addMeBaby, Cfloat, (Cfloat, Cfloat,))
-  export julia_addMeBabyFloat
 end
+
+function addMeBaby(x, y)
+  return x+y
+end
+const julia_addMeBabyInt = @cfunction(addMeBaby, Cint, (Cint, Cint,))
+const julia_addMeBabyFloat = @cfunction(addMeBaby, Cfloat, (Cfloat, Cfloat,))
+
+
+
