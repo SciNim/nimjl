@@ -1,3 +1,3 @@
 --outdir:bin
---gc:arc
 --forceBuild:on
+# --gc:arc

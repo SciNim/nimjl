@@ -10,21 +10,37 @@ block:
   doAssert not isNil(res)
 
 block:
-  var fPtr = get_cfunction_pointer("julia_addMeBabyInt")
-  echo fPtr.repr
-  var julia_addMeBabyInt: (proc(a: cint, b: cint): cint) = cast[ptr (proc(a: cint, b: cint): cint)](fPtr)[]
-  echo julia_addMeBabyInt(3.cint, 4.cint)
-  echo fPtr.repr
+  callAddMeBabyInt()
 
 block:
-  # var fPtr = get_cfunction_pointer("julia_dummy")
-  # echo fPtr.repr
-  var valPtr = nimjl_eval_string("@cfunction(custom_module.dummy, Cvoid, (Cvoid,))")
-  if not isNil(valPtr):
-    var fPtr = nimjl_unbox_voidpointer(valPtr)
-    echo fPtr.repr
-    var julia_dummy: (proc(): void) = cast[ptr proc(): void](fPtr)[]
+  var fPtr: pointer
+  fPtr = get_nimfunction_pointer("julia_addMeBabyInt")
+  # proc julia_addMeBabyInt(a: cint, b: cint): cint {.cdecl.} = cast[(proc(a: cint, b: cint): cint  {.cdecl.})](fPtr)
+  var julia_addMeBabyInt: (proc(a: cint, b: cint): cint {.cdecl.}) = cast[(proc(a: cint, b: cint): cint {.cdecl.})](fPtr)
+  echo ">>>", julia_addMeBabyInt(3.cint, 4.cint)
+
+block:
+  var fPtr = get_nimfunction_pointer("julia_dummy")
+  if not isNil(fPtr):
+    var julia_dummy: (proc() {.gcsafe, cdecl.}) = cast[(proc() {.gcsafe, cdecl.})](fPtr)
     julia_dummy()
-    echo fPtr.repr
+  else:
+    echo "Error fPtr isNil"
+
+block:
+  var valPtr = nimjl_eval_string("@cfunction(custom_module.dummy, Cvoid, ())")
+  var fPtr : pointer
+
+  if not valPtr.isNil:
+    fPtr = nimjl_unbox_voidpointer(valPtr)
+  else:
+    echo "Error valPtr isNil"
+
+  if not isNil(fPtr):
+    var julia_dummy: (proc() {.gcsafe, cdecl.}) = cast[(proc() {.gcsafe, cdecl.})](fPtr)
+    julia_dummy()
+  else:
+    echo "Error fPtr isNil"
 
 nimjl_atexit_hook(0)
+

@@ -20,7 +20,6 @@ void* nimjl_unbox_voidpointer(jl_value_t* ptr)
 }
 jl_sym_t* nimjl_symbol(const char* name)
 {
-  // jl_sym_t *(*jl_symbol)(const char *);
   return jl_symbol(name);
 }
 //
@@ -33,18 +32,25 @@ jl_value_t* nimjl_get_global(jl_module_t *module, char *name) {
   return jl_get_global(module, jl_symbol(name));
 }
 
-// void *get_cfunction_pointer(const char *name)
-// {
-//     void *p = 0;
-//     jl_value_t *boxed_pointer = jl_get_global(jl_main_module, jl_symbol(name));
-//     if (boxed_pointer != 0) {
-//         p = jl_unbox_voidpointer(boxed_pointer);
-//     }
-//     if (!p) {
-//         fprintf(stderr, "cfunction pointer %s not available.\n", name);
-//     }
-//     return p;
-// }
+void *get_cfunction_pointer(const char *name)
+{
+    void *p = 0;
+    jl_value_t *boxed_pointer = jl_get_global(jl_main_module, jl_symbol(name));
+    if (boxed_pointer != 0) {
+        p = jl_unbox_voidpointer(boxed_pointer);
+    }
+    if (!p) {
+        fprintf(stderr, "cfunction pointer %s not available.\n", name);
+    }
+    return p;
+}
+
+void callAddMeBabyInt() {
+  int (*addMe)(int, int);
+  addMe = get_cfunction_pointer("julia_addMeBabyInt");
+  int res = addMe(3, 4);
+  printf("Calling from C says : %i \n", res);
+}
 
 // TODO : Do we need the sym ?
 // jl_value_t* nimjl_get_global(jl_module_t *module, jl_sym_t *sym) {

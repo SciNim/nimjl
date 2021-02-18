@@ -59,11 +59,12 @@ proc nimjl_get_global*(module: ptr jl_module, name: cstring): ptr jl_value {.cde
 proc nimjl_unbox_voidpointer*(p: pointer): pointer {.cdecl, importc.}
 # proc nimjl_get_global*(module: ptr jl_module, sym: ptr jl_sym): ptr jl_sym{.cdecl, importc.}
 # proc nimjl_symbol(name: cstring) : ptr jl_sym {.cdecl, importc.}
-# proc get_cfunction_pointer*(name: cstring): pointer {.cdecl, importc.}
-#
-proc get_cfunction_pointer*(name: cstring): pointer =
+
+proc get_cfunction_pointer*(name: cstring): pointer {.cdecl, importc.}
+proc callAddMeBabyInt*() {.cdecl, importc.}
+
+proc get_nimfunction_pointer*(name: cstring): pointer =
   var p: pointer = nil
-  # var boxed_pointer: ptr jl_value_t = nimjl_get_global(jl_main_module, nimjl_symbol(name))
   var boxed_pointer: ptr jl_value = nimjl_get_global(jl_main_module, name)
   if not isNil(boxed_pointer): p = nimjl_unbox_voidpointer(boxed_pointer)
   if isNil(p): stderr.write(&"cfunction pointer {name} not available.\n")

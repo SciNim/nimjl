@@ -21,21 +21,20 @@ module custom_module
   export dummy
   export squareMeBaby
   export mutateMeByTen!
-  export addMeBaby
 
   function dummy()
     println("Julia says... Hello, world ! Function dummy() from module custom_module has been executed !")
   end
-  ## TODO Fix this
-  #  const julia_dummy = @cfunction(dummy, Cvoid, (Cvoid,))
-  #  export julia_dummy
+
 end
+## TODO Fix this
+const julia_dummy = @cfunction(custom_module.dummy, (Cvoid), ())
 
 function addMeBaby(x, y)
   return x+y
 end
 const julia_addMeBabyInt = @cfunction(addMeBaby, Cint, (Cint, Cint,))
-const julia_addMeBabyFloat = @cfunction(addMeBaby, Cfloat, (Cfloat, Cfloat,))
+#  const julia_addMeBabyFloat = @cfunction(addMeBaby, Cfloat, (Cfloat, Cfloat,))
 
 
 
