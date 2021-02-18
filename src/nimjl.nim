@@ -124,23 +124,21 @@ proc nimjl_box*[T](value: T): ptr nimjl_value =
 
 ##GC Functions
 
-proc nimjl_gc_push1*(a: pointer) {.cdecl, importc.}
+proc nimjl_gc_push1*(a: pointer) {.cdecl, importc, inline.}
 
-proc nimjl_gc_push2*(a: pointer, b: pointer) {.cdecl, importc.}
+proc nimjl_gc_push2*(a: pointer, b: pointer) {.cdecl, importc, inline.}
 
-proc nimjl_gc_push3*(a: pointer, b: pointer, c: pointer) {.cdecl, importc.}
+proc nimjl_gc_push3*(a: pointer, b: pointer, c: pointer) {.cdecl, importc, inline.}
 
-proc nimjl_gc_push4*(a: pointer, b: pointer, c: pointer, d: pointer) {.cdecl, importc.}
+proc nimjl_gc_push4*(a: pointer, b: pointer, c: pointer, d: pointer) {.cdecl, importc, inline.}
 
-proc nimjl_gc_push5*(a: pointer, b: pointer, c: pointer, d: pointer,
-        e: pointer) {.cdecl, importc.}
+proc nimjl_gc_push5*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer) {.cdecl, importc, inline.}
 
-proc nimjl_gc_push6*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer,
-        f: pointer) {.cdecl, importc.}
+proc nimjl_gc_push6*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer, f: pointer) {.cdecl, importc, inline.}
 
-proc nimjl_gc_pushargs*(a: pointer, n: csize_t) {.cdecl, importc.}
+proc nimjl_gc_pushargs*(a: pointer, n: csize_t) {.cdecl, importc, inline.}
 
-proc nimjl_gc_pop*() {.cdecl, importc.}
+proc nimjl_gc_pop*() {.cdecl, importc, inline.}
 
 proc nimjl_exception_occurred*(): ptr nimjl_value {.cdecl, importc.}
 
@@ -149,22 +147,17 @@ proc nimjl_typeof_str*(v: ptr nimjl_value): cstring {.cdecl, importc.}
 proc nimjl_string_ptr*(v: ptr nimjl_value): cstring {.cdecl, importc.}
 
 ## Call functions
-proc nimjl_get_function*(module: ptr nimjl_module,
-        name: cstring): ptr nimjl_func {.cdecl, importc.}
+proc nimjl_get_function*(module: ptr nimjl_module, name: cstring): ptr nimjl_func {.cdecl, importc.}
 
-proc nimjl_call *(function: ptr nimjl_func, values: ptr ptr nimjl_value,
-        nargs: cint): ptr nimjl_value {.cdecl, importc.}
+proc nimjl_call *(function: ptr nimjl_func, values: ptr ptr nimjl_value, nargs: cint): ptr nimjl_value {.cdecl, importc.}
 
 proc nimjl_call0*(function: ptr nimjl_func): ptr nimjl_value {.cdecl, importc.}
 
-proc nimjl_call1*(function: ptr nimjl_func,
-        arg: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
+proc nimjl_call1*(function: ptr nimjl_func, arg: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
 
-proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value,
-        arg2: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
+proc nimjl_call2*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
 
-proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value,
-        arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
+proc nimjl_call3*(function: ptr nimjl_func, arg1: ptr nimjl_value, arg2: ptr nimjl_value, arg3: ptr nimjl_value): ptr nimjl_value {.cdecl, importc.}
 
 ## Check for nil result
 proc nimjl_include_file*(file_name: string): ptr nimjl_value =
@@ -176,18 +169,24 @@ proc nimjl_using_module*(module_name: string): ptr nimjl_value =
 proc nimjl_get_module*(module_name: string): ptr nimjl_module =
   result = cast[ptr nimjl_module](nimjl_eval_string(module_name))
 
-proc nimjl_exec_func*(module: ptr nimjl_module, func_name: string, va: varargs[
-        ptr nimjl_value]): ptr nimjl_value =
+proc nimjl_exec_func*(module: ptr nimjl_module, func_name: string, va: varargs[ptr nimjl_value]): ptr nimjl_value =
   let f = nimjl_get_function(module, func_name)
+
   if va.len == 0:
     result = nimjl_call0(f)
+  elif va.len == 1:
+    result = nimjl_call1(f, va[0])
+  elif va.len == 2:
+    result = nimjl_call2(f, va[0], va[1])
+  elif va.len == 3:
+    result = nimjl_call3(f, va[0], va[1], va[2])
   else:
     result = nimjl_call(f, unsafeAddr(va[0]), va.len.cint)
 
-proc nimjl_exec_func*(func_name: string, va: varargs[
-        ptr nimjl_value]): ptr nimjl_value =
+
+proc nimjl_exec_func*(func_name: string, va: varargs[ptr nimjl_value]): ptr nimjl_value =
   let f = nimjl_get_function(jl_main_module, func_name)
-  result = nil
+
   if va.len == 0:
     result = nimjl_call0(f)
   elif va.len == 1:
@@ -282,19 +281,16 @@ proc nimjl_apply_array_type*[T](dim: int): ptr nimjl_value =
   elif T is char:
     result = nimjl_apply_array_type_char(dim.csize_t)
   else:
-    doAssert(false, "Type not supported")
+    doAssert(fals, "Type not supported")
 
 proc nimjl_make_array*[T](data: ptr UncheckedArray[T], dims: openArray[int]): ptr nimjl_array =
-  var array_type: ptr nimjl_value = nimjl_apply_array_type[T](dims.len)
   var dimStr = "("
   for d in dims:
     dimStr.add $d
     dimStr.add ","
   dimStr = dimStr & ")"
-  var xDims = nimjl_eval_string(dimStr)
-  nimjl_gc_push1(xDims.addr)
-  result = nimjl_ptr_to_array(array_type, data, xDims, 0)
-  nimjl_gc_pop()
+  var array_type: ptr nimjl_value = nimjl_apply_array_type[T](dims.len)
+  result = nimjl_ptr_to_array(array_type, data, nimjl_eval_string(dimStr), 0.cint)
 
 proc nimjl_make_array*[T](data: Tensor[T]): ptr nimjl_array =
   result = nimjl_make_array(data.dataArray(), data.shape.toSeq)

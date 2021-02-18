@@ -187,41 +187,42 @@ jl_value_t *nimjl_apply_array_type_char(size_t dim)
   return jl_apply_array_type((jl_value_t *)jl_char_type, dim);
 }
 
-void nimjl_gc_push1(void *a)
+inline void nimjl_gc_push1(void *a)
 {
   JL_GC_PUSH1(a);
 }
 
-void nimjl_gc_push2(void *a, void *b)
+inline void nimjl_gc_push2(void *a, void *b)
 {
   JL_GC_PUSH2(a, b);
 }
 
-void nimjl_gc_push3(void *a, void *b, void *c)
+inline void nimjl_gc_push3(void *a, void *b, void *c)
 {
   JL_GC_PUSH3(a, b, c);
 }
 
-void nimjl_gc_push4(void *a, void *b, void *c, void *d)
+inline void nimjl_gc_push4(void *a, void *b, void *c, void *d)
 {
   JL_GC_PUSH4(a, b, c, d);
 }
 
-void nimjl_gc_push5(void *a, void *b, void *c, void *d, void *e)
+inline void nimjl_gc_push5(void *a, void *b, void *c, void *d, void *e)
 {
   JL_GC_PUSH5(a, b, c, d, e);
 }
-void nimjl_gc_push6(void *a, void *b, void *c, void *d, void *e, void *f)
+
+inline void nimjl_gc_push6(void *a, void *b, void *c, void *d, void *e, void *f)
 {
   JL_GC_PUSH6(a, b, c, d, e, f);
 }
 
-void nimjl_gc_pushargs(jl_value_t **a, size_t n)
+inline void nimjl_gc_pushargs(jl_value_t **a, size_t n)
 {
   JL_GC_PUSHARGS(a, n);
 }
 
-void nimjl_gc_pop()
+inline void nimjl_gc_pop()
 {
   JL_GC_POP();
 }
