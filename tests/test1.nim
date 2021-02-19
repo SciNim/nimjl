@@ -1,17 +1,22 @@
 import unittest
 import nimjl
-import sequtils
+
 import arraymancer
+import sequtils
 import sugar
-import os
+
+import times
+import std/monotimes
+
+# Local helper for arraymancer
+proc nimjl_make_array*[T](data: Tensor[T]): ptr nimjl_array =
+  result = nimjl_make_array(data.dataArray(), data.shape.toSeq)
 
 proc simpleEvalString() =
-  echo "test nim_eval_string"
   var test = nimjl_eval_string("sqrt(4.0)")
   check nimjl_unbox[float64](test) == 2.0
 
 proc boxUnbox()=
-  echo "test nimjl_box_unbox"
   block:
     var orig: float64 = 126545836.31266
     var x = nimjl_box[float64](orig)
@@ -33,7 +38,6 @@ proc boxUnbox()=
     check nimjl_unbox[uint8](x) == orig
 
 proc jlCall1()=
-  echo "test jl_call1"
   var x = nimjl_box[float64](4.0)
   var f = nimjl_get_function(jl_base_module, "sqrt");
   var res = nimjl_call1(f, x)
@@ -42,6 +46,7 @@ proc jlCall1()=
 
 proc runSimpleTests() =
   suite "Basic stuff":
+    teardown: nimjl_gc_collect()
     test "nim_eval_string":
       simpleEvalString()
 
@@ -54,7 +59,6 @@ proc runSimpleTests() =
 ###### ARRAY
 
 proc jlArray1D()=
-  echo "test jl_array_1d"
   let ARRAY_LEN = 10
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 
@@ -80,7 +84,6 @@ proc jlArray1D()=
   nimjl_gc_pop()
 
 proc jlArray1DOwnBuffer() =
-  echo "test jl_array_1d_own_buffer"
   let ARRAY_LEN = 10
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
   let unchecked_orig = cast[ptr UncheckedArray[float64]](orig[0].addr)
@@ -105,6 +108,7 @@ proc jlArray1DOwnBuffer() =
 proc runArrayTest()=
 
   suite "Array 1D":
+    teardown: nimjl_gc_collect()
 
     test "jl_array_1d":
       jlArray1D()
@@ -114,7 +118,6 @@ proc runArrayTest()=
 
 ## Tuple stuff
 proc makeTupleTest() =
-  echo "test tupleTest"
   block:
     var jl_tuple = nimjl_make_tuple((a:124, c: 67.32147))
     check not isNil(jl_tuple)
@@ -145,12 +148,13 @@ proc makeTupleTest() =
     nimjl_gc_pop()
 
 proc runTupleTest() =
+  suite "Tuples":
+    teardown: nimjl_gc_collect()
     test "tupleTest":
       makeTupleTest()
 
 ### Externals module & easy stuff
 proc includeExternalModule() =
-  echo "test external module"
   var res_eval_include = nimjl_include_file("tests/test.jl")
   check not isNil(res_eval_include)
 
@@ -158,13 +162,13 @@ proc includeExternalModule() =
   check not isNil(res_eval_using)
 
 proc callDummyFunc() =
-  echo "test dummy"
   var ret = nimjl_exec_func("dummy")
   check not isNil(ret)
 
 
 proc runExternalsTest() =
   suite "external module":
+    teardown: nimjl_gc_collect()
     test "external_module":
       includeExternalModule()
 
@@ -173,7 +177,6 @@ proc runExternalsTest() =
 
 ### Array args
 proc arraySquareMeBaby() =
-  echo "test external_module : squareMeBaby[Array]"
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
   let orig_ptr = cast[ptr UncheckedArray[float64]](orig[0].addr)
   var xArray = nimjl_make_array(orig_ptr, @[orig.len])
@@ -196,7 +199,6 @@ proc arraySquareMeBaby() =
   check seqData == @[0.0, 1.0, 4.0, 9.0, 16.0, 25.0, 36.0, 49.0, 64.0, 81.0]
 
 proc arrayMutateMeBaby() =
-  echo "test external_module : mutateMeByTen[Array]"
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 
   var data: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
@@ -218,6 +220,7 @@ proc arrayMutateMeBaby() =
 
 proc runArrayArgsTest() =
   suite "Array":
+    teardown: nimjl_gc_collect()
 
     test "external_module : squareMeBaby[Array]":
       arraySquareMeBaby()
@@ -227,7 +230,6 @@ proc runArrayArgsTest() =
 
 ### Tensor Args
 proc tensorSquareMeBaby() =
-  echo "test external_module : squareMeBaby[Tensor]"
   var orig: Tensor[float64]
   orig = ones[float64](3, 4, 5)
   var index = 0
@@ -259,7 +261,6 @@ proc tensorSquareMeBaby() =
     check v == (i/3)*(i/3)
 
 proc tensorMutateMeBaby() =
-  echo "test external_module : mutateMeByTen[Tensor]"
   var orig : Tensor[float64]
   orig = ones[float64](4, 6, 8)
   var index = 0
@@ -281,7 +282,6 @@ proc tensorMutateMeBaby() =
   check tensorData == orig
 
 proc tensorBuiltinRot180() =
-  echo "test external_module : rot180[Tensor]"
   var orig_tensor : Tensor[float64]
   orig_tensor = newTensor[float64](4, 3)
   var index = 0
@@ -306,6 +306,7 @@ proc tensorBuiltinRot180() =
 
 proc runTensorArgsTest() =
   suite "Tensor":
+    teardown: nimjl_gc_collect()
 
     test "external_module : squareMeBaby[Tensor]":
       tensorSquareMeBaby()
@@ -318,27 +319,34 @@ proc runTensorArgsTest() =
 
 proc runTests() =
   runSimpleTests()
-  runExternalsTest()
   runTupleTest()
   runArrayArgsTest()
   runTensorArgsTest()
 
 proc runMemLeakTest() =
-  echo "test external module"
-  var res_eval_include = nimjl_include_file("tests/test.jl")
-  doAssert not isNil(res_eval_include)
+  let begin = getMonoTime()
+  let maxDuration = initDuration(seconds = 20'i64, nanoseconds = 0'i64)
+  var elapsed = initDuration(seconds = 0'i64, nanoseconds = 0'i64)
 
-  var res_eval_using = nimjl_using_module(".custom_module")
-  doAssert not isNil(res_eval_using)
+  while elapsed < maxDuration:
+    elapsed = getMonoTime() - begin
+    if elapsed.inSeconds mod 10 == 0:
+      echo GC_getStatistics()
+    runSimpleTests()
+    runTupleTest()
+    runArrayArgsTest()
+    runTensorArgsTest()
 
-  for i in 0..5:
-    tensorSquareMeBaby()
-    echo GC_getStatistics()
-    sleep(500)
+  nimjl_gc_collect()
+  echo GC_getStatistics()
 
 when isMainModule:
   nimjl_init()
+  # run Externals include module so ran it first and only once
+  runExternalsTest()
+
   runTests()
   # runMemLeakTest()
+
   nimjl_atexit_hook(0)
 

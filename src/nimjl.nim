@@ -1,5 +1,4 @@
 import os
-import arraymancer
 import strutils
 import strformat
 
@@ -48,6 +47,7 @@ proc nimjl_eval_string*(code: string): ptr nimjl_value =
   result = nimjl_eval_string(code.cstring)
 
 ## Box & Unbox
+## Using box allocate memory managed by Julia's GC
 proc nimjl_unbox_float64(value: ptr nimjl_value): float64 {.cdecl, importc.}
 proc nimjl_unbox_float32(value: ptr nimjl_value): float32 {.cdecl, importc.}
 
@@ -123,7 +123,6 @@ proc nimjl_box*[T](value: T): ptr nimjl_value =
     doAssert(false, "Type not supported")
 
 ##GC Functions
-
 proc nimjl_gc_push1*(a: pointer) {.cdecl, importc, inline.}
 
 proc nimjl_gc_push2*(a: pointer, b: pointer) {.cdecl, importc, inline.}
@@ -140,6 +139,9 @@ proc nimjl_gc_pushargs*(a: pointer, n: csize_t) {.cdecl, importc, inline.}
 
 proc nimjl_gc_pop*() {.cdecl, importc, inline.}
 
+proc nimjl_gc_collect*() {.cdecl, importc, inline.}
+
+## Error handler
 proc nimjl_exception_occurred*(): ptr nimjl_value {.cdecl, importc.}
 
 proc nimjl_typeof_str*(v: ptr nimjl_value): cstring {.cdecl, importc.}
@@ -183,7 +185,6 @@ proc nimjl_exec_func*(module: ptr nimjl_module, func_name: string, va: varargs[p
   else:
     result = nimjl_call(f, unsafeAddr(va[0]), va.len.cint)
 
-
 proc nimjl_exec_func*(func_name: string, va: varargs[ptr nimjl_value]): ptr nimjl_value =
   let f = nimjl_get_function(jl_main_module, func_name)
 
@@ -198,7 +199,7 @@ proc nimjl_exec_func*(func_name: string, va: varargs[ptr nimjl_value]): ptr nimj
   else:
     result = nimjl_call(f, unsafeAddr(va[0]), va.len.cint)
 
-## Array
+## Array bindings
 # Values will need to be cast from nimjl_value to nimjl_array back and forth
 proc nimjl_array_data*(values: ptr nimjl_array): pointer {.cdecl, importc.}
 
@@ -230,7 +231,6 @@ proc nimjl_alloc_array_3d*(atype: ptr nimjl_value, nr: csize_t, nc: csize_t,
     z: csize_t): ptr nimjl_array {.cdecl, importc.}
 
 ##  Array type
-
 proc nimjl_apply_array_type_int8(dim: csize_t): ptr nimjl_value {.cdecl, importc.}
 
 proc nimjl_apply_array_type_int16(dim: csize_t): ptr nimjl_value {.cdecl, importc.}
@@ -255,6 +255,7 @@ proc nimjl_apply_array_type_bool(dim: csize_t): ptr nimjl_value {.cdecl, importc
 
 proc nimjl_apply_array_type_char(dim: csize_t): ptr nimjl_value {.cdecl, importc.}
 
+# Array helper
 proc nimjl_apply_array_type*[T](dim: int): ptr nimjl_value =
   when T is int8:
     result = nimjl_apply_array_type_int8(dim.csize_t)
@@ -292,9 +293,7 @@ proc nimjl_make_array*[T](data: ptr UncheckedArray[T], dims: openArray[int]): pt
   var array_type: ptr nimjl_value = nimjl_apply_array_type[T](dims.len)
   result = nimjl_ptr_to_array(array_type, data, nimjl_eval_string(dimStr), 0.cint)
 
-proc nimjl_make_array*[T](data: Tensor[T]): ptr nimjl_array =
-  result = nimjl_make_array(data.dataArray(), data.shape.toSeq)
-
+# Tuple helpers -> result is memory managed by Julia's GC
 proc nimjl_make_tuple*(v: tuple): ptr nimjl_value =
   var tupleStr = $v
   tupleStr = tupleStr.replace(":", "=")

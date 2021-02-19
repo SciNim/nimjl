@@ -31,12 +31,10 @@ jl_value_t *nimjl_box_uint8(uint8_t value) { return jl_box_uint8(value); }
 jl_value_t *nimjl_box_uint16(uint16_t value) { return jl_box_uint16(value); }
 jl_value_t *nimjl_box_uint32(uint32_t value) { return jl_box_uint32(value); }
 jl_value_t *nimjl_box_uint64(uint64_t value) { return jl_box_uint64(value); }
-
 jl_value_t *nimjl_box_int8(int8_t value) { return jl_box_int8(value); }
 jl_value_t *nimjl_box_int16(int16_t value) { return jl_box_int16(value); }
 jl_value_t *nimjl_box_int32(int32_t value) { return jl_box_int32(value); }
 jl_value_t *nimjl_box_int64(int64_t value) { return jl_box_int64(value); }
-
 jl_value_t *nimjl_box_float32(float value) { return jl_box_float32(value); }
 jl_value_t *nimjl_box_float64(double value) { return jl_box_float64(value); }
 
@@ -185,6 +183,10 @@ jl_value_t *nimjl_apply_array_type_bool(size_t dim)
 jl_value_t *nimjl_apply_array_type_char(size_t dim)
 {
   return jl_apply_array_type((jl_value_t *)jl_char_type, dim);
+}
+
+inline void nimjl_gc_collect() {
+  jl_gc_collect(JL_GC_FULL);
 }
 
 inline void nimjl_gc_push1(void *a)
