@@ -2,7 +2,7 @@ import os
 
 {.used.}
 # Const julia path
-const csrc_nimjl* = "csrc/nimjl.c"
+const csrc_julia* = "csrc/julia.c"
 const juliaPath* = getEnv("JULIA_PATH")
 const juliaIncludesPath* = juliaPath / "include" / "julia"
 const juliaLibPath* = juliaPath / "lib"
@@ -18,7 +18,7 @@ const juliaHeader* = "julia.h"
 {.passL: "-Wl,-rpath," & juliaDepPath.}
 {.passL: "-ljulia".}
 
-{.compile: csrc_nimjl.}
+{.compile: csrc_julia.}
 
 # {.push cdecl}
 # {.push header: juliaHeader.}

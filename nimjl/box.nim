@@ -1,79 +1,77 @@
 import basetypes
 import config
+import private/box
 
-## Box & Unbox
-## Using box allocate memory managed by Julia's GC
-proc nimjl_unbox_float64*(value: ptr nimjl_value): float64 {.cdecl, importc.}
-proc nimjl_unbox_float32*(value: ptr nimjl_value): float32 {.cdecl, importc.}
 
-proc nimjl_unbox_int64*(value: ptr nimjl_value): int64 {.cdecl, importc.}
-proc nimjl_unbox_int32*(value: ptr nimjl_value): int32 {.cdecl, importc.}
-proc nimjl_unbox_int16*(value: ptr nimjl_value): int16 {.cdecl, importc.}
-proc nimjl_unbox_int8*(value: ptr nimjl_value): int8 {.cdecl, importc.}
+  # when T is int8:
+  #   result = julia_unbox_int8(value)
+  # elif T is int16:
+  #   result = julia_unbox_int16(value)
+  # elif T is int32:
+  #   result = julia_unbox_int32(value)
+  # elif T is int64:
+  #   result = julia_unbox_int64(value)
+  # elif T is uint8:
+  #   result = julia_unbox_uint8(value)
+  # elif T is uint16:
+  #   result = julia_unbox_uint16(value)
+  # elif T is uint32:
+  #   result = julia_unbox_uint32(value)
+  # elif T is uint64:
+  #   result = julia_unbox_uint64(value)
+  # elif T is float32:
+  #   result = julia_unbox_float32(value)
+  # elif T is float64:
+  #   result = julia_unbox_float64(value)
+  # else:
+  #   doAssert(false, "Type not supported")
 
-proc nimjl_unbox_uint64*(value: ptr nimjl_value): uint64 {.cdecl, importc.}
-proc nimjl_unbox_uint32*(value: ptr nimjl_value): uint32 {.cdecl, importc.}
-proc nimjl_unbox_uint16*(value: ptr nimjl_value): uint16 {.cdecl, importc.}
-proc nimjl_unbox_uint8*(value: ptr nimjl_value): uint8 {.cdecl, importc.}
+# proc julia_box*[T: SomeNumber](value: T): ptr julia_value =
+  # when T is int8:
+  #   result = julia_box_int8(value)
+  # elif T is int16:
+  #   result = julia_box_int16(value)
+  # elif T is int32:
+  #   result = julia_box_int32(value)
+  # elif T is int64:
+  #   result = julia_box_int64(value)
+  # elif T is uint8:
+  #   result = julia_box_uint8(value)
+  # elif T is uint16:
+  #   result = julia_box_uint16(value)
+  # elif T is uint32:
+  #   result = julia_box_uint32(value)
+  # elif T is uint64:
+  #   result = julia_box_uint64(value)
+  # elif T is float32:
+  #   result = julia_box_float32(value)
+  # elif T is float64:
+  #   result = julia_box_float64(value)
+  # else:
+  #   doAssert(false, "Type not supported")
+  #
 
-proc nimjl_box_float64*(value: float64): ptr nimjl_value {.cdecl, importc.}
-proc nimjl_box_float32*(value: float32): ptr nimjl_value {.cdecl, importc.}
+# macro julia_unbox*(t: typedesc, value: JlValue) : untyped =
+#   let gentype = getTypeInst(t)[1]
+#   let callStr = "julia_unbox_" & gentype.toStrLit().strVal
+#   echo callStr
+#   result = newCall(callStr, value)
+#   echo result.repr
+#
+# macro julia_box*(t: typedesc, value: untyped): untyped =
+#   let gentype = getTypeInst(t)[1]
+#   let typeStr = gentype.toStrLit().strVal
+#   let callStr = "julia_box_" & typeStr
+#   result = newCall(callStr, value)
 
-proc nimjl_box_int64*(value: int64): ptr nimjl_value {.cdecl, importc.}
-proc nimjl_box_int32*(value: int32): ptr nimjl_value {.cdecl, importc.}
-proc nimjl_box_int16*(value: int16): ptr nimjl_value {.cdecl, importc.}
-proc nimjl_box_int8*(value: int8): ptr nimjl_value {.cdecl, importc.}
+proc to*[T: SomeNumber](t: SomeNumber, x: JlValue): T =
+  result = julia_unbox(T, x)
+  # result = julia_unbox_float64(x)
 
-proc nimjl_box_uint64*(value: uint64): ptr nimjl_value {.cdecl, importc.}
-proc nimjl_box_uint32*(value: uint32): ptr nimjl_value {.cdecl, importc.}
-proc nimjl_box_uint16*(value: uint16): ptr nimjl_value {.cdecl, importc.}
-proc nimjl_box_uint8*(value: uint8): ptr nimjl_value {.cdecl, importc.}
+proc toJlValue*[T: SomeNumber](val: T): JlValue =
+  result = julia_box(T, val)
 
-proc nimjl_unbox*[T](value: ptr nimjl_value): T =
-  when T is int8:
-    result = nimjl_unbox_int8(value)
-  elif T is int16:
-    result = nimjl_unbox_int16(value)
-  elif T is int32:
-    result = nimjl_unbox_int32(value)
-  elif T is int64:
-    result = nimjl_unbox_int64(value)
-  elif T is uint8:
-    result = nimjl_unbox_uint8(value)
-  elif T is uint16:
-    result = nimjl_unbox_uint16(value)
-  elif T is uint32:
-    result = nimjl_unbox_uint32(value)
-  elif T is uint64:
-    result = nimjl_unbox_uint64(value)
-  elif T is float32:
-    result = nimjl_unbox_float32(value)
-  elif T is float64:
-    result = nimjl_unbox_float64(value)
-  else:
-    doAssert(false, "Type not supported")
+# discard to[float64](jlEval("sqrt(1.0)"))
+# discard toJlValue[float64](1.0'f64)
 
-proc nimjl_box*[T](value: T): ptr nimjl_value =
-  when T is int8:
-    result = nimjl_box_int8(value)
-  elif T is int16:
-    result = nimjl_box_int16(value)
-  elif T is int32:
-    result = nimjl_box_int32(value)
-  elif T is int64:
-    result = nimjl_box_int64(value)
-  elif T is uint8:
-    result = nimjl_box_uint8(value)
-  elif T is uint16:
-    result = nimjl_box_uint16(value)
-  elif T is uint32:
-    result = nimjl_box_uint32(value)
-  elif T is uint64:
-    result = nimjl_box_uint64(value)
-  elif T is float32:
-    result = nimjl_box_float32(value)
-  elif T is float64:
-    result = nimjl_box_float64(value)
-  else:
-    doAssert(false, "Type not supported")
 
