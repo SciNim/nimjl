@@ -345,8 +345,8 @@ when isMainModule:
   # run Externals include module so ran it first and only once
   runExternalsTest()
 
-  # runTests()
-  runMemLeakTest()
+  runTests()
+  # runMemLeakTest()
 
   nimjl_atexit_hook(0)
 
