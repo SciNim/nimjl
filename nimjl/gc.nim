@@ -1,7 +1,8 @@
 import config
 import basetypes
 
-##GC Functions
+## GC Functions to root
+## Must be inline
 proc nimjl_gc_push1*(a: pointer) {.cdecl, importc, inline.}
 
 proc nimjl_gc_push2*(a: pointer, b: pointer) {.cdecl, importc, inline.}
@@ -18,6 +19,8 @@ proc nimjl_gc_pushargs*(a: pointer, n: csize_t) {.cdecl, importc, inline.}
 
 proc nimjl_gc_pop*() {.cdecl, importc, inline.}
 
+## Force gc to run on everything
 proc nimjl_gc_collect*() {.cdecl, importc, inline.}
 
+## Disable / enable gc
 proc nimjl_gc_enable*(toggle: cint) {.cdecl, importc.}
