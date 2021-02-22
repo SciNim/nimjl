@@ -325,7 +325,7 @@ proc runTests() =
 
 proc runMemLeakTest() =
   let begin = getMonoTime()
-  let maxDuration = initDuration(seconds = 20'i64, nanoseconds = 0'i64)
+  let maxDuration = initDuration(seconds = 600'i64, nanoseconds = 0'i64)
   var elapsed = initDuration(seconds = 0'i64, nanoseconds = 0'i64)
 
   while elapsed < maxDuration:
@@ -345,8 +345,8 @@ when isMainModule:
   # run Externals include module so ran it first and only once
   runExternalsTest()
 
-  runTests()
-  # runMemLeakTest()
+  # runTests()
+  runMemLeakTest()
 
   nimjl_atexit_hook(0)
 
