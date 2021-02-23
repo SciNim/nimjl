@@ -5,9 +5,9 @@
 // JULIA_DEFINE_FAST_TLS() // only define this once, in an executable (not in a shared library) if you want fast code.
 
 // eval
-void julia_init() { jl_init(); }
+void jl_vm_init() { jl_init(); }
+void jl_vm_atexit_hook(int code) { jl_atexit_hook(code); }
 void julia_gc_enable(int toggle) { jl_gc_enable(toggle); }
-void julia_atexit_hook(int code) { jl_atexit_hook(code); }
 
 // eval_string
 jl_value_t *julia_eval_string(char *code) { return jl_eval_string(code); }

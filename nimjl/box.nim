@@ -71,13 +71,12 @@ proc to*[T: SomeNumber](x: JlValue): T =
 proc toJlValue*[T: SomeNumber](val: T): JlValue =
   result = julia_box(T, val)
 
-discard to[float64](jlEval("sqrt(1.0)"))
-discard to[float32](jlEval("sqrt(1.0)"))
-discard to[int8](jlEval("sqrt(1.0)"))
-discard to[uint8](jlEval("sqrt(1.0)"))
-discard toJlValue[float64](1.0'f64)
-discard toJlValue[float32](1.0'f32)
-discard toJlValue[int8](1'i8)
-discard toJlValue[uint8](1'u8)
-
+# discard to[float64](jlEval("sqrt(1.0)"))
+# discard to[float32](jlEval("sqrt(1.0)"))
+# discard to[int8](jlEval("sqrt(1.0)"))
+# discard to[uint8](jlEval("sqrt(1.0)"))
+# discard toJlValue[float64](1.0'f64)
+# discard toJlValue[float32](1.0'f32)
+# discard toJlValue[int8](1'i8)
+# discard toJlValue[uint8](1'u8)
 

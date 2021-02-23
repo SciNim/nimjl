@@ -16,8 +16,8 @@ var jlTopModule *{.importc: "jl_top_module", header: juliaHeader.}: JlModule
 
 
 ## Init & Exit function
-proc jlVmInit*() {.cdecl, importc: "julia_init".}
-proc jlVmExit*(exit_code: cint) {.cdecl, importc: "julia_atexit_hook".}
+proc jlVmInit*() {.cdecl, importc: "jl_vm_init".}
+proc jlVmExit*(exit_code: cint) {.cdecl, importc: "jl_vm_atexit_hook".}
 
 ## Basic eval function
 proc jlEval*(code: string): JlValue =
