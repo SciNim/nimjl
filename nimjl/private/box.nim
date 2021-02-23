@@ -30,16 +30,16 @@ proc julia_box_uint32*(value: uint32): ptr julia_value {.cdecl, importc.}
 proc julia_box_uint16*(value: uint16): ptr julia_value {.cdecl, importc.}
 proc julia_box_uint8*(value: uint8): ptr julia_value {.cdecl, importc.}
 
-macro julia_unbox*(t: typedesc, value: ptr julia_value) : untyped =
-  let gentype = getTypeInst(t)[1]
-  let callStr = "julia_unbox_" & gentype.toStrLit().strVal
-  echo callStr
-  result = newCall(callStr, value)
-  echo result.repr
-
-macro julia_box*(t: typedesc, value: untyped): untyped =
-  let gentype = getTypeInst(t)[1]
-  let typeStr = gentype.toStrLit().strVal
-  let callStr = "julia_box_" & typeStr
-  result = newCall(callStr, value)
-
+# macro julia_unbox*(t: typedesc, value: ptr julia_value) : untyped =
+#   let gentype = getTypeInst(t)[1]
+#   let callStr = "julia_unbox_" & gentype.toStrLit().strVal
+#   echo callStr
+#   result = newCall(callStr, value)
+#   echo result.repr
+#
+# macro julia_box*(t: typedesc, value: untyped): untyped =
+#   let gentype = getTypeInst(t)[1]
+#   let typeStr = gentype.toStrLit().strVal
+#   let callStr = "julia_box_" & typeStr
+#   result = newCall(callStr, value)
+#
