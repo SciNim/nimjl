@@ -1,12 +1,12 @@
 import unittest
-import nimjl
-
-import arraymancer
 import sequtils
 import sugar
 
+import arraymancer
+
 import times
 import std/monotimes
+import nimjl
 
 proc simpleEvalString() =
   var test = jlEval("sqrt(4.0)")
@@ -298,13 +298,6 @@ proc runTensorArgsTest() =
     test "external_module : rot180[Tensor]":
       tensorBuiltinRot180()
 
-proc runTests*() =
-  runSimpleTests()
-  runTupleTest()
-  runArrayTest()
-  runArrayArgsTest()
-  runTensorArgsTest()
-
 proc runExternalsTest*() =
   suite "external module":
     teardown: julia_gc_collect()
@@ -315,14 +308,16 @@ proc runExternalsTest*() =
       callDummyFunc()
 
 proc runMemLeakTest*() =
+  jlVmInit()
+  # run Externals include module so ran it first and only once
+  runExternalsTest()
+
   let begin = getMonoTime()
   let maxDuration = initDuration(seconds = 60'i64, nanoseconds = 0'i64)
   var elapsed = initDuration(seconds = 0'i64, nanoseconds = 0'i64)
 
   while elapsed < maxDuration:
     elapsed = getMonoTime() - begin
-    if elapsed.inSeconds mod 10 == 0:
-      echo GC_getStatistics()
     runSimpleTests()
     runTupleTest()
     runArrayTest()
@@ -332,10 +327,19 @@ proc runMemLeakTest*() =
   julia_gc_collect()
   echo GC_getStatistics()
 
-when isMainModule:
+  jlVmExit(0)
+
+proc runTests*() =
   jlVmInit()
   # run Externals include module so ran it first and only once
   runExternalsTest()
-  runTests()
+
+  runSimpleTests()
+  runTupleTest()
+  runArrayTest()
+  runArrayArgsTest()
+  runTensorArgsTest()
   jlVmExit(0)
 
+when isMainModule:
+  runTests()
