@@ -56,7 +56,7 @@ proc julia_apply_array_type_bool(dim: csize_t): ptr julia_value {.cdecl, importc
 
 proc julia_apply_array_type_char(dim: csize_t): ptr julia_value {.cdecl, importc.}
 
-proc julia_apply_array_type*(T: typedesc, dim: int): ptr julia_value =
+proc julia_apply_array_type*[T](dim: int): ptr julia_value =
   when T is int8:
     result = julia_apply_array_type_int8(dim.csize_t)
   elif T is int16:
@@ -90,19 +90,20 @@ proc julia_make_array*[T](data: ptr UncheckedArray[T], dims: openArray[int]): pt
     dimStr.add $d
     dimStr.add ","
   dimStr = dimStr & ")"
-  var array_type: ptr julia_value = julia_apply_array_type(T, dims.len)
+  var array_type = julia_apply_array_type[T](dims.len)
   result = julia_ptr_to_array(array_type, data, julia_eval_string(dimStr), 0.cint)
 
-proc julia_alloc_array*(T: typedesc, dims: openArray[int]): ptr julia_array =
+proc julia_alloc_array*[T](dims: openArray[int]): ptr julia_array =
   case dims.len
   of 1:
-    var array_type: ptr julia_value = julia_apply_array_type(T, 1)
+    var array_type = julia_apply_array_type[T](1)
     result = julia_alloc_array_1d(array_type, dims[0].csize_t)
   of 2:
-    var array_type: ptr julia_value = julia_apply_array_type(T, 2)
+    var array_type = julia_apply_array_type[T](2)
     result = julia_alloc_array_2d(array_type, dims[0].csize_t, dims[1].csize_t)
   of 3:
-    var array_type: ptr julia_value = julia_apply_array_type(T, 3)
+    var array_type = julia_apply_array_type[T](3)
     result = julia_alloc_array_3d(array_type, dims[0].csize_t, dims[1].csize_t, dims[2].csize_t)
   else:
     doAssert(false, &"Julia alloc array only supports Array for rank 1, 2, 3 not {dims.len}")
+

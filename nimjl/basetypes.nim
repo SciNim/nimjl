@@ -6,6 +6,9 @@ type
   JlModule* = ptr julia_module
   JlFunc* = ptr julia_func
 
+  JlArray*[T] = object
+    data*: ptr julia_array
+
 var jlMainModule *{.importc: "jl_main_module", header: juliaHeader.}: JlModule
 var jlCoreModule *{.importc: "jl_core_module", header: juliaHeader.}: JlModule
 var jlBaseModule *{.importc: "jl_base_module", header: juliaHeader.}: JlModule

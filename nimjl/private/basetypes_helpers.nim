@@ -1,5 +1,6 @@
 import ../config
 
+{.used.}
 ##Types
 type julia_value *{.importc: "jl_value_t", header: juliaHeader.} = object
 type julia_array *{.importc: "jl_array_t", header: juliaHeader.} = object

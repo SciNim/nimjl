@@ -24,9 +24,10 @@ How to embed Julia w/ C :
 ## Limitations
 
 * Arrays only supports POD data types (``SomeNumber`` types) 
+* Julia allocated arrays only goes up to 3 dimensions
 * No Julia struct <-> Nim object conversion
 * No proper (current way of converting is ugly) Nim tuple <-> Julia tuple conversion
-* No tag tracing Julia memory allocation 
+* No tag tracing for Julia memory allocation 
 
 # Examples
 

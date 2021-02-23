@@ -3,8 +3,7 @@ import nimjl
 
 import arraymancer
 import sequtils
-# import macros
-# import sugar
+import sugar
 
 import times
 import std/monotimes
@@ -59,7 +58,8 @@ proc jlArray1D()=
   let ARRAY_LEN = 10
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 
-  var x = allocJlArray[float64]([ARRAY_LEN])
+  var x : JlArray[float64]
+  x = allocJlArray[float64]([ARRAY_LEN])
   julia_gc_push1(addr(x))
   var xData = dataArray[float64](x)
   check ARRAY_LEN == len(x)
@@ -95,7 +95,7 @@ proc jlArray1DOwnBuffer() =
   var res = jlCall(reverse, x.toJlValue())
   check not isNil(res)
 
-  var resData = res.toJlArray().dataArray()
+  var resData = toJlArray[float64](res).dataArray()
   check resData == unchecked_orig
 
   for i in 0..<ARRAY_LEN:
@@ -171,9 +171,8 @@ proc runExternalsTest() =
 proc arraySquareMeBaby() =
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
   let orig_ptr = cast[ptr UncheckedArray[float64]](orig[0].addr)
-  var xArray = newJlArray(orig_ptr, @[orig.len])
-
-  var ret = jlCall("squareMeBaby", xArray.toJlValue()).toJlArray()
+  var xArray = newJlArray[float64](orig_ptr, @[orig.len])
+  var ret = toJlArray[float64](jlCall("squareMeBaby", xArray.toJlValue()))
 
   var len_ret = len(ret)
   check len_ret == orig.len
@@ -194,8 +193,8 @@ proc arrayMutateMeBaby() =
 
   var data: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
   let data_ptr = cast[ptr UncheckedArray[float64]](data[0].addr)
-  var xArray = newJlArray(data_ptr, @[data.len])
-  check not isNil(xArray)
+  var xArray = newJlArray[float64](data_ptr, @[data.len])
+  check not isNil(xArray.data)
 
   var ret = jlCall("mutateMeByTen!", xArray.toJlValue())
   check not isNil(ret)
@@ -227,7 +226,7 @@ proc tensorSquareMeBaby() =
   for i in orig.mitems:
     i = index.float64 / 3.0
     inc(index)
-  var xTensor = newJlArray[float64](orig)
+  var xTensor = newJlArray[float64](orig.dataArray(), orig.shape.toSeq)
   block:
     var len_ret = len(xTensor)
     check len_ret == orig.size
@@ -239,11 +238,11 @@ proc tensorSquareMeBaby() =
     check @[d0, d1, d2] == orig.shape.toSeq
 
   var retVal = jlCall("squareMeBaby", xTensor.toJlValue())
-  var ret = retVal.toJlArray()
-  check not isNil(ret)
+  check not isNil(retVal)
+  var ret = toJlArray[float64](retVal)
   var len_ret = len(ret)
   check len_ret == orig.size
-  var rank_ret = rank(ret)
+  var rank_ret = ndims(ret)
   check rank_ret == 3
   var data_ret = dataArray(ret)
   var tensorData: Tensor[float64] = newTensor[float64](3, 4, 5)
@@ -260,13 +259,12 @@ proc tensorMutateMeBaby() =
     i = index.float64 / 3.0
 
   var xTensor = newJlArray[float64](orig.dataArray(), orig.shape.toSeq)
-
-  var ret = jlCall("mutateMeByTen!", xTensor.toJlValue()).toJlArray()
-  check not isNil(ret)
+  var ret = toJlArray[float64](jlCall("mutateMeByTen!", xTensor.toJlValue()))
+  check not isNil(ret.data)
 
   var len_ret = len(ret)
   check len_ret == orig.size
-  var rank_ret = rank(ret)
+  var rank_ret = ndims(ret)
   check rank_ret == 3
   var data_ret = dataArray(ret)
   var tensorData: Tensor[float64] = newTensor[float64](4, 6, 8)
@@ -288,8 +286,8 @@ proc tensorBuiltinRot180() =
   check d0 == 4
   check d1 == 3
 
-  var ret = jlCall("rot180", xArray.toJlValue()).toJlArray()
-  check not isNil(ret)
+  var ret = toJlArray[float64](jlCall("rot180", xArray.toJlValue()))
+  check not isNil(ret.data)
 
   var data_ret = dataArray(ret)
   var tensorResData = newTensor[float64](4, 3)
