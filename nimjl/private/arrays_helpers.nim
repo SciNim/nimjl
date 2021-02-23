@@ -1,5 +1,6 @@
 import ../config
-import basetypes
+import basetypes_helpers
+import strformat
 
 ## Array bindings
 # Values will need to be cast from julia_value to julia_array back and forth
@@ -14,7 +15,8 @@ proc julia_array_rank*(a: ptr julia_array): cint {.cdecl, importc.}
 proc julia_new_array*(atype: ptr julia_value,
         dims: ptr julia_value): ptr julia_array {.cdecl, importc.}
 
-proc julia_reshape_array*(atype: ptr julia_value, data: ptr julia_array, dims: ptr julia_value): ptr julia_array {.cdecl, importc.}
+proc julia_reshape_array*(atype: ptr julia_value, data: ptr julia_array, dims: ptr julia_value): ptr julia_array {.
+    cdecl, importc.}
 
 # Not wrapped -> Use generic version
 # proc julia_ptr_to_array_1d*(atype: ptr julia_value, data: pointer, nel: csize_t,
@@ -23,14 +25,11 @@ proc julia_reshape_array*(atype: ptr julia_value, data: ptr julia_array, dims: p
 proc julia_ptr_to_array*(atype: ptr julia_value, data: pointer, dims: ptr julia_value,
     own_buffer: cint): ptr julia_array {.cdecl, importc.}
 
-proc julia_alloc_array_1d*(atype: ptr julia_value,
-        nr: csize_t): ptr julia_array {.cdecl, importc.}
+proc julia_alloc_array_1d*(atype: ptr julia_value, nr: csize_t): ptr julia_array {.cdecl, importc.}
 
-proc julia_alloc_array_2d*(atype: ptr julia_value, nr: csize_t,
-    nc: csize_t): ptr julia_array {.cdecl, importc.}
+proc julia_alloc_array_2d*(atype: ptr julia_value, nr: csize_t, nc: csize_t): ptr julia_array {.cdecl, importc.}
 
-proc julia_alloc_array_3d*(atype: ptr julia_value, nr: csize_t, nc: csize_t,
-    z: csize_t): ptr julia_array {.cdecl, importc.}
+proc julia_alloc_array_3d*(atype: ptr julia_value, nr: csize_t, nc: csize_t, z: csize_t): ptr julia_array {.cdecl, importc.}
 
 ## Handle apply Array type mechanics
 proc julia_apply_array_type_int8(dim: csize_t): ptr julia_value {.cdecl, importc.}
@@ -57,7 +56,7 @@ proc julia_apply_array_type_bool(dim: csize_t): ptr julia_value {.cdecl, importc
 
 proc julia_apply_array_type_char(dim: csize_t): ptr julia_value {.cdecl, importc.}
 
-proc julia_apply_array_type*[T](dim: int): ptr julia_value =
+proc julia_apply_array_type*(T: typedesc, dim: int): ptr julia_value =
   when T is int8:
     result = julia_apply_array_type_int8(dim.csize_t)
   elif T is int16:
@@ -91,17 +90,19 @@ proc julia_make_array*[T](data: ptr UncheckedArray[T], dims: openArray[int]): pt
     dimStr.add $d
     dimStr.add ","
   dimStr = dimStr & ")"
-  var array_type: ptr julia_value = julia_apply_array_type[T](dims.len)
+  var array_type: ptr julia_value = julia_apply_array_type(T, dims.len)
   result = julia_ptr_to_array(array_type, data, julia_eval_string(dimStr), 0.cint)
 
-proc julia_alloc_array*[T](size: int) : ptr julia_array =
-  var array_type: ptr julia_value = julia_apply_array_type[T](1)
-  result = julia_alloc_array_1d(array_type, size.csize_t)
-
-proc julia_alloc_array*[T](dim1, dim2: int) : ptr julia_array =
-  var array_type: ptr julia_value = julia_apply_array_type[T](2)
-  result = julia_alloc_array_2d(array_type, dim1.csize_t, dim2.csize_t)
-
-proc julia_alloc_array*[T](dim1, dim2, dim3: int) : ptr julia_array =
-  var array_type: ptr julia_value = julia_apply_array_type[T](3)
-  result = julia_alloc_array_2d(array_type, dim1.csize_t, dim2.csize_t, dim3.csize_t)
+proc julia_alloc_array*(T: typedesc, dims: openArray[int]): ptr julia_array =
+  case dims.len
+  of 1:
+    var array_type: ptr julia_value = julia_apply_array_type(T, 1)
+    result = julia_alloc_array_1d(array_type, dims[0].csize_t)
+  of 2:
+    var array_type: ptr julia_value = julia_apply_array_type(T, 2)
+    result = julia_alloc_array_2d(array_type, dims[0].csize_t, dims[1].csize_t)
+  of 3:
+    var array_type: ptr julia_value = julia_apply_array_type(T, 3)
+    result = julia_alloc_array_3d(array_type, dims[0].csize_t, dims[1].csize_t, dims[2].csize_t)
+  else:
+    doAssert(false, &"Julia alloc array only supports Array for rank 1, 2, 3 not {dims.len}")

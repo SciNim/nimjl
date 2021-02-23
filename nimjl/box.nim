@@ -64,14 +64,20 @@ import private/box
 #   let callStr = "julia_box_" & typeStr
 #   result = newCall(callStr, value)
 
-proc to*[T: SomeNumber](t: SomeNumber, x: JlValue): T =
+proc to*[T: SomeNumber](x: JlValue): T =
   result = julia_unbox(T, x)
   # result = julia_unbox_float64(x)
 
 proc toJlValue*[T: SomeNumber](val: T): JlValue =
   result = julia_box(T, val)
 
-# discard to[float64](jlEval("sqrt(1.0)"))
-# discard toJlValue[float64](1.0'f64)
+discard to[float64](jlEval("sqrt(1.0)"))
+discard to[float32](jlEval("sqrt(1.0)"))
+discard to[int8](jlEval("sqrt(1.0)"))
+discard to[uint8](jlEval("sqrt(1.0)"))
+discard toJlValue[float64](1.0'f64)
+discard toJlValue[float32](1.0'f32)
+discard toJlValue[int8](1'i8)
+discard toJlValue[uint8](1'u8)
 
 

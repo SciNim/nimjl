@@ -59,24 +59,19 @@ proc jlArray1D()=
   let ARRAY_LEN = 10
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 
-  # var array_type = nimjl_apply_array_type[float64](1)
-  # var x= nimjl_alloc_array_1d(array_type, ARRAY_LEN.csize_t)
-  var x = allocJlArray[float64](ARRAY_LEN)
+  var x = allocJlArray[float64]([ARRAY_LEN])
   julia_gc_push1(addr(x))
-  var xData = x.dataArray()
-  # var xData : ptr UncheckedArray[float64] = cast[ptr UncheckedArray[float64]](nimjl_array_dataArray(x))
+  var xData = dataArray[float64](x)
   check ARRAY_LEN == len(x)
 
   for i in 0..<len(x):
     xData[i] = i.float64
 
   var reverse = getJlFunc(jl_base_module, "reverse!")
-  # var res = jlCall(reverse, cast[ptr ptr nimjl_value](x.addr), 1)
   var res = jlCall(reverse, x.toJlValue())
   check not isNil(res)
 
-  # var resData = cast[ptr UncheckedArray[float64]](nimjl_array_dataArray(x))
-  var resData = res.toJlArray().dataArray()
+  var resData = toJlArray[float64](res).dataArray()
   check resData == xData
 
   for i in 0..<ARRAY_LEN:

@@ -7,6 +7,9 @@ export basetypes
 import nimjl/box
 export box
 
+# import nimjl/config
+# export config
+
 import nimjl/functions
 export functions
 
@@ -19,3 +22,4 @@ export modules
 import nimjl/tuples
 export tuples
 
+static: echo "~~~~~~~~~~~~~~~~~"

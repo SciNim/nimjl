@@ -1,5 +1,5 @@
 import ../config
-import basetypes
+import basetypes_helpers
 import macros
 
 ## Box & Unbox
@@ -42,5 +42,4 @@ macro julia_box*(t: typedesc, value: untyped): untyped =
   let typeStr = gentype.toStrLit().strVal
   let callStr = "julia_box_" & typeStr
   result = newCall(callStr, value)
-
 
