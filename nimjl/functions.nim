@@ -3,10 +3,10 @@ import basetypes
 import private/functions
 
 proc getJlFunc*(funcname: string): JlFunc =
-  result = julia_get_function(jlMainModule, funcname)
+  result = jl_get_function(jlMainModule, funcname)
 
 proc getJlFunc*(jlmod: JlModule, funcname: string): JlFunc =
-  result = julia_get_function(jlmod, funcname)
+  result = jl_get_function(jlmod, funcname)
 
 proc jlCall*(jlfunc: JlFunc, va: varargs[JlValue]): JlValue =
   result = julia_exec_func(jlfunc, va)

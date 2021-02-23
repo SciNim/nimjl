@@ -9,19 +9,19 @@ proc toJlValue*[T](x: JlArray[T]): JlValue =
 
 # TODO : Check if it's an array trhen converter
 proc toJlArray*[T](x: JlValue): JlArray[T] =
-  result.data = cast[ptr julia_array](x)
+  result.data = cast[ptr jl_array](x)
 
 proc dataArray*[T](x: JlArray[T]): ptr UncheckedArray[T] =
-  result = cast[ptr UncheckedArray[T]](julia_array_data(x.data))
+  result = cast[ptr UncheckedArray[T]](jl_array_data(x.data))
 
 proc len*[T](x: JlArray[T]): int =
-  result = julia_array_len(x.data)
+  result = jl_array_len(x.data)
 
 proc ndims*[T](x: JlArray[T]): int =
-  result = julia_array_rank(x.data)
+  result = jl_array_rank(x.data)
 
 proc dim*[T](x: JlArray[T], dim: int): int =
-  result = julia_array_dim(x.data, dim.cint)
+  result = jl_array_dim(x.data, dim.cint)
 
 proc shape*[T](x: JlArray[T]): seq[int] =
   for i in 0..<x.ndims():

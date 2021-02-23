@@ -2,20 +2,21 @@ import ../config
 
 {.used.}
 ##Types
-type julia_value *{.importc: "jl_value_t", header: juliaHeader.} = object
-type julia_array *{.importc: "jl_array_t", header: juliaHeader.} = object
-type julia_func *{.importc: "jl_function_t", header: juliaHeader.} = object
-type julia_module *{.importc: "jl_module_t", header: juliaHeader.} = object
+type jl_value *{.importc: "jl_value_t", header: juliaHeader.} = object
+type jl_array *{.importc: "jl_array_t", header: juliaHeader.} = object
+type jl_func *{.importc: "jl_function_t", header: juliaHeader.} = object
+type jl_module *{.importc: "jl_module_t", header: juliaHeader.} = object
+type jl_datatype*{.importc: "jl_datatype_t", header: juliaHeader.} = object
 
-proc julia_eval_string*(code: cstring): ptr julia_value {.cdecl, importc.}
+proc jl_eval_string*(code: cstring): ptr jl_value {.nodecl, importc.}
 
-proc julia_eval_string*(code: string): ptr julia_value =
-  result = julia_eval_string(code.cstring)
+proc jl_eval_string*(code: string): ptr jl_value =
+  result = jl_eval_string(code.cstring)
 
 ## Error handler
-proc julia_exception_occurred*(): ptr julia_value {.cdecl, importc.}
+proc jl_exception_occurred*(): ptr jl_value {.cdecl, importc.}
 
-proc julia_typeof_str*(v: ptr julia_value): cstring {.cdecl, importc.}
+proc jl_typeof_str*(v: ptr jl_value): cstring {.cdecl, importc.}
 
-proc julia_string_ptr*(v: ptr julia_value): cstring {.cdecl, importc.}
+proc jl_string_ptr*(v: ptr jl_value): cstring {.cdecl, importc.}
 

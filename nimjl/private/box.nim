@@ -1,45 +1,46 @@
 import ../config
 import basetypes_helpers
-import macros
 
 ## Box & Unbox
-proc julia_unbox_float64*(value: ptr julia_value): float64 {.cdecl, importc.}
-proc julia_unbox_float32*(value: ptr julia_value): float32 {.cdecl, importc.}
+{.push nodecl.}
+proc jl_unbox_float64*(value: ptr jl_value): float64 {.importc.}
+proc jl_unbox_float32*(value: ptr jl_value): float32 {.importc.}
 
-proc julia_unbox_int64*(value: ptr julia_value): int64 {.cdecl, importc.}
-proc julia_unbox_int32*(value: ptr julia_value): int32 {.cdecl, importc.}
-proc julia_unbox_int16*(value: ptr julia_value): int16 {.cdecl, importc.}
-proc julia_unbox_int8*(value: ptr julia_value): int8 {.cdecl, importc.}
+proc jl_unbox_int64*(value: ptr jl_value): int64 {.importc.}
+proc jl_unbox_int32*(value: ptr jl_value): int32 {.importc.}
+proc jl_unbox_int16*(value: ptr jl_value): int16 {.importc.}
+proc jl_unbox_int8*(value: ptr jl_value): int8 {.importc.}
 
-proc julia_unbox_uint64*(value: ptr julia_value): uint64 {.cdecl, importc.}
-proc julia_unbox_uint32*(value: ptr julia_value): uint32 {.cdecl, importc.}
-proc julia_unbox_uint16*(value: ptr julia_value): uint16 {.cdecl, importc.}
-proc julia_unbox_uint8*(value: ptr julia_value): uint8 {.cdecl, importc.}
+proc jl_unbox_uint64*(value: ptr jl_value): uint64 {.importc.}
+proc jl_unbox_uint32*(value: ptr jl_value): uint32 {.importc.}
+proc jl_unbox_uint16*(value: ptr jl_value): uint16 {.importc.}
+proc jl_unbox_uint8*(value: ptr jl_value): uint8 {.importc.}
 
 ## Using box allocate memory managed by Julia's GC
-proc julia_box_float64*(value: float64): ptr julia_value {.cdecl, importc.}
-proc julia_box_float32*(value: float32): ptr julia_value {.cdecl, importc.}
+proc jl_box_float64*(value: float64): ptr jl_value {.importc.}
+proc jl_box_float32*(value: float32): ptr jl_value {.importc.}
 
-proc julia_box_int64*(value: int64): ptr julia_value {.cdecl, importc.}
-proc julia_box_int32*(value: int32): ptr julia_value {.cdecl, importc.}
-proc julia_box_int16*(value: int16): ptr julia_value {.cdecl, importc.}
-proc julia_box_int8*(value: int8): ptr julia_value {.cdecl, importc.}
+proc jl_box_int64*(value: int64): ptr jl_value {.importc.}
+proc jl_box_int32*(value: int32): ptr jl_value {.importc.}
+proc jl_box_int16*(value: int16): ptr jl_value {.importc.}
+proc jl_box_int8*(value: int8): ptr jl_value {.importc.}
 
-proc julia_box_uint64*(value: uint64): ptr julia_value {.cdecl, importc.}
-proc julia_box_uint32*(value: uint32): ptr julia_value {.cdecl, importc.}
-proc julia_box_uint16*(value: uint16): ptr julia_value {.cdecl, importc.}
-proc julia_box_uint8*(value: uint8): ptr julia_value {.cdecl, importc.}
+proc jl_box_uint64*(value: uint64): ptr jl_value {.importc.}
+proc jl_box_uint32*(value: uint32): ptr jl_value {.importc.}
+proc jl_box_uint16*(value: uint16): ptr jl_value {.importc.}
+proc jl_box_uint8*(value: uint8): ptr jl_value {.importc.}
+{.pop.}
 
-# macro julia_unbox*(t: typedesc, value: ptr julia_value) : untyped =
+# macro jl_unbox*(t: typedescvalue: ptr jl_value) : untyped =
 #   let gentype = getTypeInst(t)[1]
-#   let callStr = "julia_unbox_" & gentype.toStrLit().strVal
+#   let callStr = "jl_unbox_" & gentype.toStrLit().strVal
 #   echo callStr
-#   result = newCall(callStr, value)
+#   result = newCall(callStrvalue)
 #   echo result.repr
 #
-# macro julia_box*(t: typedesc, value: untyped): untyped =
+# macro jl_box*(t: typedescvalue: untyped): untyped =
 #   let gentype = getTypeInst(t)[1]
 #   let typeStr = gentype.toStrLit().strVal
-#   let callStr = "julia_box_" & typeStr
-#   result = newCall(callStr, value)
+#   let callStr = "jl_box_" & typeStr
+#   result = newCall(callStrvalue)
 #

@@ -2,43 +2,45 @@ import basetypes_helpers
 import ../config
 
 ## Call functions
-proc julia_get_function*(module: ptr julia_module, name: cstring): ptr julia_func {.cdecl, importc.}
+{.push nodecl.}
+proc jl_get_function*(module: ptr jl_module, name: cstring): ptr jl_func {.importc:"jl_get_function".}
 
-proc julia_call *(function: ptr julia_func, values: ptr ptr julia_value, nargs: cint): ptr julia_value {.cdecl, importc.}
+proc jl_call *(function: ptr jl_func, values: ptr ptr jl_value, nargs: cint): ptr jl_value {.importc:"jl_call".}
 
-proc julia_call0*(function: ptr julia_func): ptr julia_value {.cdecl, importc.}
+proc jl_call0*(function: ptr jl_func): ptr jl_value {.nodecl, importc:"jl_call0".}
 
-proc julia_call1*(function: ptr julia_func, arg: ptr julia_value): ptr julia_value {.cdecl, importc.}
+proc jl_call1*(function: ptr jl_func, arg: ptr jl_value): ptr jl_value {.importc:"jl_call1".}
 
-proc julia_call2*(function: ptr julia_func, arg1: ptr julia_value, arg2: ptr julia_value): ptr julia_value {.cdecl, importc.}
+proc jl_call2*(function: ptr jl_func, arg1: ptr jl_value, arg2: ptr jl_value): ptr jl_value {.importc:"jl_call2".}
 
-proc julia_call3*(function: ptr julia_func, arg1: ptr julia_value, arg2: ptr julia_value,
-    arg3: ptr julia_value): ptr julia_value {.cdecl, importc.}
+proc jl_call3*(function: ptr jl_func, arg1: ptr jl_value, arg2: ptr jl_value,
+    arg3: ptr jl_value): ptr jl_value {.importc:"jl_call3".}
 
-proc julia_exec_func*(module: ptr julia_module, func_name: string, va: varargs[ptr julia_value]): ptr julia_value =
-  let f = julia_get_function(module, func_name)
+{.pop.}
+
+proc julia_exec_func*(module: ptr jl_module, func_name: string, va: varargs[ptr jl_value]): ptr jl_value =
+  let f = jl_get_function(module, func_name)
 
   if va.len == 0:
-    result = julia_call0(f)
+    result = jl_call0(f)
   elif va.len == 1:
-    result = julia_call1(f, va[0])
+    result = jl_call1(f, va[0])
   elif va.len == 2:
-    result = julia_call2(f, va[0], va[1])
+    result = jl_call2(f, va[0], va[1])
   elif va.len == 3:
-    result = julia_call3(f, va[0], va[1], va[2])
+    result = jl_call3(f, va[0], va[1], va[2])
   else:
-    result = julia_call(f, unsafeAddr(va[0]), va.len.cint)
+    result = jl_call(f, unsafeAddr(va[0]), va.len.cint)
 
-proc julia_exec_func*(f: ptr julia_func, va: varargs[ptr julia_value]): ptr julia_value =
+proc julia_exec_func*(f: ptr jl_func, va: varargs[ptr jl_value]): ptr jl_value =
   if va.len == 0:
-    result = julia_call0(f)
+    result = jl_call0(f)
   elif va.len == 1:
-    result = julia_call1(f, va[0])
+    result = jl_call1(f, va[0])
   elif va.len == 2:
-    result = julia_call2(f, va[0], va[1])
+    result = jl_call2(f, va[0], va[1])
   elif va.len == 3:
-    result = julia_call3(f, va[0], va[1], va[2])
+    result = jl_call3(f, va[0], va[1], va[2])
   else:
-    result = julia_call(f, unsafeAddr(va[0]), va.len.cint)
-
+    result = jl_call(f, unsafeAddr(va[0]), va.len.cint)
 
