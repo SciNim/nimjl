@@ -4,11 +4,7 @@ This is repo is a WIP to be able to call Julia function from Nim using the C-API
 
 ## Prerequisite
 
-You need to setup an envinronment variable called `JULIA_PATH` pointing to the parent folder of Julia.
-For example, on Linux you can add this to your `.bashrc` :
-```
-export JULIA_PATH=~/julia-1.4.2
-```
+Run ``nimble install`` or ``nimble develop``
 
 ## Ressources
 
@@ -22,9 +18,16 @@ How to embed Julia w/ C :
 
 * Julia Tuples using C-API (no eval_string)
 * Pass complex struct / object from Nim to Julia & vice-versa
-* Generate the wrapper using c2nim / nimterop
 * Handle row major vs column major transposition when using array
+* Supports Windows 
 
+## Limitations
+
+* Arrays only supports POD data types (``SomeNumber`` types) 
+* Julia allocated arrays only goes up to 3 dimensions
+* No Julia struct <-> Nim object conversion
+* No proper (current way of converting is ugly) Nim tuple <-> Julia tuple conversion
+* No tag tracing for Julia memory allocation 
 
 # Examples
 
