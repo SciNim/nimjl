@@ -14,9 +14,9 @@ proc jl_eval_string*(code: string): ptr jl_value =
   result = jl_eval_string(code.cstring)
 
 ## Error handler
-proc jl_exception_occurred*(): ptr jl_value {.cdecl, importc.}
+proc jl_exception_occurred*(): ptr jl_value {.importc.}
 
-proc jl_typeof_str*(v: ptr jl_value): cstring {.cdecl, importc.}
+proc jl_typeof_str*(v: ptr jl_value): cstring {.importc.}
 
-proc jl_string_ptr*(v: ptr jl_value): cstring {.cdecl, importc.}
+proc jl_string_ptr*(v: ptr jl_value): cstring {.importc.}
 

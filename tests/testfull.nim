@@ -6,47 +6,47 @@ import arraymancer
 
 import times
 import std/monotimes
-import nimjl
+import ../nimjl
 
 proc simpleEvalString() =
   var test = jlEval("sqrt(4.0)")
-  check to[float64](test) == 2.0
+  check unboxJlVal[float64](test) == 2.0
 
 proc boxUnbox()=
   block:
     var orig: float64 = 126545836.31266
-    var x = toJlValue[float64](orig)
-    check to[float64](x) == orig
+    var x = boxJlVal[float64](orig)
+    check unboxJlVal[float64](x) == orig
 
   block:
     var orig: float32 = 0.01561238536
-    var x = toJlValue[float32](orig)
-    check to[float32](x) == orig
+    var x = boxJlVal[float32](orig)
+    check unboxJlVal[float32](x) == orig
 
   block:
     var orig: int8 = -121
-    var x = toJlValue[int8](orig)
-    check to[int8](x) == orig
+    var x = boxJlVal[int8](orig)
+    check unboxJlVal[int8](x) == orig
 
   block:
     var orig: uint8 = 251
-    var x = toJlValue[uint8](orig)
-    check to[uint8](x) == orig
+    var x = boxJlVal[uint8](orig)
+    check unboxJlVal[uint8](x) == orig
 
 proc jlCall()=
-  var x = toJlValue[float64](4.0)
+  var x = boxJlVal[float64](4.0)
   var f = getJlFunc(jl_base_module, "sqrt");
   var res = jlCall(f, x)
-  check to[float64](res) == 2.0
-  check to[float64](x) == 4.0
+  check unboxJlVal[float64](res) == 2.0
+  check unboxJlVal[float64](x) == 4.0
 
 proc runSimpleTests() =
   suite "Basic stuff":
-    teardown: julia_gc_collect()
+    teardown: jlGcCollect()
     test "nim_eval_string":
       simpleEvalString()
 
-    test "toJlValue_unbox":
+    test "box_unbox":
       boxUnbox()
 
     test "jl_call1":
@@ -104,7 +104,7 @@ proc jlArray1DOwnBuffer() =
 proc runArrayTest()=
 
   suite "Array 1D":
-    teardown: julia_gc_collect()
+    teardown: jlGcCollect()
 
     test "jl_array_1d":
       jlArray1D()
@@ -122,7 +122,7 @@ proc makeTupleTest() =
 
     check not isNil(ret)
     if not isNil(ret):
-      var bres = to[uint8](ret)
+      var bres = unboxJlVal[uint8](ret)
       check bres == 255
     julia_gc_pop()
 
@@ -139,13 +139,13 @@ proc makeTupleTest() =
     var ret = jlCall("tupleTest", jl_tuple_fromobj)
     check not isNil(ret)
     if not isNil(ret):
-      var bres = to[uint8](ret)
+      var bres = unboxJlVal[uint8](ret)
       check bres == 255
     julia_gc_pop()
 
 proc runTupleTest() =
   suite "Tuples":
-    teardown: julia_gc_collect()
+    teardown: jlGcCollect()
     test "tupleTest":
       makeTupleTest()
 
@@ -201,7 +201,7 @@ proc arrayMutateMeBaby() =
 
 proc runArrayArgsTest() =
   suite "Array":
-    teardown: julia_gc_collect()
+    teardown: jlGcCollect()
 
     test "external_module : squareMeBaby[Array]":
       arraySquareMeBaby()
@@ -287,7 +287,7 @@ proc tensorBuiltinRot180() =
 
 proc runTensorArgsTest() =
   suite "Tensor":
-    teardown: julia_gc_collect()
+    teardown: jlGcCollect()
 
     test "external_module : squareMeBaby[Tensor]":
       tensorSquareMeBaby()
@@ -300,7 +300,7 @@ proc runTensorArgsTest() =
 
 proc runExternalsTest*() =
   suite "external module":
-    teardown: julia_gc_collect()
+    teardown: jlGcCollect()
     test "external_module":
       includeExternalModule()
 
@@ -324,7 +324,7 @@ proc runMemLeakTest*() =
     runArrayArgsTest()
     runTensorArgsTest()
 
-  julia_gc_collect()
+  jlGcCollect()
   echo GC_getStatistics()
 
   jlVmExit(0)
