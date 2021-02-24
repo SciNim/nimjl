@@ -17,7 +17,6 @@ var jl_float64_type {.importc, header: juliaHeader.}: ptr jl_datatype
 
 
 ## Array bindings
-# Values will need to be cast from jl_value to jl_array back and forth
 {.push nodecl.}
 proc jl_array_data*(values: ptr jl_array): pointer {.importc.}
 
@@ -32,10 +31,6 @@ proc jl_new_array*(atype: ptr jl_value,
 
 proc jl_reshape_array*(atype: ptr jl_value, data: ptr jl_array, dims: ptr jl_value): ptr jl_array {.
     importc.}
-
-# Not wrapped -> Use generic version
-# proc jl_ptr_to_array_1d*(atype: ptr jl_value, data: pointer, nel: csize_t,
-#     own_buffer: cint): ptr jl_array {.importc.}
 
 proc jl_ptr_to_array*(atype: ptr jl_value, data: pointer, dims: ptr jl_value,
     own_buffer: cint): ptr jl_array {.importc.}

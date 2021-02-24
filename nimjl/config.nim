@@ -1,15 +1,13 @@
 import os
 
 {.used.}
-# Const julia path
-const csrc_julia* = "csrc/julia.c"
-const juliaPath* = getEnv("JULIA_PATH")
+const juliaPath* {.strdefine.} = getEnv("JULIA_PATH")
 const juliaIncludesPath* = juliaPath / "include" / "julia"
+const juliaHeader* = "julia.h"
 const juliaLibPath* = juliaPath / "lib"
 const juliaDepPath* = juliaPath / "lib" / "julia"
-const juliaHeader* = "julia.h"
 
-{.passC: "-fPIC".}
+# TODO: handle more platform
 {.passC: " -DJULIA_ENABLE_THREADING=1".}
 {.passC: "-I" & juliaIncludesPath.}
 {.passL: "-L" & juliaLibPath.}
@@ -17,11 +15,7 @@ const juliaHeader* = "julia.h"
 {.passL: "-L" & juliaDepPath.}
 {.passL: "-Wl,-rpath," & juliaDepPath.}
 {.passL: "-ljulia".}
-
-{.compile: csrc_julia.}
-
-# {.push cdecl}
-# {.push header: juliaHeader.}
+{.push header: juliaHeader.}
 
 static:
   echo "juliaPath> ", juliaPath

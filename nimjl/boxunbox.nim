@@ -1,8 +1,8 @@
 import basetypes
 import config
-import private/box
+import private/boxunbox_helpers
 
-proc jl_unbox[T: SomeNumber](value: JlValue): T =
+proc julia_unbox[T: SomeNumber](value: JlValue): T =
   when T is int8:
     result = jl_unbox_int8(value)
   elif T is int16:
@@ -26,7 +26,7 @@ proc jl_unbox[T: SomeNumber](value: JlValue): T =
   else:
     doAssert(false, "Type not supported")
 
-proc jl_box[T: SomeNumber](value: T): JlValue =
+proc julia_box[T: SomeNumber](value: T): JlValue =
   when T is int8:
     result = jl_box_int8(value)
   elif T is int16:
@@ -50,9 +50,9 @@ proc jl_box[T: SomeNumber](value: T): JlValue =
   else:
     doAssert(false, "Type not supported")
 
-proc to*[T: SomeNumber](x: JlValue): T =
-  result = jl_unbox[T](x)
+proc unboxJlVal*[T: SomeNumber](x: JlValue): T =
+  result = julia_unbox[T](x)
 
-proc toJlValue*[T: SomeNumber](val: T): JlValue =
-  result = jl_box[T](val)
+proc boxJlVal*[T: SomeNumber](val: T): JlValue =
+  result = julia_box[T](val)
 

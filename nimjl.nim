@@ -4,8 +4,8 @@ export arrays
 import nimjl/basetypes
 export basetypes
 
-import nimjl/box
-export box
+import nimjl/boxunbox
+export boxunbox
 
 # import nimjl/config
 # export config
