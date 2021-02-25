@@ -15,8 +15,12 @@ proc jl_unbox_uint64*(value: ptr jl_value): uint64 {.importc.}
 proc jl_unbox_uint32*(value: ptr jl_value): uint32 {.importc.}
 proc jl_unbox_uint16*(value: ptr jl_value): uint16 {.importc.}
 proc jl_unbox_uint8*(value: ptr jl_value): uint8 {.importc.}
+proc jl_unbox_bool*(value: ptr jl_value): bool {.importc.}
+proc jl_unbox_voidpointer*(value: ptr jl_value): pointer {.importc.}
 
 ## Using box allocate memory managed by Julia's GC
+proc jl_box_voidpointer*(value: pointer): ptr jl_value {.importc.}
+proc jl_box_bool*(value: bool): ptr jl_value {.importc.}
 proc jl_box_float64*(value: float64): ptr jl_value {.importc.}
 proc jl_box_float32*(value: float32): ptr jl_value {.importc.}
 

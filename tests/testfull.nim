@@ -1,6 +1,8 @@
 import unittest
 import sequtils
 import sugar
+import tables
+import json
 
 import arraymancer
 
@@ -143,11 +145,31 @@ proc makeTupleTest() =
       check bres == 255
     julia_gc_pop()
 
+proc stringModTest() =
+  var inputStr = "This is a nice string, isn't it ?"
+  var res : string = jlCall("modString", inputStr.toJlString()).jlString()
+  check inputStr & " This is an amazing string" == res
+
+proc printDictTest() =
+  discard jlEval("import Pkg; Pkg.add(\"JSON\")")
+  discard jlEval("import JSON;")
+  var dict : Table[string, float] = {"12":36.36, "13": 48.48}.toTable
+  var res = jlCall("printDict", jlDict(%dict))
+  check unboxJlVal[bool](res)
+
 proc runTupleTest() =
   suite "Tuples":
     teardown: jlGcCollect()
+
     test "tupleTest":
       makeTupleTest()
+
+    test "modString":
+      stringModTest()
+
+    test "dictTest":
+      printDictTest()
+
 
 ### Externals module & easy stuff
 proc includeExternalModule() =

@@ -14,9 +14,15 @@ proc jl_eval_string*(code: string): ptr jl_value =
   result = jl_eval_string(code.cstring)
 
 ## Error handler
-proc jl_exception_occurred*(): ptr jl_value {.importc.}
+proc jl_exception_occurred*(): ptr jl_value {.nodecl, importc.}
 
-proc jl_typeof_str*(v: ptr jl_value): cstring {.importc.}
+proc jl_typeof_str*(v: ptr jl_value): cstring {.nodecl, importc.}
 
-proc jl_string_ptr*(v: ptr jl_value): cstring {.importc.}
+proc jl_string_ptr*(v: ptr jl_value): cstring {.nodecl, importc.}
+
+proc jl_exception_message*(): cstring =
+  result = jl_string_ptr(jl_eval_string("sprint(showerror, ccall(:jl_exception_occurred, Any, ()))"))
+  # result = jl_typeof_str(jl_exception_occurred())
+
+
 
