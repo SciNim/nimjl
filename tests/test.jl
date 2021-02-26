@@ -5,15 +5,25 @@ module custom_module
     println("Julia says... Hello, world ! Function dummy() from module custom_module has been executed !")
   end
 
+  function modString(inputStr)
+    println("Input string: ", inputStr)
+    return inputStr * " This is an amazing string"
+  end
+
+  function printDict(dict, key1, val1, key2, val2)
+    println(dict)
+    if dict[key1] == val1 && dict[key2] == val2
+      return true
+    else
+      return false
+    end
+  end
+
   function squareMeBaby(A)
     ## Square array and return the result
     println(typeof(A))
-
-    #  A[:]=[i*i for i in A]
-    #  return A
     B = A.*A
     return B
-    #  return map(x -> x*x, A)
   end
 
   function mutateMeByTen!(A)
@@ -31,6 +41,8 @@ module custom_module
 
   export dummy
   export tupleTest
+  export modString
+  export printDict
   export squareMeBaby
   export mutateMeByTen!
 end

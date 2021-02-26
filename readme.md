@@ -6,9 +6,6 @@ This is repo is a WIP to be able to call Julia function from Nim using the C-API
 
 * Have Julia installed 
 * Set the environment variable JULIA_PATH to the Julia installation folder 
-OR
-* Use ``-d:juliaPath=/path/to/folder/julia-1.5.3``
-
 * Run ``nimble install`` or ``nimble develop`` 
 
 ## Ressources

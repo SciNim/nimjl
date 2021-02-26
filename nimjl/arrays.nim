@@ -7,7 +7,6 @@ import private/basetypes_helpers
 proc toJlValue*[T](x: JlArray[T]): JlValue =
   result = cast[JlValue](x.data)
 
-# TODO : Check if it's an array trhen converter
 proc toJlArray*[T](x: JlValue): JlArray[T] =
   result.data = cast[ptr jl_array](x)
 
@@ -17,8 +16,9 @@ proc dataArray*[T](x: JlArray[T]): ptr UncheckedArray[T] =
 proc len*[T](x: JlArray[T]): int =
   result = jl_array_len(x.data)
 
+# Rank func takes value for some reason
 proc ndims*[T](x: JlArray[T]): int =
-  result = jl_array_rank(x.data)
+  result = jl_array_rank(toJlValue(x))
 
 proc dim*[T](x: JlArray[T], dim: int): int =
   result = jl_array_dim(x.data, dim.cint)
