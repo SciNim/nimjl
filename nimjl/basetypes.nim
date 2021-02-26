@@ -1,6 +1,7 @@
 import config
 import private/basetypes_helpers
 import json
+import tables
 import strutils
 import strformat
 
@@ -26,9 +27,6 @@ var jlTopModule *{.importc: "jl_top_module", header: juliaHeader.}: JlModule
 proc jlVmInit*() {.nodecl, importc: "jl_init".}
 proc jlVmExit*(exit_code: cint) {.nodecl, importc: "jl_atexit_hook".}
 
-proc jlString*(v: JlValue) : string =
-  result = $(jl_string_ptr(v))
-
 proc jlExceptionHandler*() =
   if not isNil(jl_exception_occurred()):
     let msg = $(jl_exception_message())
@@ -41,12 +39,16 @@ proc jlEval*(code: string): JlValue =
   result = jl_eval_string(code)
   jlExceptionHandler()
 
-proc toJlString*(v: string) : JlValue=
-  let tmp = &""""{v}""""
-  result = jlEval(tmp)
-
-# TODO fix this
 proc jlDict*(json: JsonNode) : JlValue =
+  var dictStr = "Dict(["
+  for k, v in json:
+    dictStr.add &"(\"{k}\",{v}),"
+  dictStr = dictStr.strip(chars = {','})
+  dictStr.add "])"
+  result = jlEval(dictStr)
+
+proc jlDict*[T](tab: Table[string, T]) : JlValue =
+  let json = %tab
   var dictStr = "Dict(["
   for k, v in json:
     dictStr.add &"(\"{k}\",{v}),"

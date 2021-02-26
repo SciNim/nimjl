@@ -12,35 +12,35 @@ import ../nimjl
 
 proc simpleEvalString() =
   var test = jlEval("sqrt(4.0)")
-  check unboxJlVal[float64](test) == 2.0
+  check jlUnbox[float64](test) == 2.0
 
 proc boxUnbox()=
   block:
     var orig: float64 = 126545836.31266
-    var x = boxJlVal[float64](orig)
-    check unboxJlVal[float64](x) == orig
+    var x = jlBox[float64](orig)
+    check jlUnbox[float64](x) == orig
 
   block:
     var orig: float32 = 0.01561238536
-    var x = boxJlVal[float32](orig)
-    check unboxJlVal[float32](x) == orig
+    var x = jlBox[float32](orig)
+    check jlUnbox[float32](x) == orig
 
   block:
     var orig: int8 = -121
-    var x = boxJlVal[int8](orig)
-    check unboxJlVal[int8](x) == orig
+    var x = jlBox[int8](orig)
+    check jlUnbox[int8](x) == orig
 
   block:
     var orig: uint8 = 251
-    var x = boxJlVal[uint8](orig)
-    check unboxJlVal[uint8](x) == orig
+    var x = jlBox[uint8](orig)
+    check jlUnbox[uint8](x) == orig
 
 proc jlCall()=
-  var x = boxJlVal[float64](4.0)
+  var x = jlBox[float64](4.0)
   var f = getJlFunc(jl_base_module, "sqrt");
   var res = jlCall(f, x)
-  check unboxJlVal[float64](res) == 2.0
-  check unboxJlVal[float64](x) == 4.0
+  check jlUnbox[float64](res) == 2.0
+  check jlUnbox[float64](x) == 4.0
 
 proc runSimpleTests() =
   suite "Basic stuff":
@@ -124,7 +124,7 @@ proc makeTupleTest() =
 
     check not isNil(ret)
     if not isNil(ret):
-      var bres = unboxJlVal[uint8](ret)
+      var bres = jlUnbox[uint8](ret)
       check bres == 255
     julia_gc_pop()
 
@@ -141,19 +141,46 @@ proc makeTupleTest() =
     var ret = jlCall("tupleTest", jl_tuple_fromobj)
     check not isNil(ret)
     if not isNil(ret):
-      var bres = unboxJlVal[uint8](ret)
+      var bres = jlUnbox[uint8](ret)
       check bres == 255
     julia_gc_pop()
 
 proc stringModTest() =
   var inputStr = "This is a nice string, isn't it ?"
-  var res : string = jlCall("modString", inputStr.toJlString()).jlString()
+  var res : string = jlCall("modString", jlBox(inputStr)).jlString()
   check inputStr & " This is an amazing string" == res
 
 proc printDictTest() =
-  var dict : Table[string, float] = {"12":36.36, "13": 48.48}.toTable
-  var res = jlCall("printDict", jlDict(%dict))
-  check unboxJlVal[bool](res)
+  block:
+    var
+      key1 = "t0acq"
+      val1 = 14
+      key2 = "xOrigin"
+      val2 = 3.48
+      dict : Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
+    var res = jlCall("printDict", jlDict(%dict),
+                     jlBox(key1),
+                     jlBox(val1),
+                     jlBox(key2),
+                     jlBox(val2)
+                    )
+    check jlUnbox[bool](res)
+
+  block:
+    var
+      key1 = "Nx"
+      val1 = 144
+      key2 = "dx"
+      val2 = 100e-6
+      dict : Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
+    var res = jlCall("printDict", jlDict(%dict),
+                     jlBox(key1),
+                     jlBox(val1),
+                     jlBox(key2),
+                     jlBox(val2)
+                    )
+    check jlUnbox[bool](res)
+
 
 proc runTupleTest() =
   suite "Tuples":

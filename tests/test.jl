@@ -10,9 +10,9 @@ module custom_module
     return inputStr * " This is an amazing string"
   end
 
-  function printDict(dict)
+  function printDict(dict, key1, val1, key2, val2)
     println(dict)
-    if dict["12"] != 36.36 && dict["13"] == 48.48
+    if dict[key1] == val1 && dict[key2] == val2
       return true
     else
       return false
