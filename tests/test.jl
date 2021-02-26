@@ -6,12 +6,12 @@ module custom_module
   end
 
   function modString(inputStr)
-    println("Input string: ", inputStr)
+    println("Julia says... Input string: ", inputStr)
     return inputStr * " This is an amazing string"
   end
 
   function printDict(dict, key1, val1, key2, val2)
-    println(dict)
+    println("Julia says...", dict)
     if dict[key1] == val1 && dict[key2] == val2
       return true
     else
@@ -21,7 +21,7 @@ module custom_module
 
   function squareMeBaby(A)
     ## Square array and return the result
-    println(typeof(A))
+    println("Julia says...", typeof(A))
     B = A.*A
     return B
   end

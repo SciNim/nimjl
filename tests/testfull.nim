@@ -147,7 +147,7 @@ proc makeTupleTest() =
 
 proc stringModTest() =
   var inputStr = "This is a nice string, isn't it ?"
-  var res : string = jlUnbox[string](jlCall("modString", (jlBox(inputStr)))
+  var res : string = jlUnbox[string](jlCall("modString", (jlBox(inputStr))))
   check inputStr & " This is an amazing string" == res
 
 proc printDictTest() =
@@ -258,8 +258,8 @@ proc runArrayArgsTest() =
 
 ### Tensor Args
 proc tensorSquareMeBaby() =
-  var orig: Tensor[float64]
-  orig = ones[float64](3, 4, 5)
+  let dims = [18, 21, 33]
+  var orig: Tensor[float64] = ones[float64](dims)
   var index = 0
   for i in orig.mitems:
     i = index.float64 / 3.0
@@ -283,14 +283,14 @@ proc tensorSquareMeBaby() =
   var rank_ret = ndims(ret)
   check rank_ret == 3
   var data_ret = dataArray(ret)
-  var tensorData: Tensor[float64] = newTensor[float64](3, 4, 5)
+  var tensorData: Tensor[float64] = newTensor[float64](dims)
   copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
   for i, v in enumerate(tensorData):
     check v == (i/3)*(i/3)
 
 proc tensorMutateMeBaby() =
-  var orig : Tensor[float64]
-  orig = ones[float64](4, 6, 8)
+  let dims = [14, 12, 10]
+  var orig : Tensor[float64] = ones[float64](dims)
   var index = 0
   for i in orig.mitems:
     inc(index)
@@ -305,7 +305,7 @@ proc tensorMutateMeBaby() =
   var rank_ret = ndims(ret)
   check rank_ret == 3
   var data_ret = dataArray(ret)
-  var tensorData: Tensor[float64] = newTensor[float64](4, 6, 8)
+  var tensorData: Tensor[float64] = newTensor[float64](dims)
   copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
   check tensorData == orig
 
@@ -321,8 +321,8 @@ proc tensorBuiltinRot180() =
 
   var d0 = dim(xArray, 0).int
   var d1 = dim(xArray, 1).int
-  check d0 == 4
-  check d1 == 3
+  check d0 == orig_tensor.shape[0]
+  check d1 == orig_tensor.shape[1]
 
   var ret = toJlArray[float64](jlCall("rot180", xArray.toJlValue()))
   check not isNil(ret.data)

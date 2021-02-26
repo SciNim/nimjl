@@ -61,13 +61,13 @@ proc julia_box[T](value: T): JlValue =
 
 proc jlUnbox*[T: SomeNumber|string|bool|pointer](x: JlValue): T =
   when T is string:
-    result = jlval_to_string(v)
+    result = jlval_to_string(x)
   else:
     result = julia_unbox[T](x)
 
 proc jlBox*[T: SomeNumber|string|bool|pointer](val: T): JlValue =
   when T is string:
-    result = jlval_from_string(v)
+    result = jlval_from_string(val)
   else:
     result = julia_box[T](val)
 
