@@ -39,7 +39,7 @@ proc jlEval*(code: string): JlValue =
   result = jl_eval_string(code)
   jlExceptionHandler()
 
-proc jlDict*(json: JsonNode) : JlValue =
+proc jlDict*(json: JsonNode): JlValue =
   var dictStr = "Dict(["
   for k, v in json:
     dictStr.add &"(\"{k}\",{v}),"
@@ -47,7 +47,7 @@ proc jlDict*(json: JsonNode) : JlValue =
   dictStr.add "])"
   result = jlEval(dictStr)
 
-proc jlDict*[T](tab: Table[string, T]) : JlValue =
+proc jlDict*[T](tab: Table[string, T]): JlValue =
   let json = %tab
   var dictStr = "Dict(["
   for k, v in json:
@@ -55,4 +55,10 @@ proc jlDict*[T](tab: Table[string, T]) : JlValue =
   dictStr = dictStr.strip(chars = {','})
   dictStr.add "])"
   result = jlEval(dictStr)
+
+proc toJlString*(v: string): JlValue =
+  result = jlval_from_string(v)
+
+proc jlToString*(v: JlValue): string =
+  result = jlval_to_string(v)
 
