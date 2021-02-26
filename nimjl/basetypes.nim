@@ -1,6 +1,7 @@
 import config
 import private/basetypes_helpers
 import json
+import strutils
 import strformat
 
 type
@@ -41,11 +42,15 @@ proc jlEval*(code: string): JlValue =
   jlExceptionHandler()
 
 proc toJlString*(v: string) : JlValue=
-  let tmp = "\"" & v & "\""
+  let tmp = &""""{v}""""
   result = jlEval(tmp)
 
 # TODO fix this
 proc jlDict*(json: JsonNode) : JlValue =
-  let json = $(json)
-  echo json
-  result = jlEval(&"JSON.parse({json})")
+  var dictStr = "Dict(["
+  for k, v in json:
+    dictStr.add &"(\"{k}\",{v}),"
+  dictStr = dictStr.strip(chars = {','})
+  dictStr.add "])"
+  result = jlEval(dictStr)
+

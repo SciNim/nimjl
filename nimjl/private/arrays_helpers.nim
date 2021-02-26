@@ -24,10 +24,9 @@ proc jl_array_dim*(a: ptr jl_array, dim: cint): cint {.importc.}
 
 proc jl_array_len*(a: ptr jl_array): cint {.importc.}
 
-proc jl_array_rank*(a: ptr jl_array): cint {.importc.}
+proc jl_array_rank*(a: ptr jl_value): cint {.importc.}
 
-proc jl_new_array*(atype: ptr jl_value,
-        dims: ptr jl_value): ptr jl_array {.importc.}
+proc jl_new_array*(atype: ptr jl_value, dims: ptr jl_value): ptr jl_array {.importc.}
 
 proc jl_reshape_array*(atype: ptr jl_value, data: ptr jl_array, dims: ptr jl_value): ptr jl_array {.
     importc.}
@@ -42,8 +41,11 @@ proc jl_alloc_array_2d*(atype: ptr jl_value, nr: csize_t, nc: csize_t): ptr jl_a
 proc jl_alloc_array_3d*(atype: ptr jl_value, nr: csize_t, nc: csize_t, z: csize_t): ptr jl_array {.importc.}
 
 ## Handle apply Array type mechanics
-proc jl_apply_array_type(x: ptr jl_datatype, ndims: csize_t): ptr jl_value {.importc.}
+proc jl_apply_array_type(x: ptr jl_value, ndims: csize_t): ptr jl_value {.importc.}
 {.pop.}
+
+proc jl_apply_array_type(x: ptr jl_datatype, ndims: csize_t): ptr jl_value =
+  result = jl_apply_array_type(cast[ptr jl_value](x), ndims)
 
 proc julia_apply_array_type*[T](dim: int): ptr jl_value =
   when T is int8:
