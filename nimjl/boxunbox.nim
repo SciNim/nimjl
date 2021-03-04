@@ -3,7 +3,10 @@ import config
 import private/boxunbox_helpers
 import private/basetypes_helpers
 
-proc julia_unbox[T](value: JlValue): T =
+import tables
+import json
+
+proc julia_unbox[T: SomeNumber|bool|pointer](value: JlValue): T {.inline.} =
   when T is int8:
     result = jl_unbox_int8(value)
   elif T is int16:
@@ -31,7 +34,7 @@ proc julia_unbox[T](value: JlValue): T =
   else:
     doAssert(false, "Type not supported")
 
-proc julia_box[T](value: T): JlValue =
+proc julia_box[T: SomeNumber|string|pointer](value: T): JlValue {.inline.} =
   when T is int8:
     result = jl_box_int8(value)
   elif T is int16:
@@ -59,18 +62,27 @@ proc julia_box[T](value: T): JlValue =
   else:
     doAssert(false, "Type not supported")
 
-template to*(x: JlValue, t: typedesc[SomeNumber|string|bool|pointer]): t =
+# TODO complete Missing useful types : Tuple, Object, enum
+template to*[T](x: JlValue, t: typedesc[T]): t =
   jlUnbox[t](x)
 
-proc jlUnbox*[T: SomeNumber|string|bool|pointer](x: JlValue): T =
+proc jlUnbox*[T](x: JlValue): T =
   when T is string:
     result = jlval_to_string(x)
+  elif T is JsonNode:
+    doAssert(false,"JsonNode Not implemented")
+  elif T is Table:
+    doAssert(false,"Table Not implemented")
   else:
     result = julia_unbox[T](x)
 
-proc jlBox*[T: SomeNumber|string|bool|pointer](val: T): JlValue =
+proc jlBox*[T](val: T): JlValue =
   when T is string:
     result = jlval_from_string(val)
+  elif T is JsonNode:
+    result = jlDict(val)
+  elif T is Table:
+    result = jlDict(val)
   else:
     result = julia_box[T](val)
 

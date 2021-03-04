@@ -151,14 +151,14 @@ proc stringModTest() =
   check inputStr & " This is an amazing string" == res
 
 proc printDictTest() =
-  block:
+  block StrNumTable:
     var
       key1 = "t0acq"
       val1 = 14
       key2 = "xOrigin"
       val2 = 3.48
       dict : Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
-    var res = jlCall("printDict", jlDict(%dict),
+    var res = jlCall("printDict", jlDict(dict),
                      jlBox(key1),
                      jlBox(val1),
                      jlBox(key2),
@@ -166,7 +166,22 @@ proc printDictTest() =
                     )
     check jlUnbox[bool](res)
 
-  block:
+  block NumTable:
+    var
+      key1 = 11
+      val1 = 14.144'f64
+      key2 = 12
+      val2 = 3.48'f64
+      dict : Table[int, float64] = {key1: val1, key2: val2}.toTable
+    var res = jlCall("printDict", jlDict(dict),
+                     jlBox(key1),
+                     jlBox(val1),
+                     jlBox(key2),
+                     jlBox(val2)
+                    )
+    check jlUnbox[bool](res)
+
+  block JsonNode:
     var
       key1 = "Nx"
       val1 = 144

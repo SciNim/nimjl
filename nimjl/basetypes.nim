@@ -13,7 +13,6 @@ type
   JlArray*[T] = object
     data*: ptr jl_array
 
-
 type
   JlError* = object of IOError
 
@@ -55,6 +54,17 @@ proc jlDict*[T](tab: Table[string, T]): JlValue =
   dictStr = dictStr.strip(chars = {','})
   dictStr.add "])"
   result = jlEval(dictStr)
+
+proc jlDict*[U, V](tab: Table[U, V]): JlValue =
+  var dictStr = "Dict(["
+  for k, v in tab:
+    dictStr.add &"({k}, {v}),"
+  dictStr = dictStr.strip(chars = {','})
+  dictStr.add "])"
+  result = jlEval(dictStr)
+
+proc toJlDict*[U, V](val: JlValue): Table[U, V]=
+  result = initTable[U, V]()
 
 proc toJlString*(v: string): JlValue =
   result = jlval_from_string(v)
