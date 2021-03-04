@@ -70,9 +70,9 @@ proc jlUnbox*[T](x: JlValue): T =
   when T is string:
     result = jlval_to_string(x)
   elif T is JsonNode:
-    doAssert(false,"JsonNode Not implemented")
+    doAssert(false, "JsonNode Not implemented")
   elif T is Table:
-    doAssert(false,"Table Not implemented")
+    doAssert(false, "Table Not implemented")
   else:
     result = julia_unbox[T](x)
 

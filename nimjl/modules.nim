@@ -11,5 +11,5 @@ proc jlUseModule*(modname: string) =
   let tmp = jlEval(&"using {modname}")
   assert not tmp.isNil()
 
-proc jlGetModule*(modname: string) : JlModule =
+proc jlGetModule*(modname: string): JlModule =
   result = cast[JlModule](jlEval(modname))

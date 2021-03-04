@@ -63,7 +63,7 @@ proc jlDict*[U, V](tab: Table[U, V]): JlValue =
   dictStr.add "])"
   result = jlEval(dictStr)
 
-proc toJlDict*[U, V](val: JlValue): Table[U, V]=
+proc toJlDict*[U, V](val: JlValue): Table[U, V] =
   result = initTable[U, V]()
 
 proc toJlString*(v: string): JlValue =
