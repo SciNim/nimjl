@@ -1,12 +1,15 @@
-import osproc
 import strformat
+import osproc
+import os
 
 proc checkLeak() =
-  const srcName = "testleak"
+  const srcName = "checkleak"
   const nimExt = "nim"
-  const srcFile = srcName & "." & nimExt
+  const srcFile = "tests" / srcName & "." & nimExt
   const pngName = "memgraph.png"
-  discard execCmd(&"./graphMem.sh {srcName} {pngName}  & nim r {srcFile}")
+  let cmdStr = &"./graphMem.sh {srcName} {pngName}  & nim r {srcFile}"
+  echo cmdStr
+  discard execCmd(cmdStr)
 
 when defined(checkMemLeak):
   checkLeak()

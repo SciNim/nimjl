@@ -95,5 +95,17 @@ proc nimValueToJlValue*[T](val: T): JlValue {.inline.} =
 proc nimValueToJlValue*[T](val: ptr UncheckedArray[T]): JlValue {.inline.} =
   result = newJlArray(unsafeAddr(val[0]))
 
+# TODO : Converter ?
+# Avoid going throung template toJlVal pointer version when dealing with Julia known type
+proc toJlVal*(x: JlFunc): JlValue {.inline.} =
+  result = cast[JlValue](x)
+
+proc toJlVal*(x: JlModule): JlValue {.inline.} =
+  result = cast[JlValue](x)
+
+proc toJlVal*(x: JlValue): JlValue {.inline.} =
+  result = x
+
 template toJlVal*[T](x: T): JlValue =
   nimValueToJlValue(x)
+

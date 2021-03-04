@@ -3,14 +3,14 @@ import basetypes
 import private/arrays_helpers
 import private/basetypes_helpers
 
-# TODO : Converter
-proc toJlVal*[T](x: JlArray[T]): JlValue =
+# Declare toJlVal here to avoir circular dependencies
+proc toJlVal*[T](x: JlArray[T]): JlValue {.inline.} =
   result = cast[JlValue](x)
 
-proc toJlArray*[T](x: JlValue): JlArray[T] =
+proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =
   result = cast[ptr jl_array](x)
 
-proc dataArray*[T](x: JlArray[T]): ptr UncheckedArray[T] =
+proc dataArray*[T](x: JlArray[T]): ptr UncheckedArray[T] {.inline.} =
   result = cast[ptr UncheckedArray[T]](jl_array_data(x))
 
 proc len*[T](x: JlArray[T]): int =
