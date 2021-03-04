@@ -16,6 +16,6 @@ export gc
 import nimjl/modules
 export modules
 
-import nimjl/tuples
-export tuples
+import nimjl/converttypes
+export converttypes
 

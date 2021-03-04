@@ -1,17 +1,11 @@
 import config
 import private/basetypes_helpers
-import json
-import tables
-import strutils
-import strformat
 
 type
   JlValue* = ptr jl_value
   JlModule* = ptr jl_module
   JlFunc* = ptr jl_func
-
-  JlArray*[T] = object
-    data*: ptr jl_array
+  JlArray*[T] = ptr jl_array
 
 type
   JlError* = object of IOError
@@ -38,37 +32,9 @@ proc jlEval*(code: string): JlValue =
   result = jl_eval_string(code)
   jlExceptionHandler()
 
-proc jlDict*(json: JsonNode): JlValue =
-  var dictStr = "Dict(["
-  for k, v in json:
-    dictStr.add &"(\"{k}\",{v}),"
-  dictStr = dictStr.strip(chars = {','})
-  dictStr.add "])"
-  result = jlEval(dictStr)
+proc nimStringToJlVal*(v: string): JlValue =
+  result = jlvalue_from_string(v)
 
-proc jlDict*[T](tab: Table[string, T]): JlValue =
-  let json = %tab
-  var dictStr = "Dict(["
-  for k, v in json:
-    dictStr.add &"(\"{k}\",{v}),"
-  dictStr = dictStr.strip(chars = {','})
-  dictStr.add "])"
-  result = jlEval(dictStr)
-
-proc jlDict*[U, V](tab: Table[U, V]): JlValue =
-  var dictStr = "Dict(["
-  for k, v in tab:
-    dictStr.add &"({k}, {v}),"
-  dictStr = dictStr.strip(chars = {','})
-  dictStr.add "])"
-  result = jlEval(dictStr)
-
-proc toJlDict*[U, V](val: JlValue): Table[U, V] =
-  result = initTable[U, V]()
-
-proc toJlString*(v: string): JlValue =
-  result = jlval_from_string(v)
-
-proc jlToString*(v: JlValue): string =
-  result = jlval_to_string(v)
+proc jlValToString*(v: JlValue): string =
+  result = jlvalue_to_string(v)
 

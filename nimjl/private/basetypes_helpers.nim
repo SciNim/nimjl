@@ -26,10 +26,10 @@ proc jl_exception_message*(): cstring =
   result = jl_string_ptr(jl_eval_string("sprint(showerror, ccall(:jl_exception_occurred, Any, ()))"))
   # result = jl_typeof_str(jl_exception_occurred())
 
-proc jlval_to_string*(v: ptr jl_value) : string =
+proc jlvalue_to_string*(v: ptr jl_value) : string =
   result = $(jl_string_ptr(v))
 
-proc jlval_from_string*(v: string) : ptr jl_value =
+proc jlvalue_from_string*(v: string) : ptr jl_value =
   # Replace any " in string by \"
   var tmp = replace(v, "\"", "\\\"")
   # Put the string into quote "

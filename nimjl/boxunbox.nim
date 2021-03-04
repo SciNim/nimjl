@@ -1,5 +1,6 @@
 import basetypes
 import config
+
 import private/boxunbox_helpers
 import private/basetypes_helpers
 
@@ -62,27 +63,10 @@ proc julia_box[T: SomeNumber|string|pointer](value: T): JlValue {.inline.} =
   else:
     doAssert(false, "Type not supported")
 
-# TODO complete Missing useful types : Tuple, Object, enum
-template to*[T](x: JlValue, t: typedesc[T]): t =
-  jlUnbox[t](x)
-
+# API for box / unbox. Exported because it's part of Julia's API but it is recommendned to use converter API instead
 proc jlUnbox*[T](x: JlValue): T =
-  when T is string:
-    result = jlval_to_string(x)
-  elif T is JsonNode:
-    doAssert(false, "JsonNode Not implemented")
-  elif T is Table:
-    doAssert(false, "Table Not implemented")
-  else:
-    result = julia_unbox[T](x)
+  result = julia_unbox[T](x)
 
 proc jlBox*[T](val: T): JlValue =
-  when T is string:
-    result = jlval_from_string(val)
-  elif T is JsonNode:
-    result = jlDict(val)
-  elif T is Table:
-    result = jlDict(val)
-  else:
-    result = julia_box[T](val)
+  result = julia_box[T](val)
 
