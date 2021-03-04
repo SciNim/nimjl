@@ -9,4 +9,4 @@ license       = "MIT"
 
 # Dependencies
 requires "nim >= 1.2.0"
-
+requires "arraymancer" # For tests only

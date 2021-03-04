@@ -59,6 +59,9 @@ proc julia_box[T](value: T): JlValue =
   else:
     doAssert(false, "Type not supported")
 
+template jlUnbox*(x: JlValue, t: typedesc[SomeNumber|string|bool|pointer]): t =
+  jlUnbox[t](x)
+
 proc jlUnbox*[T: SomeNumber|string|bool|pointer](x: JlValue): T =
   when T is string:
     result = jlval_to_string(x)

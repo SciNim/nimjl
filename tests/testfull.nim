@@ -147,7 +147,7 @@ proc makeTupleTest() =
 
 proc stringModTest() =
   var inputStr = "This is a nice string, isn't it ?"
-  var res : string = jlUnbox[string](jlCall("modString", (jlBox(inputStr))))
+  var res : string = jlCall("modString", (jlBox(inputStr))).jlUnbox(string)
   check inputStr & " This is an amazing string" == res
 
 proc printDictTest() =
