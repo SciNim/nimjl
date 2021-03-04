@@ -7,6 +7,13 @@ type
   JlFunc* = ptr jl_func
   JlArray*[T] = ptr jl_array
 
+# Avoid going throung template toJlValue pointer version when dealing with Julia known type
+proc toJlVal*(x: JlFunc): JlValue =
+  result = cast[JlValue](x)
+
+proc toJlVal*(x: JlModule): JlValue =
+  result = cast[JlValue](x)
+
 type
   JlError* = object of IOError
 
