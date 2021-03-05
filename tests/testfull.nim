@@ -117,33 +117,32 @@ proc runArrayTest()=
 ## Tuple stuff
 proc makeTupleTest() =
   block:
-    var jl_tuple = jlTuple((a:124, c: 67.32147))
+    var jl_tuple = toJlVal((a:124, c: 67.32147))
     check not isNil(jl_tuple)
     julia_gc_push1(jl_tuple.addr)
-    var ret = jlCall("tupleTest", jl_tuple)
-
-    check not isNil(ret)
-    if not isNil(ret):
-      var bres = jlUnbox[uint8](ret)
-      check bres == 255
+    var ret = jlCall("tupleTest", jl_tuple).to(bool)
+    check ret
     julia_gc_pop()
 
-  type TT = object
-    a: int
-    c: float
+  # block:
+  #   var res = jlCall("makeMyTuple").to(tuple[A: int, B: int, C: int])
 
-  block:
-    var tt: TT = TT(a: 124, c: 67.32147)
-    var jl_tuple_fromobj = jlTuple(tt)
-    check not isNil(jl_tuple_fromobj)
-    julia_gc_push1(jl_tuple_fromobj.addr)
-
-    var ret = jlCall("tupleTest", jl_tuple_fromobj)
-    check not isNil(ret)
-    if not isNil(ret):
-      var bres = jlUnbox[uint8](ret)
-      check bres == 255
-    julia_gc_pop()
+  # type TT = object
+  #   a: int
+  #   c: float
+  #
+  # block:
+  #   var tt: TT = TT(a: 124, c: 67.32147)
+  #   var jl_tuple_fromobj = jlTuple(tt)
+  #   check not isNil(jl_tuple_fromobj)
+  #   julia_gc_push1(jl_tuple_fromobj.addr)
+  #
+  #   var ret = jlCall("tupleTest", jl_tuple_fromobj)
+  #   check not isNil(ret)
+  #   if not isNil(ret):
+  #     var bres = jlUnbox[uint8](ret)
+  #     check bres == 255
+  #   julia_gc_pop()
 
 proc stringModTest() =
   var inputStr = "This is a nice string, isn't it ?"
@@ -171,17 +170,29 @@ proc printDictTest() =
     var res = jlCall("printDict", dict, key1, val1, key2, val2)
     check res.to(bool)
 
-  block JsonNode:
-    var
-      key1 = "Nx"
-      val1 = 144
-      key2 = "dx"
-      val2 = 100e-6
-      dict : Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
-    var res = jlCall("printDict", dict, key1, val1, key2, val2)
-    check res.to(bool)
-
-
+proc dictInvertTest() = discard
+  # block StrNumTable:
+  #   var
+  #     key1 = "t0acq"
+  #     val1 = 14
+  #     key2 = "xOrigin"
+  #     val2 = 3.48
+  #     dict : Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
+  #   var res = jlCall("printDict", dict, key1, val1, key2, val2).to(Table[string,float])
+  #   check res[key1] == val2
+  #   check res[key2] == val1
+  #
+  # block NumTable:
+  #   var
+  #     key1 = 11
+  #     val1 = 14.144'f64
+  #     key2 = 12
+  #     val2 = 3.48'f64
+  #     dict : Table[int, float64] = {key1: val1, key2: val2}.toTable
+  #   var res = jlCall("printDict", dict, key1, val1, key2, val2).to(Table[string,float])
+  #   check res[key1] == val2
+  #   check res[key2] == val1
+  #
 proc runTupleTest() =
   suite "Tuples":
     teardown: jlGcCollect()
@@ -194,6 +205,9 @@ proc runTupleTest() =
 
     test "dictTest":
       printDictTest()
+
+    test "invertDict":
+      dictInvertTest()
 
 
 ### Externals module & easy stuff

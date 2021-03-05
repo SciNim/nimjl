@@ -19,6 +19,12 @@ module custom_module
     end
   end
 
+  function dictInvert!(dict, key1, val1, key2, val2)
+    dict[key2] = va1
+    dict[key1] = va2
+  end
+
+
   function squareMeBaby(A)
     ## Square array and return the result
     println("Julia says...", typeof(A))
@@ -32,17 +38,18 @@ module custom_module
   end
 
   function tupleTest(tt)
-    ## test tuple creation with specific values
+    ## test tuple args with specific values
     if (tt.a == 124) && (tt.c - 67.32147 < 1e-8)
-      return 255
+      return true
     end
-    return 0
+    return false
   end
 
   export dummy
   export tupleTest
   export modString
   export printDict
+  export dictInvert!
   export squareMeBaby
   export mutateMeByTen!
 end

@@ -6,6 +6,7 @@ type
   JlModule* = ptr jl_module
   JlFunc* = ptr jl_func
   JlArray*[T] = ptr jl_array
+  JlSym* = ptr jl_sym
 
 type
   JlError* = object of IOError
@@ -14,7 +15,6 @@ var jlMainModule *{.importc: "jl_main_module", header: juliaHeader.}: JlModule
 var jlCoreModule *{.importc: "jl_core_module", header: juliaHeader.}: JlModule
 var jlBaseModule *{.importc: "jl_base_module", header: juliaHeader.}: JlModule
 var jlTopModule *{.importc: "jl_top_module", header: juliaHeader.}: JlModule
-
 
 ## Init & Exit function
 proc jlVmInit*() {.nodecl, importc: "jl_init".}
@@ -38,3 +38,5 @@ proc nimStringToJlVal*(v: string): JlValue =
 proc jlValToString*(v: JlValue): string =
   result = jlvalue_to_string(v)
 
+proc jlSym*(symname: string) : JlSym =
+  result = jl_symbol(symname.cstring)

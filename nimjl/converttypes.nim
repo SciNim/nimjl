@@ -1,111 +1,76 @@
 import config
 import basetypes
+import boxunbox
+import dicttuples
 import arrays
 
-import strutils
 import json
 import tables
-import strutils
-import strformat
 
-
-# Tuple helpers -> result is memory managed by Julia's GC
-proc jlTuple*(v: tuple): JlValue =
-  var tupleStr = $v
-  tupleStr = tupleStr.replace(":", "=")
-  # This make tuple of a single element valid
-  # (1) won't create a valid tuple -> (1,) is a valid tuple
-  tupleStr = tupleStr.replace(")", ",)")
-  result = jlEval(tupleStr)
-
-proc jlTuple*(v: object): JlValue =
-  var tupleStr = $v
-  tupleStr = tupleStr.replace(":", "=")
-  # This make tuple of a single element valid
-  # (1) won't create a valid tuple -> (1,) is a valid tuple
-  tupleStr = tupleStr.replace(")", ",)")
-  result = jlEval(tupleStr)
-
-proc jlDict*(json: JsonNode): JlValue =
-  var dictStr = "Dict(["
-  for k, v in json:
-    dictStr.add &"(\"{k}\",{v}),"
-  dictStr = dictStr.strip(chars = {','})
-  dictStr.add "])"
-  result = jlEval(dictStr)
-
-proc jlDict*[T](tab: Table[string, T]): JlValue =
-  let json = %tab
-  var dictStr = "Dict(["
-  for k, v in json:
-    dictStr.add &"(\"{k}\",{v}),"
-  dictStr = dictStr.strip(chars = {','})
-  dictStr.add "])"
-  result = jlEval(dictStr)
-
-proc jlDict*[U, V](tab: Table[U, V]): JlValue =
-  var dictStr = "Dict(["
-  for k, v in tab:
-    dictStr.add &"({k}, {v}),"
-  dictStr = dictStr.strip(chars = {','})
-  dictStr.add "])"
-  result = jlEval(dictStr)
-
-proc toJlDict*[U, V](val: JlValue): Table[U, V] =
-  result = initTable[U, V]()
-
-###### Public API
 # TODO complete Missing useful types : Tuple, Object, enum, Seq/Arrays
-template to*[T](x: JlValue, t: typedesc[T]): t =
+## Julia -> Nim
+
+# Tuple becomes Json ?
+proc jlTupleToNim*[T: tuple](x: JlValue, t: typedesc[T]): JsonNode =
+  # jlTupleToNim(x)
+  doAssert(false, "Tuple Not implemented")
+
+# Dict become Table or Json ?
+proc toNimVal*[U, V](x: JlValue, t: typedesc[Table[U, V]]): Table[U, V] =
+  doAssert(false, "Table Not implemented")
+
+proc toNimVal*[T: SomeNumber|bool|pointer|string](x: JlValue): T =
   when T is string:
     jlValToString(x)
-  elif T is JsonNode:
-    doAssert(false, "JsonNode Not implemented")
-  elif T is Table:
-    doAssert(false, "Table Not implemented")
-  elif T is object:
-    doAssert(false, "object Not implemented")
-  elif T is tuple:
-    doAssert(false, "Tuples Not implemented")
   else:
-    jlUnbox[t](x)
+    jlUnbox[T](x)
 
-## to(ptr UncheckedArray[float64]) is not very intuitve. Use dataArray[float64] instead
-template to*[T](x: JlValue, t: typedesc[ptr UncheckedArray[T]]): ptr UncheckedArray[T] =
-  toJlArray(x).dataArray()
+# Julia Tuple / Dict can't really be mapped to Nim's type so returning JsonNode is easier.
+# It introduces a "distinction" between to[T] -> T and to[T] -> JsonNode as return types
+proc to*[T: tuple|Table](x: JlValue, t: typedesc[T]): JsonNode =
+  doAssert(false, "Tuple/Table from JlValue not implemented")
 
-proc nimValueToJlValue*[T](val: T): JlValue {.inline.} =
-  when T is string:
-    result = nimStringToJlVal(val)
-  elif T is JsonNode:
-    result = jlDict(val)
-  elif T is Table:
-    result = jlDict(val)
-  elif T is JsonNode:
-    doAssert(false, "JsonNode Not implemented")
-  elif T is Table:
-    doAssert(false, "Table Not implemented")
-  elif T is object:
-    result = jlTuple(val)
-  elif T is tuple:
-    result = jlTuple(val)
-  else:
-    result = jlBox(val)
+template to*[T](x: JlValue, t: typedesc[T]): T =
+  toNimVal[T](x)
 
-proc nimValueToJlValue*[T](val: ptr UncheckedArray[T]): JlValue {.inline.} =
+## Nim -> Julia
+proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue {.inline.} =
+  result = jlBox(val)
+
+proc nimValueToJlValue(val: string): JlValue {.inline.} =
+  result = nimStringToJlVal(val)
+
+proc nimValueToJlValue(val: object): JlValue {.inline.} =
+  doAssert(false, "Object Not implemented")
+
+proc nimValueToJlValue[T](val: ptr UncheckedArray[T]): JlValue {.inline.} =
   result = newJlArray(unsafeAddr(val[0]))
 
-# TODO : Converter ?
 # Avoid going throung template toJlVal pointer version when dealing with Julia known type
-proc toJlVal*(x: JlFunc): JlValue {.inline.} =
+# Declare toJlVal here to avoir circular dependencies
+proc nimValueToJlValue*[T](x: JlArray[T]): JlValue {.inline.} =
   result = cast[JlValue](x)
 
-proc toJlVal*(x: JlModule): JlValue {.inline.} =
+proc nimValueToJlValue(x: JlSym): JlValue {.inline.} =
   result = cast[JlValue](x)
 
-proc toJlVal*(x: JlValue): JlValue {.inline.} =
+proc nimValueToJlValue(x: JlFunc): JlValue {.inline.} =
+  result = cast[JlValue](x)
+
+proc nimValueToJlValue(x: JlModule): JlValue {.inline.} =
+  result = cast[JlValue](x)
+
+proc nimValueToJlValue(x: JlValue): JlValue {.inline.} =
   result = x
 
+proc nimValueToJlValue(x: tuple): JlValue {.inline.} =
+  result = nimTupleToJlTuple(x)
+
+proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue {.inline.} =
+  result = nimTableToJlDict(x)
+
+# Generic API
 template toJlVal*[T](x: T): JlValue =
   nimValueToJlValue(x)
+
 

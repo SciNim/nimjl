@@ -9,6 +9,9 @@ type jl_array *{.importc: "jl_array_t", header: juliaHeader.} = object
 type jl_func *{.importc: "jl_function_t", header: juliaHeader.} = object
 type jl_module *{.importc: "jl_module_t", header: juliaHeader.} = object
 type jl_datatype*{.importc: "jl_datatype_t", header: juliaHeader.} = object
+type jl_sym*{.importc: "jl_sym_t", header: juliaHeader.} = object
+
+proc jl_symbol*(symname: cstring) : ptr jl_sym {.nodecl, importc: "jl_symbol".}
 
 proc jl_eval_string*(code: cstring): ptr jl_value {.nodecl, importc.}
 

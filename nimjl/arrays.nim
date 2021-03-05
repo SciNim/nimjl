@@ -3,11 +3,10 @@ import basetypes
 import private/arrays_helpers
 import private/basetypes_helpers
 
-# Declare toJlVal here to avoir circular dependencies
-proc toJlVal*[T](x: JlArray[T]): JlValue {.inline.} =
-  result = cast[JlValue](x)
-
 proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =
+  result = cast[ptr jl_array](x)
+
+proc toJlArray*(x: JlValue, T: typedesc): JlArray[T] {.inline.} =
   result = cast[ptr jl_array](x)
 
 proc dataArray*[T](x: JlArray[T]): ptr UncheckedArray[T] {.inline.} =
@@ -18,7 +17,7 @@ proc len*[T](x: JlArray[T]): int =
 
 # Rank func takes value for some reason
 proc ndims*[T](x: JlArray[T]): int =
-  result = jl_array_rank(toJlVal(x))
+  result = jl_array_rank(cast[JlValue](x))
 
 proc dim*[T](x: JlArray[T], dim: int): int =
   result = jl_array_dim(x, dim.cint)
