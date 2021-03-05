@@ -73,7 +73,7 @@ proc julia_apply_array_type*[T](dim: int): ptr jl_value =
   elif T is char:
     result = jl_apply_array_type(jl_char_type, dim.csize_t)
   else:
-    doAssert(fals, "Type not supported")
+    raise newException(JuliaError, &"Arrays of {typedesc[T]} is not supported.")
 
 proc julia_make_array*[T](data: ptr UncheckedArray[T], dims: openArray[int]): ptr jl_array =
   var dimStr = "("

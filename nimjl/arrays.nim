@@ -26,9 +26,16 @@ proc shape*[T](x: JlArray[T]): seq[int] =
   for i in 0..<x.ndims():
     result.add x.dim(i)
 
-proc newJlArray*[T](data: ptr UncheckedArray[T], dims: openArray[int]): JlArray[T] =
+# Buffer with dims
+proc jlArrayFromBuffer*[T](data: ptr UncheckedArray[T], dims: openArray[int]): JlArray[T] =
   ## Create an Array from existing buffer
   result = julia_make_array[T](data, dims)
+
+# 1D Mode
+proc jlArrayFromBuffer*[T](data: openArray[T]): JlArray[T] =
+  ## Create an Array from existing buffer
+  let uncheckedDataPtr = cast[ptr UncheckedArray[float64]](data[0].unsafeAddr)
+  result = jlArrayFromBuffer(uncheckedDataPtr, [data.len()])
 
 proc allocJlArray*[T](dims: openArray[int]): JlArray[T] =
   ## Create a Julia Array managed by Julia GC
