@@ -42,32 +42,32 @@ proc julia_gc_pop*() {.importc: "JL_GC_POP".}
 
 # Make it easier to not lose the scope
 template jlGcRoot*(a: pointer, body: untyped) =
-  julia_gc_push1(a.addr)
+  julia_gc_push1(a.unsafeAddr())
   body
   julia_gc_pop()
 
 template jlGcRoot*(a: pointer, b: pointer, body: untyped) =
-  julia_gc_push2(a.addr, b.addr)
+  julia_gc_push2(a.unsafeAddr(), b.unsafeAddr())
   body
   julia_gc_pop()
 
 template jlGcRoot*(a: pointer, b: pointer, c: pointer, body: untyped) =
-  julia_gc_push3(a.addr, b.addr, c.addr)
+  julia_gc_push3(a.unsafeAddr(), b.unsafeAddr(), c.unsafeAddr())
   body
   julia_gc_pop()
 
 template jlGcRoot*(a: pointer, b: pointer, c: pointer, d: pointer, body: untyped) =
-  julia_gc_push4(a.addr, b.addr, c.addr, d.addr)
+  julia_gc_push4(a.unsafeAddr(), b.unsafeAddr(), c.unsafeAddr(), d.unsafeAddr())
   body
   julia_gc_pop()
 
 template jlGcRoot*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer, body: untyped) =
-  julia_gc_push5(a.addr, b.addr, c.addr, d.addr, e.addr)
+  julia_gc_push5(a.unsafeAddr(), b.unsafeAddr(), c.unsafeAddr(), d.unsafeAddr(), e.unsafeAddr())
   body
   julia_gc_pop()
 
 template jlGcRoot*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer, f: pointer, body: untyped) =
-  julia_gc_push6(a.addr, b.addr, c.addr, d.addr, e.addr, f.addr)
+  julia_gc_push6(a.unsafeAddr(), b.unsafeAddr(), c.unsafeAddr(), d.unsafeAddr(), e.unsafeAddr(), f.unsafeAddr())
   body
   julia_gc_pop()
 

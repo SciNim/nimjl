@@ -3,6 +3,7 @@ import basetypes
 import private/arrays_helpers
 import private/basetypes_helpers
 
+
 proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =
   result = cast[ptr jl_array](x)
 

@@ -27,3 +27,4 @@ proc jlCall*(jlmod: JlModule, jlfuncname: string, va: varargs[JlValue, toJlVal])
 proc jlCall*(jlfuncname: string, va: varargs[JlValue, toJlVal]): JlValue =
   result = jlCall(jlMainModule, jlfuncname, va)
 
+
