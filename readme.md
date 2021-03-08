@@ -54,14 +54,16 @@ jlVmExit() # Exit Julia VM. This can be done only once in the lifetime of your p
 
 Take a look at ``tests/testfull.nim`` and the ``examples/`` folder for  more examples. 
 
-## Memory Leak
+## Checking Memory Leak
 
-The test ``tests/testleak.nim`` run the full tests suites (with multiple allocations in both Nim and Julia) continuously for 60 seconds and trace the graph of memory and virtual memory (Linux only).
+The test ``tests/testleak.nim`` run the full tests suites (with multiple allocations in both Nim and Julia) continuously for 60 seconds.
+At the end of each test, Julia's garbage collector is called manually and a bash script trace the graph of memory and virtual memory (Linux only).
+This is to make sure that Julia's memory get cleaned up on exit and that there is on weird GC interaction that makes memory consumption increase over time when using the Julia VM.
 
-This is done to make sure that Julia's memory get cleaned up on exit and that there is on weird GC interaction that makes memory consumption increase over time when using the Julia VM.
+If there is a simpler way to do this, feel free to open a PR ! 
 
 ![](memgraph.png)
 
 # Documentation
 
-Complete documentation remains a TODO.
+Complete API documentation remains a TODO.
