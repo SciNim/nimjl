@@ -33,7 +33,7 @@ proc julia_unbox[T: SomeNumber|bool|pointer](value: JlValue): T {.inline.} =
   elif T is pointer:
     result = jl_unbox_voidpointer(value)
   else:
-    doAssert(false, "Type not supported")
+    raise newException(JlError, "Unboxing value failed. Type not supported.")
 
 proc julia_box[T: SomeNumber|string|pointer](value: T): JlValue {.inline.} =
   when T is int8:
@@ -61,7 +61,7 @@ proc julia_box[T: SomeNumber|string|pointer](value: T): JlValue {.inline.} =
   elif T is pointer:
     result = jl_box_voidpointer(value)
   else:
-    doAssert(false, "Type not supported")
+    raise newException(JlError, "Boxing value failed. Type not supported.")
 
 # API for box / unbox. Exported because it's part of Julia's API but it is recommendned to use converter API instead
 proc jlUnbox*[T](x: JlValue): T =

@@ -96,5 +96,5 @@ proc julia_alloc_array*[T](dims: openArray[int]): ptr jl_array =
     var array_type = julia_apply_array_type[T](3)
     result = jl_alloc_array_3d(array_type, dims[0].csize_t, dims[1].csize_t, dims[2].csize_t)
   else:
-    doAssert(false, &"Julia alloc array only supports Array for rank 1, 2, 3 not {dims.len}")
+    raise newException(JlError, &"Julia alloc array only supports Array for rank 1, 2, 3 not {dims.len}")
 

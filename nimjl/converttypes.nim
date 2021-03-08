@@ -20,11 +20,9 @@ proc toNimVal*[T: SomeNumber|bool|pointer|string](x: JlValue, res: var T) =
 # Julia Tuple / Dict can't really be mapped to Nim's type so returning JsonNode is easier.
 # It introduces a "distinction" between to[T] -> T and to[T] -> JsonNode as return types
 proc toNimVal*(x: JlValue, t: var tuple) =
-  # doAssert(false, "Tuple from JlValue not implemented")
   jlTupleToNim(x, t)
 
 proc toNimVal*[U, V](x: JlValue, tab: var Table[U, V]) =
-  # doAssert(false, "Table from JlValue not implemented")
   jlDictToNim[U, V](x, tab)
 
 proc to*(x: JlValue, T: typedesc): T =
@@ -62,7 +60,6 @@ proc nimValueToJlValue(x: tuple): JlValue {.inline.} =
 
 proc nimValueToJlValue(x: object): JlValue {.inline.} =
   result = nimToJlTuple(x)
-  # doAssert(false, "Object Not implemented")
 
 proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue {.inline.} =
   result = nimTableToJlDict(x)
