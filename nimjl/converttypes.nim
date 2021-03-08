@@ -50,10 +50,6 @@ proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
     copyMem(unsafeAddr(locseq[0]), x.dataArray(), nbytes)
 
 proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
-  # Tensor tmp version
-  # var tmp : Tensor[T]
-  # toNimVal(x, tmp)
-  # locseq = tmp.toSeq
   let x = toJlArray[T](x)
   if x.ndims > 1:
     raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
