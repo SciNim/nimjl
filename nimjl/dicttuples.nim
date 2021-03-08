@@ -2,47 +2,53 @@ import config
 import basetypes
 import functions
 
-import strutils
 import tables
-import npeg
+import strutils
 
 # Tuple helpers -> result is memory managed by Julia's GC
-proc nimTupleToJlTuple*(v: tuple): JlValue =
+# Convert object as tuple ?
+proc nimToJlTuple*(v: tuple|object): JlValue =
   result = jlEval("NamedTuple()")
   for name, field in v.fieldPairs:
     result = jlCall(jlBaseModule, "setindex", result, field, jlSym(name))
 
+proc jlTupleToNim*(val: JlValue, tup: var tuple) =
+  # collect(keys(val))
+  var keys = jlCall("keys", val)
+  keys = jlCall("collect", keys)
+  # Tuple of JlSymbol
+  # length(collect(keys(val)))
+  var nkeys = jlCall("length", keys).to(int)
+  var show = getJlFunc("show")
+  var sprint = getJlFunc("sprint")
+  # for i in 1..nkeys:
+  var i = 0
+  for name, field in tup.fieldPairs:
+    inc(i)
+    var key = jlCall("getindex", keys, i)
+    var keyName = jlCall(sprint, show, key).to(string)
+    removePrefix(keyName, ':')
+    echo ">> ", keyName, " : ", name, " = ", typedesc(field)
+    if keyName == name:
+      var val = jlCall("getindex", val, key)
+      field = val.to(typedesc(field))
+    else:
+      raise newException(JlError, "Tuple conversion from Julia to Nim failed ! Fields must identical")
+
+
 
 proc jlDictToNim*[U, V: string|SomeNumber|bool](val: JlValue, tab: var Table[U, V]) =
-  discard
-#   discard jlEval("""
-# function printKeys(x)
-#   ke = keys(x)
-#   return sprint(show, ke)
-# end
-# export printkeys""")
-#
-  # var keys = jlCall("keys", val)
-  # var show = getJlFunc("show")
-  # echo "##################"
-  # var dictstr = jlCall("sprint", show, val).jlValToString()
-  # dictStr = dictStr.replace("=>", "=")
-  # dictStr = dictStr[(dictStr.find("(")+1)..<dictStr.find(")")]
-  # echo dictstr
-  #
-  # let parser = peg "pairs":
-  #   pairs <- pair * *(',' * pair) * !1
-  #   word <- +Alnum
-  #   number <- +Alnum
-  #   pair <- word * '=' * number
-  #
-  # let r = parser.match(dictstr)
-  # echo r
-  #
-  # parser.match(dictstr, tab)
+  # collect(keys(val))
+  var keys = jlCall("keys", val)
+  keys = jlCall("collect", keys)
+  # Tuple of JlSymbol
+  # length(collect(keys(val)))
+  var nkeys = jlCall("length", keys).to(int)
+  for i in 1..nkeys:
+    var key = jlCall("getindex", keys, i)
+    var val = jlCall("getindex", val, key)
+    tab[key.to(U)] = val.to(V)
 
-  # echo "##################"
-  # var values = jlCall("values", val)
 
 proc nimTableToJlDict*[U, V: string|SomeNumber](tab: Table[U, V]): JlValue =
   result = jlEval("Dict()")

@@ -20,11 +20,12 @@ proc toNimVal*[T: SomeNumber|bool|pointer|string](x: JlValue, res: var T) =
 # Julia Tuple / Dict can't really be mapped to Nim's type so returning JsonNode is easier.
 # It introduces a "distinction" between to[T] -> T and to[T] -> JsonNode as return types
 proc toNimVal*(x: JlValue, t: var tuple) =
-  doAssert(false, "Tuple from JlValue not implemented")
+  # doAssert(false, "Tuple from JlValue not implemented")
+  jlTupleToNim(x, t)
 
 proc toNimVal*[U, V](x: JlValue, tab: var Table[U, V]) =
-  doAssert(false, "Table from JlValue not implemented")
-  # jlDictToNim[U, V](x, tab)
+  # doAssert(false, "Table from JlValue not implemented")
+  jlDictToNim[U, V](x, tab)
 
 proc to*(x: JlValue, T: typedesc): T =
   when T is void:
@@ -38,10 +39,6 @@ proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue {.inline.} 
 
 proc nimValueToJlValue(val: string): JlValue {.inline.} =
   result = nimStringToJlVal(val)
-
-proc nimValueToJlValue(val: object): JlValue {.inline.} =
-  doAssert(false, "Object Not implemented")
-
 
 # Avoid going throung template toJlVal pointer version when dealing with Julia known type
 # Declare toJlVal here to avoir circular dependencies
@@ -61,7 +58,11 @@ proc nimValueToJlValue(x: JlValue): JlValue {.inline.} =
   result = x
 
 proc nimValueToJlValue(x: tuple): JlValue {.inline.} =
-  result = nimTupleToJlTuple(x)
+  result = nimToJlTuple(x)
+
+proc nimValueToJlValue(x: object): JlValue {.inline.} =
+  result = nimToJlTuple(x)
+  # doAssert(false, "Object Not implemented")
 
 proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue {.inline.} =
   result = nimTableToJlDict(x)

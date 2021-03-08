@@ -22,9 +22,6 @@ How to embed Julia w/ C :
 
 ## Next steps 
 
-* Julia Tuples using C-API (no eval_string)
-* Pass complex struct / object from Nim to Julia & vice-versa
-* Converting Nim tuple / Julia tuple without copy
 * Handle row major vs column major transposition when using array
 * Tag tracing for Julia memory allocation 
 
@@ -32,8 +29,8 @@ How to embed Julia w/ C :
 
 * Only supports Linux for now
 * Arrays only supports POD data types (``SomeNumber`` types) 
-* Julia allocated arrays only goes up to 3 dimensions
-
+* Julia allocated arrays only goes up to 3 dimensions (but Arrays can be allocated in Nim)
+* Value conversion Nim <==> Julia involves a copy unless using Julia Arrays allocated in Nim. 
 
 # Examples
 

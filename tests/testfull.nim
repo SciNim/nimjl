@@ -117,25 +117,20 @@ proc makeTupleTest() =
     check ret
     julia_gc_pop()
 
-  # block:
-  #   var res = jlCall("makeMyTuple").to(tuple[A: int, B: int, C: int])
+  block:
+    var res = jlCall("makeMyTuple").to(tuple[A: int, B: int, C: int])
+    check res.A == 1
+    check res.B == 2
+    check res.C == 3
 
-  # type TT = object
-  #   a: int
-  #   c: float
-  #
-  # block:
-  #   var tt: TT = TT(a: 124, c: 67.32147)
-  #   var jl_tuple_fromobj = jlTuple(tt)
-  #   check not isNil(jl_tuple_fromobj)
-  #   julia_gc_push1(jl_tuple_fromobj.addr)
-  #
-  #   var ret = jlCall("tupleTest", jl_tuple_fromobj)
-  #   check not isNil(ret)
-  #   if not isNil(ret):
-  #     var bres = jlUnbox[uint8](ret)
-  #     check bres == 255
-  #   julia_gc_pop()
+  type TT = object
+    a: int
+    c: float
+
+  block:
+    var tt: TT = TT(a: 124, c: 67.32147)
+    var ret = jlCall("tupleTest", tt).to(bool)
+    check ret
 
 proc stringModTest() =
   var inputStr = "This is a nice string, isn't it ?"
@@ -163,31 +158,30 @@ proc printDictTest() =
     var res = jlCall("printDict", dict, key1, val1, key2, val2)
     check res.to(bool)
 
-# TODO : implement Table conversion
-# proc dictInvertTest() =
-#   block StrNumTable:
-#     var
-#       key1 = "t0acq"
-#       val1 = 14.0
-#       key2 = "xOrigin"
-#       val2 = 3.48
-#       dict: Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
-#     var jlres = jlCall("dictInvert!", dict, key1, val1, key2, val2)
-#     var res = jlres.to(Table[string, float])
-#     check res[key1] == val2
-#     check res[key2] == val1
-#
-#   block NumTable:
-#     var
-#       key1 = 11
-#       val1 = 14.144'f64
-#       key2 = 12
-#       val2 = 3.48'f64
-#       dict: Table[int, float64] = {key1: val1, key2: val2}.toTable
-#     var jlres = jlCall("dictInvert!", dict, key1, val1, key2, val2)
-#     var res = jlres.to(Table[int, float])
-#     check res[key1] == val2
-#     check res[key2] == val1
+proc dictInvertTest() =
+  block StrNumTable:
+    var
+      key1 = "t0acq"
+      val1 = 14.0
+      key2 = "xOrigin"
+      val2 = 3.48
+      dict: Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
+    var jlres = jlCall("dictInvert!", dict, key1, val1, key2, val2)
+    var res = jlres.to(Table[string, float])
+    check res[key1] == val2
+    check res[key2] == val1
+
+  block NumTable:
+    var
+      key1 = 11
+      val1 = 14.144'f64
+      key2 = 12
+      val2 = 3.48'f64
+      dict: Table[int, float64] = {key1: val1, key2: val2}.toTable
+    var jlres = jlCall("dictInvert!", dict, key1, val1, key2, val2)
+    var res = jlres.to(Table[int, float])
+    check res[key1] == val2
+    check res[key2] == val1
 
 proc runTupleTest() =
   suite "Tuples":

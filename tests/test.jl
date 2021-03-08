@@ -41,10 +41,14 @@ module custom_module
 
   function tupleTest(tt)
     ## test tuple args with specific values
-    if (tt.a == 124) && (tt.c - 67.32147 < 1e-8)
+    if (tt.a == 124) && (tt.c - 67.32147 < 1e-12)
       return true
     end
     return false
+  end
+
+  function makeMyTuple()
+    return (A=1, B=2, C=3,)
   end
 
   export dummy
@@ -52,6 +56,7 @@ module custom_module
   export modString
   export printDict
   export dictInvert!
+  export makeMyTuple
   export squareMeBaby
   export mutateMeByTen!
 end

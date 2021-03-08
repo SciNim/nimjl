@@ -13,9 +13,9 @@ proc julia_unbox[T: SomeNumber|bool|pointer](value: JlValue): T {.inline.} =
   elif T is int16:
     result = jl_unbox_int16(value)
   elif T is int32 or (T is int and sizeof(int) == sizeof(int32)):
-    result = jl_unbox_int32(value)
+    result = jl_unbox_int32(value).T
   elif T is int64 or (T is int and sizeof(int) == sizeof(int64)):
-    result = jl_unbox_int64(value)
+    result = jl_unbox_int64(value).T
   elif T is uint8:
     result = jl_unbox_uint8(value)
   elif T is uint16:
@@ -41,9 +41,9 @@ proc julia_box[T: SomeNumber|string|pointer](value: T): JlValue {.inline.} =
   elif T is int16:
     result = jl_box_int16(value)
   elif T is int32 or (T is int and sizeof(int) == sizeof(int32)):
-    result = jl_box_int32(value)
+    result = jl_box_int32(value.T)
   elif T is int64 or (T is int and sizeof(int) == sizeof(int64)):
-    result = jl_box_int64(value)
+    result = jl_box_int64(value.T)
   elif T is uint8:
     result = jl_box_uint8(value)
   elif T is uint16:
