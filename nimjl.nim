@@ -7,8 +7,11 @@ export basetypes
 import nimjl/boxunbox
 export boxunbox
 
-# import nimjl/config
-# export config
+import nimjl/converttypes
+export converttypes
+
+import nimjl/dicttuples
+export dicttuples
 
 import nimjl/functions
 export functions
@@ -18,7 +21,4 @@ export gc
 
 import nimjl/modules
 export modules
-
-import nimjl/tuples
-export tuples
 

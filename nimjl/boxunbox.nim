@@ -1,17 +1,21 @@
 import basetypes
 import config
+
 import private/boxunbox_helpers
 import private/basetypes_helpers
 
-proc julia_unbox[T](value: JlValue): T =
+import tables
+import json
+
+proc julia_unbox[T: SomeNumber|bool|pointer](value: JlValue): T {.inline.} =
   when T is int8:
     result = jl_unbox_int8(value)
   elif T is int16:
     result = jl_unbox_int16(value)
   elif T is int32 or (T is int and sizeof(int) == sizeof(int32)):
-    result = jl_unbox_int32(value)
+    result = jl_unbox_int32(value).T
   elif T is int64 or (T is int and sizeof(int) == sizeof(int64)):
-    result = jl_unbox_int64(value)
+    result = jl_unbox_int64(value).T
   elif T is uint8:
     result = jl_unbox_uint8(value)
   elif T is uint16:
@@ -29,17 +33,17 @@ proc julia_unbox[T](value: JlValue): T =
   elif T is pointer:
     result = jl_unbox_voidpointer(value)
   else:
-    doAssert(false, "Type not supported")
+    raise newException(JlError, "Unboxing value failed. Type not supported.")
 
-proc julia_box[T](value: T): JlValue =
+proc julia_box[T: SomeNumber|string|pointer](value: T): JlValue {.inline.} =
   when T is int8:
     result = jl_box_int8(value)
   elif T is int16:
     result = jl_box_int16(value)
   elif T is int32 or (T is int and sizeof(int) == sizeof(int32)):
-    result = jl_box_int32(value)
+    result = jl_box_int32(value.T)
   elif T is int64 or (T is int and sizeof(int) == sizeof(int64)):
-    result = jl_box_int64(value)
+    result = jl_box_int64(value.T)
   elif T is uint8:
     result = jl_box_uint8(value)
   elif T is uint16:
@@ -57,17 +61,12 @@ proc julia_box[T](value: T): JlValue =
   elif T is pointer:
     result = jl_box_voidpointer(value)
   else:
-    doAssert(false, "Type not supported")
+    raise newException(JlError, "Boxing value failed. Type not supported.")
 
-proc jlUnbox*[T: SomeNumber|string|bool|pointer](x: JlValue): T =
-  when T is string:
-    result = jlval_to_string(x)
-  else:
-    result = julia_unbox[T](x)
+# API for box / unbox. Exported because it's part of Julia's API but it is recommendned to use converter API instead
+proc jlUnbox*[T](x: JlValue): T =
+  result = julia_unbox[T](x)
 
-proc jlBox*[T: SomeNumber|string|bool|pointer](val: T): JlValue =
-  when T is string:
-    result = jlval_from_string(val)
-  else:
-    result = julia_box[T](val)
+proc jlBox*[T](val: T): JlValue =
+  result = julia_box[T](val)
 

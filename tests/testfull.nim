@@ -14,7 +14,7 @@ proc simpleEvalString() =
   var test = jlEval("sqrt(4.0)")
   check jlUnbox[float64](test) == 2.0
 
-proc boxUnbox()=
+proc boxUnbox() =
   block:
     var orig: float64 = 126545836.31266
     var x = jlBox[float64](orig)
@@ -35,7 +35,7 @@ proc boxUnbox()=
     var x = jlBox[uint8](orig)
     check jlUnbox[uint8](x) == orig
 
-proc jlCall()=
+proc jlCall() =
   var x = jlBox[float64](4.0)
   var f = getJlFunc(jl_base_module, "sqrt");
   var res = jlCall(f, x)
@@ -56,54 +56,49 @@ proc runSimpleTests() =
 
 ###### ARRAY
 
-proc jlArray1D()=
+proc jlArray1D() =
   let ARRAY_LEN = 10
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 
-  var x : JlArray[float64]
+  var x: JlArray[float64]
   x = allocJlArray[float64]([ARRAY_LEN])
-  julia_gc_push1(addr(x))
-  var xData = dataArray[float64](x)
-  check ARRAY_LEN == len(x)
+  # Root the value
+  jlGcRoot(x):
+  # julia_gc_push1(addr(x))
+    var xData = dataArray[float64](x)
+    check ARRAY_LEN == len(x)
 
-  for i in 0..<len(x):
-    xData[i] = i.float64
+    for i in 0..<len(x):
+      xData[i] = i.float64
 
-  var reverse = getJlFunc(jl_base_module, "reverse!")
-  var res = jlCall(reverse, x.toJlValue())
-  check not isNil(res)
+    var reverse = getJlFunc(jl_base_module, "reverse!")
+    var res = jlCall(reverse, toJlVal(x))
+    check not isNil(res)
 
-  var resData = toJlArray[float64](res).dataArray()
-  check resData == xData
+    var resData = toJlArray[float64](res).dataArray()
+    check resData == xData
 
-  for i in 0..<ARRAY_LEN:
-    check xData[i] == orig[ARRAY_LEN - i - 1]
-  julia_gc_pop()
+    for i in 0..<ARRAY_LEN:
+      check xData[i] == orig[ARRAY_LEN - i - 1]
+  # julia_gc_pop()
 
 proc jlArray1DOwnBuffer() =
   let ARRAY_LEN = 10
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-  let unchecked_orig = cast[ptr UncheckedArray[float64]](orig[0].addr)
 
-  # var array_type = nimjl_apply_array_type[float64](1)
-  # var x = nimjl_ptr_to_array_1d(array_type, unchecked_orig, ARRAY_LEN.csize_t, 0)
-
-  var x = newJlArray[float64](unchecked_orig, [10])
-  check ARRAY_LEN == len(x)
-  for i in 0..<len(x):
-    unchecked_orig[i] = i.float64
-
+  var x = jlArrayFromBuffer[float64](orig)
   var reverse = getJlFunc(jl_base_module, "reverse!")
-  var res = jlCall(reverse, x.toJlValue())
+  var res = jlCall(reverse, x)
   check not isNil(res)
 
   var resData = toJlArray[float64](res).dataArray()
-  check resData == unchecked_orig
+  for i in 0..<orig.len:
+    check resData[i] == orig[i]
 
   for i in 0..<ARRAY_LEN:
-    check unchecked_orig[i] == (ARRAY_LEN - i - 1).float
+    check orig[i] == float64(ARRAY_LEN - i - 1)
 
-proc runArrayTest()=
+proc runArrayTest() =
 
   suite "Array 1D":
     teardown: jlGcCollect()
@@ -117,16 +112,15 @@ proc runArrayTest()=
 ## Tuple stuff
 proc makeTupleTest() =
   block:
-    var jl_tuple = jlTuple((a:124, c: 67.32147))
-    check not isNil(jl_tuple)
-    julia_gc_push1(jl_tuple.addr)
-    var ret = jlCall("tupleTest", jl_tuple)
+    var jl_tuple = (a: 124, c: 67.32147)
+    var ret = jlCall("tupleTest", jl_tuple).to(bool)
+    check ret
 
-    check not isNil(ret)
-    if not isNil(ret):
-      var bres = jlUnbox[uint8](ret)
-      check bres == 255
-    julia_gc_pop()
+  block:
+    var res = jlCall("makeMyTuple").to(tuple[A: int, B: int, C: int])
+    check res.A == 1
+    check res.B == 2
+    check res.C == 3
 
   type TT = object
     a: int
@@ -134,53 +128,59 @@ proc makeTupleTest() =
 
   block:
     var tt: TT = TT(a: 124, c: 67.32147)
-    var jl_tuple_fromobj = jlTuple(tt)
-    check not isNil(jl_tuple_fromobj)
-    julia_gc_push1(jl_tuple_fromobj.addr)
-
-    var ret = jlCall("tupleTest", jl_tuple_fromobj)
-    check not isNil(ret)
-    if not isNil(ret):
-      var bres = jlUnbox[uint8](ret)
-      check bres == 255
-    julia_gc_pop()
+    var ret = jlCall("tupleTest", tt).to(bool)
+    check ret
 
 proc stringModTest() =
   var inputStr = "This is a nice string, isn't it ?"
-  var res : string = jlUnbox[string](jlCall("modString", (jlBox(inputStr))))
+  var res: string = jlCall("modString", inputStr).to(string)
   check inputStr & " This is an amazing string" == res
 
 proc printDictTest() =
-  block:
+  block StrNumTable:
     var
       key1 = "t0acq"
       val1 = 14
       key2 = "xOrigin"
       val2 = 3.48
-      dict : Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
-    var res = jlCall("printDict", jlDict(%dict),
-                     jlBox(key1),
-                     jlBox(val1),
-                     jlBox(key2),
-                     jlBox(val2)
-                    )
-    check jlUnbox[bool](res)
+      dict: Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
+    var res = jlCall("printDict", dict, key1, val1, key2, val2)
+    check res.to(bool)
 
-  block:
+  block NumTable:
     var
-      key1 = "Nx"
-      val1 = 144
-      key2 = "dx"
-      val2 = 100e-6
-      dict : Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
-    var res = jlCall("printDict", jlDict(%dict),
-                     jlBox(key1),
-                     jlBox(val1),
-                     jlBox(key2),
-                     jlBox(val2)
-                    )
-    check jlUnbox[bool](res)
+      key1 = 11
+      val1 = 14.144'f64
+      key2 = 12
+      val2 = 3.48'f64
+      dict: Table[int, float64] = {key1: val1, key2: val2}.toTable
+    var res = jlCall("printDict", dict, key1, val1, key2, val2)
+    check res.to(bool)
 
+proc dictInvertTest() =
+  block StrNumTable:
+    var
+      key1 = "t0acq"
+      val1 = 14.0
+      key2 = "xOrigin"
+      val2 = 3.48
+      dict: Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
+    var jlres = jlCall("dictInvert!", dict, key1, val1, key2, val2)
+    var res = jlres.to(Table[string, float])
+    check res[key1] == val2
+    check res[key2] == val1
+
+  block NumTable:
+    var
+      key1 = 11
+      val1 = 14.144'f64
+      key2 = 12
+      val2 = 3.48'f64
+      dict: Table[int, float64] = {key1: val1, key2: val2}.toTable
+    var jlres = jlCall("dictInvert!", dict, key1, val1, key2, val2)
+    var res = jlres.to(Table[int, float])
+    check res[key1] == val2
+    check res[key2] == val1
 
 proc runTupleTest() =
   suite "Tuples":
@@ -194,6 +194,9 @@ proc runTupleTest() =
 
     test "dictTest":
       printDictTest()
+
+    test "invertDict":
+      dictInvertTest()
 
 
 ### Externals module & easy stuff
@@ -209,8 +212,8 @@ proc callDummyFunc() =
 proc arraySquareMeBaby() =
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
   let orig_ptr = cast[ptr UncheckedArray[float64]](orig[0].addr)
-  var xArray = newJlArray[float64](orig_ptr, @[orig.len])
-  var ret = toJlArray[float64](jlCall("squareMeBaby", xArray.toJlValue()))
+  var xArray = jlArrayFromBuffer[float64](orig_ptr, @[orig.len])
+  var ret = toJlArray[float64](jlCall("squareMeBaby", xArray))
 
   var len_ret = len(ret)
   check len_ret == orig.len
@@ -231,10 +234,10 @@ proc arrayMutateMeBaby() =
 
   var data: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
   let data_ptr = cast[ptr UncheckedArray[float64]](data[0].addr)
-  var xArray = newJlArray[float64](data_ptr, @[data.len])
-  check not isNil(xArray.data)
+  var xArray = jlArrayFromBuffer[float64](data_ptr, @[data.len])
+  check not isNil(xArray)
 
-  var ret = jlCall("mutateMeByTen!", xArray.toJlValue())
+  var ret = jlCall("mutateMeByTen!", xArray)
   check not isNil(ret)
 
   var len_ret = len(xArray)
@@ -264,7 +267,7 @@ proc tensorSquareMeBaby() =
   for i in orig.mitems:
     i = index.float64 / 3.0
     inc(index)
-  var xTensor = newJlArray[float64](orig.dataArray(), orig.shape.toSeq)
+  var xTensor = jlArrayFromBuffer[float64](orig.dataArray(), orig.shape.toSeq)
   block:
     var len_ret = len(xTensor)
     check len_ret == orig.size
@@ -275,7 +278,7 @@ proc tensorSquareMeBaby() =
     var d2 = dim(xTensor, 2)
     check @[d0, d1, d2] == orig.shape.toSeq
 
-  var retVal = jlCall("squareMeBaby", xTensor.toJlValue())
+  var retVal = jlCall("squareMeBaby", xTensor)
   check not isNil(retVal)
   var ret = toJlArray[float64](retVal)
   var len_ret = len(ret)
@@ -290,15 +293,15 @@ proc tensorSquareMeBaby() =
 
 proc tensorMutateMeBaby() =
   let dims = [14, 12, 10]
-  var orig : Tensor[float64] = ones[float64](dims)
+  var orig: Tensor[float64] = ones[float64](dims)
   var index = 0
   for i in orig.mitems:
     inc(index)
     i = index.float64 / 3.0
 
-  var xTensor = newJlArray[float64](orig.dataArray(), orig.shape.toSeq)
-  var ret = toJlArray[float64](jlCall("mutateMeByTen!", xTensor.toJlValue()))
-  check not isNil(ret.data)
+  var xTensor = jlArrayFromBuffer[float64](orig.dataArray(), orig.shape.toSeq)
+  var ret = toJlArray[float64](jlCall("mutateMeByTen!", xTensor))
+  check not isNil(ret)
 
   var len_ret = len(ret)
   check len_ret == orig.size
@@ -310,22 +313,22 @@ proc tensorMutateMeBaby() =
   check tensorData == orig
 
 proc tensorBuiltinRot180() =
-  var orig_tensor : Tensor[float64]
+  var orig_tensor: Tensor[float64]
   orig_tensor = newTensor[float64](4, 3)
   var index = 0
   for i in orig_tensor.mitems:
     i = index.float64
     inc(index)
 
-  var xArray = newJlArray[float64](orig_tensor.dataArray(), orig_tensor.shape.toSeq)
+  var xArray = jlArrayFromBuffer[float64](orig_tensor.dataArray(), orig_tensor.shape.toSeq)
 
   var d0 = dim(xArray, 0).int
   var d1 = dim(xArray, 1).int
   check d0 == orig_tensor.shape[0]
   check d1 == orig_tensor.shape[1]
 
-  var ret = toJlArray[float64](jlCall("rot180", xArray.toJlValue()))
-  check not isNil(ret.data)
+  var ret = toJlArray[float64](jlCall("rot180", xArray))
+  check not isNil(ret)
 
   var data_ret = dataArray(ret)
   var tensorResData = newTensor[float64](4, 3)

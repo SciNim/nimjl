@@ -9,6 +9,9 @@ type jl_array *{.importc: "jl_array_t", header: juliaHeader.} = object
 type jl_func *{.importc: "jl_function_t", header: juliaHeader.} = object
 type jl_module *{.importc: "jl_module_t", header: juliaHeader.} = object
 type jl_datatype*{.importc: "jl_datatype_t", header: juliaHeader.} = object
+type jl_sym*{.importc: "jl_sym_t", header: juliaHeader.} = object
+
+proc jl_symbol*(symname: cstring) : ptr jl_sym {.nodecl, importc: "jl_symbol".}
 
 proc jl_eval_string*(code: cstring): ptr jl_value {.nodecl, importc.}
 
@@ -26,10 +29,10 @@ proc jl_exception_message*(): cstring =
   result = jl_string_ptr(jl_eval_string("sprint(showerror, ccall(:jl_exception_occurred, Any, ()))"))
   # result = jl_typeof_str(jl_exception_occurred())
 
-proc jlval_to_string*(v: ptr jl_value) : string =
+proc jlvalue_to_string*(v: ptr jl_value) : string =
   result = $(jl_string_ptr(v))
 
-proc jlval_from_string*(v: string) : ptr jl_value =
+proc jlvalue_from_string*(v: string) : ptr jl_value =
   # Replace any " in string by \"
   var tmp = replace(v, "\"", "\\\"")
   # Put the string into quote "
