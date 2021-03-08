@@ -34,7 +34,7 @@ proc jlArrayFromBuffer*[T](data: ptr UncheckedArray[T], dims: openArray[int]): J
 # 1D Mode
 proc jlArrayFromBuffer*[T](data: openArray[T]): JlArray[T] =
   ## Create an Array from existing buffer
-  let uncheckedDataPtr = cast[ptr UncheckedArray[float64]](data[0].unsafeAddr)
+  let uncheckedDataPtr = cast[ptr UncheckedArray[T]](data[0].unsafeAddr)
   result = jlArrayFromBuffer(uncheckedDataPtr, [data.len()])
 
 proc allocJlArray*[T](dims: openArray[int]): JlArray[T] =

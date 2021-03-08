@@ -1,4 +1,5 @@
 import config
+import basetypes
 
 
 ## GC Functions to root
@@ -26,15 +27,47 @@ proc julia_gc_push2*(a: pointer, b: pointer) {.importc: "JL_GC_PUSH2".}
 
 proc julia_gc_push3*(a: pointer, b: pointer, c: pointer) {.importc: "JL_GC_PUSH3".}
 
-proc JL_GC_PUSH4*(a: pointer, b: pointer, c: pointer, d: pointer) {.importc: "JL_GC_PUSH4".}
+proc julia_gc_push4*(a: pointer, b: pointer, c: pointer, d: pointer) {.importc: "JL_GC_PUSH4".}
 
-proc JL_GC_PUSH5*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer) {.importc: "JL_GC_PUSH5".}
+proc julia_gc_push5*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer) {.importc: "JL_GC_PUSH5".}
 
-proc JL_GC_PUSH6*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer, f: pointer) {.importc: "JL_GC_PUSH6".}
+proc julia_gc_push6*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer, f: pointer) {.importc: "JL_GC_PUSH6".}
 
+# This one is even weirder : TODO document
 proc julia_gc_pushargs*(a: pointer, n: csize_t) {.importc: "JL_GC_PUSHARGS".}
 
 proc julia_gc_pop*() {.importc: "JL_GC_POP".}
 
 {.pop.}
+
+# Make it easier to not lose the scope
+template jlGcRoot*(a: pointer, body: untyped) =
+  julia_gc_push1(a.addr)
+  body
+  julia_gc_pop()
+
+template jlGcRoot*(a: pointer, b: pointer, body: untyped) =
+  julia_gc_push2(a.addr, b.addr)
+  body
+  julia_gc_pop()
+
+template jlGcRoot*(a: pointer, b: pointer, c: pointer, body: untyped) =
+  julia_gc_push3(a.addr, b.addr, c.addr)
+  body
+  julia_gc_pop()
+
+template jlGcRoot*(a: pointer, b: pointer, c: pointer, d: pointer, body: untyped) =
+  julia_gc_push4(a.addr, b.addr, c.addr, d.addr)
+  body
+  julia_gc_pop()
+
+template jlGcRoot*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer, body: untyped) =
+  julia_gc_push5(a.addr, b.addr, c.addr, d.addr, e.addr)
+  body
+  julia_gc_pop()
+
+template jlGcRoot*(a: pointer, b: pointer, c: pointer, d: pointer, e: pointer, f: pointer, body: untyped) =
+  julia_gc_push6(a.addr, b.addr, c.addr, d.addr, e.addr, f.addr)
+  body
+  julia_gc_pop()
 

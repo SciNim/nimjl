@@ -28,14 +28,11 @@ proc jlTupleToNim*(val: JlValue, tup: var tuple) =
     var key = jlCall("getindex", keys, i)
     var keyName = jlCall(sprint, show, key).to(string)
     removePrefix(keyName, ':')
-    echo ">> ", keyName, " : ", name, " = ", typedesc(field)
     if keyName == name:
       var val = jlCall("getindex", val, key)
       field = val.to(typedesc(field))
     else:
       raise newException(JlError, "Tuple conversion from Julia to Nim failed ! Fields must identical")
-
-
 
 proc jlDictToNim*[U, V: string|SomeNumber|bool](val: JlValue, tab: var Table[U, V]) =
   # collect(keys(val))

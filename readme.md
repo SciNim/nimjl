@@ -22,20 +22,46 @@ How to embed Julia w/ C :
 
 ## Next steps 
 
+* Use DotOperators for a close to native syntax
+* Improve Julia functions chaining
 * Handle row major vs column major transposition when using array
-* Tag tracing for Julia memory allocation 
+* Expand support for non-trivial / non-POD types for Arrays / Tuples / Dict
+* Add a tag for tracing for Julia memory allocation 
 
 ## Limitations
 
 * Only supports Linux for now
+* Julia Init / Exit can only be called once in the lifetime of your program
 * Arrays only supports POD data types (``SomeNumber`` types) 
 * Julia allocated arrays only goes up to 3 dimensions (but Arrays can be allocated in Nim)
 * Value conversion Nim <==> Julia involves a copy unless using Julia Arrays allocated in Nim. 
 
 # Examples
 
-TODO
+Here is the basic API usage : 
+```nim
+import nimjl
+
+jlVmInit() # Initialize Julia VM. This should be done once in the lifetime of your program.
+
+var myval = 4.0'f64
+# Call Julia function "sqrt" and convert the result to a float
+var res = jlCall("sqrt", myval).to(float64)
+echo res # 2.0
+
+jlVmExit() # Exit Julia VM. This can be done only once in the lifetime of your program.
+```
+
+Take a look at ``tests/testfull.nim`` and the ``examples/`` folder for  more examples. 
+
+## Memory Leak
+
+The test ``tests/testleak.nim`` run the full tests suites (with multiple allocations in both Nim and Julia) continuously for 60 seconds and trace the graph of memory and virtual memory (Linux only).
+
+This is done to make sure that Julia's memory get cleaned up on exit and that there is on weird GC interaction that makes memory consumption increase over time when using the Julia VM.
+
+![](memgraph.png)
 
 # Documentation
 
-TODO
+Complete documentation remains a TODO.

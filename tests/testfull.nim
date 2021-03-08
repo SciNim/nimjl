@@ -62,23 +62,25 @@ proc jlArray1D() =
 
   var x: JlArray[float64]
   x = allocJlArray[float64]([ARRAY_LEN])
-  julia_gc_push1(addr(x))
-  var xData = dataArray[float64](x)
-  check ARRAY_LEN == len(x)
+  # Root the value
+  jlGcRoot(x):
+  # julia_gc_push1(addr(x))
+    var xData = dataArray[float64](x)
+    check ARRAY_LEN == len(x)
 
-  for i in 0..<len(x):
-    xData[i] = i.float64
+    for i in 0..<len(x):
+      xData[i] = i.float64
 
-  var reverse = getJlFunc(jl_base_module, "reverse!")
-  var res = jlCall(reverse, toJlVal(x))
-  check not isNil(res)
+    var reverse = getJlFunc(jl_base_module, "reverse!")
+    var res = jlCall(reverse, toJlVal(x))
+    check not isNil(res)
 
-  var resData = toJlArray[float64](res).dataArray()
-  check resData == xData
+    var resData = toJlArray[float64](res).dataArray()
+    check resData == xData
 
-  for i in 0..<ARRAY_LEN:
-    check xData[i] == orig[ARRAY_LEN - i - 1]
-  julia_gc_pop()
+    for i in 0..<ARRAY_LEN:
+      check xData[i] == orig[ARRAY_LEN - i - 1]
+  # julia_gc_pop()
 
 proc jlArray1DOwnBuffer() =
   let ARRAY_LEN = 10
@@ -110,12 +112,9 @@ proc runArrayTest() =
 ## Tuple stuff
 proc makeTupleTest() =
   block:
-    var jl_tuple = toJlVal((a: 124, c: 67.32147))
-    check not isNil(jl_tuple)
-    julia_gc_push1(jl_tuple.addr)
+    var jl_tuple = (a: 124, c: 67.32147)
     var ret = jlCall("tupleTest", jl_tuple).to(bool)
     check ret
-    julia_gc_pop()
 
   block:
     var res = jlCall("makeMyTuple").to(tuple[A: int, B: int, C: int])

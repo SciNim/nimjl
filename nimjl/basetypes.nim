@@ -18,7 +18,7 @@ var jlTopModule *{.importc: "jl_top_module", header: juliaHeader.}: JlModule
 
 ## Init & Exit function
 proc jlVmInit*() {.nodecl, importc: "jl_init".}
-proc jlVmExit*(exit_code: cint) {.nodecl, importc: "jl_atexit_hook".}
+proc jlVmExit*(exit_code: cint = 0.cint) {.nodecl, importc: "jl_atexit_hook".}
 
 proc jlExceptionHandler*() =
   if not isNil(jl_exception_occurred()):
