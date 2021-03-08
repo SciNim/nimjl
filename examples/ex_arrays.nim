@@ -6,7 +6,7 @@ import nimjl
 randomize()
 jlVmInit() # Initialize Julia VM. This should be done once in the lifetime of your program.
 block sort:
-  var seqRand : seq[int64] = newSeqWith(12, rand(100)).map(x => x.int64)
+  var seqRand: seq[int64] = newSeqWith(12, rand(100)).map(x => x.int64)
   echo seqRand
   # Convert Nim array to Julia array without copy
   var jlRandArray = jlArrayFromBuffer(seqRand)
@@ -41,7 +41,7 @@ block sort:
   # julia_gc_pop()
 
 block sort:
-  var seqRand : seq[int64] = newSeqWith(12, rand(100)).map(x => x.int64)
+  var seqRand: seq[int64] = newSeqWith(12, rand(100)).map(x => x.int64)
   # Convert Nim array to Julia array without copy
   var jlRandArray = jlArrayFromBuffer(seqRand)
   echo seqRand

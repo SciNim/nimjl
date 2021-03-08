@@ -33,7 +33,7 @@ proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
     raise newException(JlError, "Tensor only support up to 6 dimensions")
   tensor = newTensor[T](x.shape)
   if x.len > 0:
-    let nbytes : int = x.len()*sizeof(T) div sizeof(byte)
+    let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
     copyMem(tensor.get_data_ptr, x.dataArray(), nbytes)
 
 proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
@@ -44,7 +44,7 @@ proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
   let x = toJlArray[T](x)
   if x.ndims > 1:
     raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
-  let nbytes : int = x.len()*sizeof(T) div sizeof(byte)
+  let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   locseq.setLen(x.len())
   if x.len() > 0:
     copyMem(unsafeAddr(locseq[0]), x.dataArray(), nbytes)
@@ -53,7 +53,7 @@ proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
   let x = toJlArray[T](x)
   if x.ndims > 1:
     raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
-  let nbytes : int = x.len()*sizeof(T) div sizeof(byte)
+  let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   if x.len() > 0:
     copyMem(unsafeAddr(locarr[0]), x.dataArray(), nbytes)
 
