@@ -8,13 +8,13 @@ proc getJlFunc*(funcname: string): JlFunc =
   result = jl_get_function(jlMainModule, funcname)
   jlExceptionHandler()
   if isNil(result):
-      raise newException(JlError, &"Function {funcname} does not exists.")
+    raise newException(JlError, &"Function {funcname} does not exists.")
 
 proc getJlFunc*(jlmod: JlModule, funcname: string): JlFunc =
   result = jl_get_function(jlmod, funcname)
   jlExceptionHandler()
   if isNil(result):
-      raise newException(JlError, &"Function {funcname} does not exists.")
+    raise newException(JlError, &"Function {funcname} does not exists.")
 
 proc jlCall*(jlfunc: JlFunc, va: varargs[JlValue, toJlVal]): JlValue =
   result = julia_exec_func(jlfunc, va)

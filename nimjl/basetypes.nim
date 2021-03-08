@@ -38,5 +38,5 @@ proc nimStringToJlVal*(v: string): JlValue =
 proc jlValToString*(v: JlValue): string =
   result = jlvalue_to_string(v)
 
-proc jlSym*(symname: string) : JlSym =
+proc jlSym*(symname: string): JlSym =
   result = jl_symbol(symname.cstring)
