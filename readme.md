@@ -24,17 +24,18 @@ How to embed Julia w/ C :
 
 * Use DotOperators for a close to native syntax
 * Improve Julia functions chaining
+* Test for nested types (Tuples containing Arrays or other Tuples etc.)
 * Handle row major vs column major transposition when using array
 * Expand support for non-trivial / non-POD types for Arrays / Tuples / Dict
 * Add a tag for tracing for Julia memory allocation 
 
 ## Limitations
 
-* Only supports Linux for now
-* Julia Init / Exit can only be called once in the lifetime of your program
-* Arrays only supports POD data types (``SomeNumber`` types) 
+* Julia Init / Exit can only be called **once in the lifetime of your program**
+* Value conversion Nim <==> Julia are done **by copy** except for Julia Arrays that can use a pre-allocated buffer
+* Tuples/Arrays/Dict only tested with POD data types (``SomeNumber|string|bool`` types) 
 * Julia allocated arrays only goes up to 3 dimensions (but Arrays can be allocated in Nim)
-* Value conversion Nim <==> Julia involves a copy unless using Julia Arrays allocated in Nim. 
+* Only supports Linux for now
 
 # Examples
 
