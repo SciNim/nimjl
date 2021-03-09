@@ -26,7 +26,7 @@ block sort:
     let
       jlResArray = res.toJlArray(int64)
       arrLen = jlResArray.len()
-      resArray = jlResArray.rawData()
+      resArray = jlResArray.getRawData()
 
     # rawData() return a ptr UncheckedArray[T] from a JlArray
     stdout.write("@[")

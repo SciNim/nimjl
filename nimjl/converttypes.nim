@@ -8,6 +8,7 @@ import json
 import tables
 import arraymancer
 
+{.push inline.}
 ## Julia -> Nim
 proc toNimVal[T: SomeNumber|bool|pointer|string](x: JlValue, res: var T) =
   when T is string:
@@ -34,7 +35,7 @@ proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
   tensor = newTensor[T](x.shape)
   if x.len > 0:
     let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
-    copyMem(tensor.get_offset_ptr(), x.rawData(), nbytes)
+    copyMem(tensor.get_offset_ptr(), x.getRawData(), nbytes)
 
 proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
   # Tensor tmp version
@@ -47,7 +48,7 @@ proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   locseq.setLen(x.len())
   if x.len() > 0:
-    copyMem(unsafeAddr(locseq[0]), x.rawData(), nbytes)
+    copyMem(unsafeAddr(locseq[0]), x.getRawData(), nbytes)
 
 proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
   let x = toJlArray[T](x)
@@ -57,65 +58,67 @@ proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
   if x.len() > 0:
     copyMem(unsafeAddr(locarr[0]), x.rawData(), nbytes)
 
-proc to*(x: JlValue, T: typedesc): T =
-  when T is void:
-    discard
-  else:
-    toNimVal(x, result)
-
 # Nim -> Julia
-proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue {.inline.} =
+proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue =
   result = jlBox(val)
 
-proc nimValueToJlValue(val: string): JlValue {.inline.} =
+proc nimValueToJlValue(val: string): JlValue =
   result = nimStringToJlVal(val)
 
 # Avoid going throung template toJlVal pointer version when dealing with Julia known type
 # Is converter the right choice here ?
-converter nimValueToJlValue*[T](x: JlArray[T]): JlValue {.inline.} =
+converter nimValueToJlValue*[T](x: JlArray[T]): JlValue =
   result = cast[JlValue](x)
 
-converter nimValueToJlValue(x: JlSym): JlValue {.inline.} =
+converter nimValueToJlValue(x: JlSym): JlValue =
   result = cast[JlValue](x)
 
-converter nimValueToJlValue(x: JlFunc): JlValue {.inline.} =
+converter nimValueToJlValue(x: JlFunc): JlValue  =
   result = cast[JlValue](x)
 
-converter nimValueToJlValue(x: JlModule): JlValue {.inline.} =
+converter nimValueToJlValue(x: JlModule): JlValue  =
   result = cast[JlValue](x)
 
-proc nimValueToJlValue(x: JlValue): JlValue {.inline.} =
+proc nimValueToJlValue(x: JlValue): JlValue  =
   result = x
 
 # Complex stuff
-proc nimValueToJlValue(x: tuple): JlValue {.inline.} =
+proc nimValueToJlValue(x: tuple): JlValue  =
   result = nimToJlTuple(x)
 
 # Treat Nim object as Julia tuple
-proc nimValueToJlValue(x: object): JlValue {.inline.} =
+proc nimValueToJlValue(x: object): JlValue  =
   result = nimToJlTuple(x)
 
-proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue {.inline.} =
+proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue  =
   result = nimTableToJlDict(x)
 
-proc nimValueToJlValue[T](x: seq[T]): JlValue {.inline.} =
+proc nimValueToJlValue[T](x: seq[T]): JlValue  =
   result = nimValueToJlValue(
     jlArrayFromBuffer(x)
   )
 
-proc nimValueToJlValue[I, T](x: array[I, T]): JlValue {.inline.} =
+proc nimValueToJlValue[I, T](x: array[I, T]): JlValue  =
   result = nimValueToJlValue(
     jlArrayFromBuffer(x)
   )
 
-proc nimValueToJlValue[T](x: Tensor[T]): JlValue {.inline.} =
+proc nimValueToJlValue[T](x: Tensor[T]): JlValue  =
   ## Convert a Tensor to JlValue
   result = nimValueToJlValue(
     jlArrayFromBuffer(x)
   )
 
-# Generic API
-template toJlVal*[T](x: T): JlValue =
+# Public API
+proc to*(x: JlValue, T: typedesc): T =
+  ## Copy a JlValue into a Nim type
+  when T is void:
+    discard
+  else:
+    toNimVal(x, result)
+
+proc toJlVal*[T](x: T): JlValue =
   ## Convert a generic Nim type to a JlValue
   nimValueToJlValue(x)
 
+{.pop.}

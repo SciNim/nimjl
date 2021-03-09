@@ -13,7 +13,7 @@ proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =
 proc toJlArray*(x: JlValue, T: typedesc): JlArray[T] {.inline.} =
   result = cast[ptr jl_array](x)
 
-proc rawData*[T](x: JlArray[T]): ptr UncheckedArray[T] {.inline.} =
+proc getRawData*[T](x: JlArray[T]): ptr UncheckedArray[T] {.inline.} =
   result = cast[ptr UncheckedArray[T]](jl_array_data(x))
 
 proc len*[T](x: JlArray[T]): int =

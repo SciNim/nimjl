@@ -1,3 +1,6 @@
 embedding
 bin/
 .vscode
+tests/testfull
+tests/testleak
+tests/checkleak

@@ -2,10 +2,6 @@ import unittest
 import sequtils
 import tables
 import sugar
-import os
-
-import times
-import std/monotimes
 
 import arraymancer
 import nimjl
@@ -35,7 +31,7 @@ proc boxUnbox() =
     var x = jlBox[uint8](orig)
     check jlUnbox[uint8](x) == orig
 
-proc jlCall() =
+proc callJulia() =
   var x = jlBox[float64](4.0)
   var f = getJlFunc(jl_base_module, "sqrt");
   var res = jlCall(f, x)
@@ -52,7 +48,7 @@ proc runSimpleTests() =
       boxUnbox()
 
     test "jl_call1":
-      jlCall()
+      callJulia()
 
 ###### ARRAY
 
@@ -65,17 +61,16 @@ proc jlArray1D() =
   # Root the value
   jlGcRoot(x):
   # julia_gc_push1(addr(x))
-    var xData = rawData[float64](x)
+    var xData = getRawData[float64](x)
     check ARRAY_LEN == len(x)
-
     for i in 0..<len(x):
       xData[i] = i.float64
 
     var reverse = getJlFunc(jl_base_module, "reverse!")
-    var res = jlCall(reverse, toJlVal(x))
+    var res = jlCall(reverse, x)
     check not isNil(res)
 
-    var resData = toJlArray[float64](res).rawData()
+    var resData = toJlArray[float64](res).getRawData()
     check resData == xData
 
     for i in 0..<ARRAY_LEN:
@@ -83,20 +78,17 @@ proc jlArray1D() =
   # julia_gc_pop()
 
 proc jlArray1DOwnBuffer() =
-  let ARRAY_LEN = 10
-  var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-
-  var x = jlArrayFromBuffer[float64](orig)
-  var reverse = getJlFunc(jl_base_module, "reverse!")
-  var res = jlCall(reverse, x)
+  var orig: seq[int] = @[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  var res = jlCall("reverse!", orig)
   check not isNil(res)
 
-  var resData = toJlArray[float64](res).rawData()
+  var resData = toJlArray[int](res).getRawData()
   for i in 0..<orig.len:
     check resData[i] == orig[i]
 
-  for i in 0..<ARRAY_LEN:
-    check orig[i] == float64(ARRAY_LEN - i - 1)
+  # Check reverse
+  for i in 0..<orig.len():
+    check orig[i] == int(orig.len() - i - 1)
 
 proc runArrayTest*() =
 
@@ -365,3 +357,36 @@ proc runTests*() =
 
 when isMainModule:
   runTests()
+
+## Mem Leak Tests
+import os
+import times
+import std/monotimes
+proc runMemLeakTest*(maxDuration: Duration) =
+  # Hello Julia
+  jlVmInit()
+
+  # run Externals include module so ran it first and only once
+  runExternalsTest()
+
+  let begin = getMonoTime()
+  var elapsed = initDuration(seconds = 0'i64, nanoseconds = 0'i64)
+  let deltaTest = initDuration(seconds = 10)
+  var maxDuration = maxDuration + 4*deltaTest
+
+  while elapsed <= maxDuration:
+    elapsed = getMonoTime() - begin
+    runTupleTest()
+    sleep(deltaTest.inMilliseconds().int)
+    runArrayTest()
+    sleep(deltaTest.inMilliseconds().int)
+    runArrayArgsTest()
+    sleep(deltaTest.inMilliseconds().int)
+    runTensorArgsTest()
+    sleep(deltaTest.inMilliseconds().int)
+
+  # Bye bye Julia
+  jlVmExit(0)
+  echo GC_getStatistics()
+  sleep(deltaTest.inMilliseconds().int)
+
