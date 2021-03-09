@@ -34,7 +34,7 @@ proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
   tensor = newTensor[T](x.shape)
   if x.len > 0:
     let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
-    copyMem(tensor.get_data_ptr, x.dataArray(), nbytes)
+    copyMem(tensor.get_offset_ptr(), x.rawData(), nbytes)
 
 proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
   # Tensor tmp version
@@ -47,7 +47,7 @@ proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   locseq.setLen(x.len())
   if x.len() > 0:
-    copyMem(unsafeAddr(locseq[0]), x.dataArray(), nbytes)
+    copyMem(unsafeAddr(locseq[0]), x.rawData(), nbytes)
 
 proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
   let x = toJlArray[T](x)
@@ -55,7 +55,7 @@ proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
     raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   if x.len() > 0:
-    copyMem(unsafeAddr(locarr[0]), x.dataArray(), nbytes)
+    copyMem(unsafeAddr(locarr[0]), x.rawData(), nbytes)
 
 proc to*(x: JlValue, T: typedesc): T =
   when T is void:
@@ -105,15 +105,17 @@ proc nimValueToJlValue[T](x: seq[T]): JlValue {.inline.} =
 
 proc nimValueToJlValue[I, T](x: array[I, T]): JlValue {.inline.} =
   result = nimValueToJlValue(
-    jlArrayFromBuffer(x.dataArray(), x.shape.toSeq)
+    jlArrayFromBuffer(x)
   )
 
 proc nimValueToJlValue[T](x: Tensor[T]): JlValue {.inline.} =
+  ## Convert a Tensor to JlValue
   result = nimValueToJlValue(
-    jlArrayFromBuffer(x.dataArray(), x.shape.toSeq)
+    jlArrayFromBuffer(x)
   )
 
 # Generic API
 template toJlVal*[T](x: T): JlValue =
+  ## Convert a generic Nim type to a JlValue
   nimValueToJlValue(x)
 

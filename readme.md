@@ -32,7 +32,12 @@ How to embed Julia w/ C :
 ## Limitations
 
 * Julia Init / Exit can only be called **once in the lifetime of your program**
-* Value conversion Nim <==> Julia are done **by copy** except for Julia Arrays that can use a pre-allocated buffer
+* Value conversion Nim ==> Julia are done **by copy** except for Arrays-like type that use a pre-allocated buffer.
+* Value conversion Julia => Nim s always done **by copy**
+
+  * When using Arrays you can access the buffer as ``ptr UncheckedArray`` of the Julia Arrays with ``rawData()``. 
+  * Using ``to(seq[T])`` or ``to(Tensor[T])`` perform a ``copyMem`` of ``jlArray.rawData()`` in your seq/Tensor 
+
 * Tuples/Arrays/Dict only tested with POD data types (``SomeNumber|string|bool`` types) 
 * Julia allocated arrays only goes up to 3 dimensions (but Arrays can be allocated in Nim)
 * Only supports Linux for now
