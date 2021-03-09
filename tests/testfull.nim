@@ -50,8 +50,6 @@ proc runSimpleTests() =
     test "jl_call1":
       callJulia()
 
-###### ARRAY
-
 proc jlArray1D() =
   let ARRAY_LEN = 1000
   var orig: seq[float64] = toSeq(0..<1500).map(x => x.float64)
@@ -60,7 +58,7 @@ proc jlArray1D() =
   x = allocJlArray[float64]([ARRAY_LEN])
   # Root the value
   jlGcRoot(x):
-  # julia_gc_push1(addr(x))
+    # julia_gc_push1(addr(x))
     var xData = getRawData[float64](x)
     check ARRAY_LEN == len(x)
     for i in 0..<len(x):
@@ -77,7 +75,7 @@ proc jlArray1D() =
       check xData[i] == orig[ARRAY_LEN - i - 1]
   # julia_gc_pop()
 
-proc jlArray1DOwnBuffer() =
+proc jlArrayFromSeq() =
   var orig: seq[int] = @[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   var res = jlCall("reverse!", orig)
   check not isNil(res)
@@ -90,7 +88,7 @@ proc jlArray1DOwnBuffer() =
   for i in 0..<orig.len():
     check orig[i] == int(orig.len() - i - 1)
 
-proc runArrayTest*() =
+proc run1DArrayTest*() =
 
   suite "Array 1D":
     teardown: jlGcCollect()
@@ -99,10 +97,10 @@ proc runArrayTest*() =
       jlArray1D()
 
     test "jl_array_1d_own_buffer":
-      jlArray1DOwnBuffer()
+      jlArrayFromSeq()
 
 ## Tuple stuff
-proc makeTupleTest() =
+proc tuplesTest() =
   block:
     var jl_tuple = (a: 124, c: 67.32147)
     var ret = jlCall("tupleTest", jl_tuple).to(bool)
@@ -128,7 +126,7 @@ proc stringModTest() =
   var res: string = jlCall("modString", inputStr).to(string)
   check inputStr & " This is an amazing string" == res
 
-proc printDictTest() =
+proc tableToDictTest() =
   block StrNumTable:
     var
       key1 = "t0acq"
@@ -149,7 +147,7 @@ proc printDictTest() =
     var res = jlCall("printDict", dict, key1, val1, key2, val2)
     check res.to(bool)
 
-proc dictInvertTest() =
+proc dictToTableTest() =
   block StrNumTable:
     var
       key1 = "t0acq"
@@ -179,16 +177,16 @@ proc runTupleTest*() =
     teardown: jlGcCollect()
 
     test "tupleTest":
-      makeTupleTest()
+      tuplesTest()
 
     test "modString":
       stringModTest()
 
     test "dictTest":
-      printDictTest()
+      tableToDictTest()
 
     test "invertDict":
-      dictInvertTest()
+      dictToTableTest()
 
 
 ### Externals module & easy stuff
@@ -276,7 +274,7 @@ proc tensorSquareMeBaby() =
   check len_ret == orig.size
   check rank_ret == 3
 
-  var tensorData: Tensor[float64] = ret.to(Tensor[float64])
+  var tensorData: Tensor[float64] = ret.to(Tensor[float])
   check tensorData == square(orig)
 
 proc tensorMutateMeBaby() =
@@ -350,7 +348,7 @@ proc runTests*() =
   runExternalsTest()
   runSimpleTests()
   runTupleTest()
-  runArrayTest()
+  run1DArrayTest()
   runArrayArgsTest()
   runTensorArgsTest()
   jlVmExit(0)
@@ -378,7 +376,7 @@ proc runMemLeakTest*(maxDuration: Duration) =
     elapsed = getMonoTime() - begin
     runTupleTest()
     sleep(deltaTest.inMilliseconds().int)
-    runArrayTest()
+    run1DArrayTest()
     sleep(deltaTest.inMilliseconds().int)
     runArrayArgsTest()
     sleep(deltaTest.inMilliseconds().int)
