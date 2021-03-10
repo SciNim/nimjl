@@ -22,6 +22,8 @@ How to embed Julia w/ C :
 
 ## Next steps 
 
+* Automate Julia download and installation if environment variable ``JULIA_PATH`` is not set
+
 * Improve function calling
   * Use `.()` / DotOperators for a syntax that looks more "native" when calling function
   * Find a solution for chaining Julia functions in one expression
@@ -81,10 +83,10 @@ If there is a simpler way to do this, feel free to open a PR !
 
 Complete API documentation remains a TODO.
 
-# Contribution
+# Contributions
 
 All contributions are welcomed !
 
-# Licenses
+# License
 
 This project is released under MIT License.
