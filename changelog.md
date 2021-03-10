@@ -1,6 +1,6 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
-Release v0.4.1 - 2021_XX_XX
+Release v0.4.1 - 2021_03_10
 ===========================
 
 * Add seq support when converting types
@@ -8,8 +8,10 @@ Release v0.4.1 - 2021_XX_XX
 * Improved dispatch using generic proc instead of ``when T is ...``
 * Format code using nimpretty 
 * Add changelog
+* Improve readme
+* Improve examples
 
-Release v0.4.0 - 2021_08_03
+Release v0.4.0 - 2021_03_08
 ===========================
 
 * First official release
