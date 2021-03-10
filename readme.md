@@ -80,3 +80,11 @@ If there is a simpler way to do this, feel free to open a PR !
 # Documentation
 
 Complete API documentation remains a TODO.
+
+# Contribution
+
+All contributions are welcomed !
+
+# Licenses
+
+This project is released under MIT License.
