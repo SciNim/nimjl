@@ -1,14 +1,10 @@
 import unittest
 import sequtils
-import sugar
 import tables
-import json
+import sugar
 
 import arraymancer
-
-import times
-import std/monotimes
-import ../nimjl
+import nimjl
 
 proc simpleEvalString() =
   var test = jlEval("sqrt(4.0)")
@@ -35,7 +31,7 @@ proc boxUnbox() =
     var x = jlBox[uint8](orig)
     check jlUnbox[uint8](x) == orig
 
-proc jlCall() =
+proc callJulia() =
   var x = jlBox[float64](4.0)
   var f = getJlFunc(jl_base_module, "sqrt");
   var res = jlCall(f, x)
@@ -52,53 +48,47 @@ proc runSimpleTests() =
       boxUnbox()
 
     test "jl_call1":
-      jlCall()
-
-###### ARRAY
+      callJulia()
 
 proc jlArray1D() =
-  let ARRAY_LEN = 10
-  var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+  let ARRAY_LEN = 1000
+  var orig: seq[float64] = toSeq(0..<1500).map(x => x.float64)
 
   var x: JlArray[float64]
   x = allocJlArray[float64]([ARRAY_LEN])
   # Root the value
   jlGcRoot(x):
-  # julia_gc_push1(addr(x))
-    var xData = dataArray[float64](x)
+    # julia_gc_push1(addr(x))
+    var xData = getRawData[float64](x)
     check ARRAY_LEN == len(x)
-
     for i in 0..<len(x):
       xData[i] = i.float64
 
     var reverse = getJlFunc(jl_base_module, "reverse!")
-    var res = jlCall(reverse, toJlVal(x))
+    var res = jlCall(reverse, x)
     check not isNil(res)
 
-    var resData = toJlArray[float64](res).dataArray()
+    var resData = toJlArray[float64](res).getRawData()
     check resData == xData
 
     for i in 0..<ARRAY_LEN:
       check xData[i] == orig[ARRAY_LEN - i - 1]
   # julia_gc_pop()
 
-proc jlArray1DOwnBuffer() =
-  let ARRAY_LEN = 10
-  var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-
-  var x = jlArrayFromBuffer[float64](orig)
-  var reverse = getJlFunc(jl_base_module, "reverse!")
-  var res = jlCall(reverse, x)
+proc jlArrayFromSeq() =
+  var orig: seq[int] = @[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  var res = jlCall("reverse!", orig)
   check not isNil(res)
 
-  var resData = toJlArray[float64](res).dataArray()
+  var resData = toJlArray[int](res).getRawData()
   for i in 0..<orig.len:
     check resData[i] == orig[i]
 
-  for i in 0..<ARRAY_LEN:
-    check orig[i] == float64(ARRAY_LEN - i - 1)
+  # Check reverse
+  for i in 0..<orig.len():
+    check orig[i] == int(orig.len() - i - 1)
 
-proc runArrayTest() =
+proc run1DArrayTest*() =
 
   suite "Array 1D":
     teardown: jlGcCollect()
@@ -107,10 +97,10 @@ proc runArrayTest() =
       jlArray1D()
 
     test "jl_array_1d_own_buffer":
-      jlArray1DOwnBuffer()
+      jlArrayFromSeq()
 
 ## Tuple stuff
-proc makeTupleTest() =
+proc tuplesTest() =
   block:
     var jl_tuple = (a: 124, c: 67.32147)
     var ret = jlCall("tupleTest", jl_tuple).to(bool)
@@ -136,7 +126,7 @@ proc stringModTest() =
   var res: string = jlCall("modString", inputStr).to(string)
   check inputStr & " This is an amazing string" == res
 
-proc printDictTest() =
+proc tableToDictTest() =
   block StrNumTable:
     var
       key1 = "t0acq"
@@ -157,7 +147,7 @@ proc printDictTest() =
     var res = jlCall("printDict", dict, key1, val1, key2, val2)
     check res.to(bool)
 
-proc dictInvertTest() =
+proc dictToTableTest() =
   block StrNumTable:
     var
       key1 = "t0acq"
@@ -182,21 +172,21 @@ proc dictInvertTest() =
     check res[key1] == val2
     check res[key2] == val1
 
-proc runTupleTest() =
+proc runTupleTest*() =
   suite "Tuples":
     teardown: jlGcCollect()
 
     test "tupleTest":
-      makeTupleTest()
+      tuplesTest()
 
     test "modString":
       stringModTest()
 
     test "dictTest":
-      printDictTest()
+      tableToDictTest()
 
     test "invertDict":
-      dictInvertTest()
+      dictToTableTest()
 
 
 ### Externals module & easy stuff
@@ -211,45 +201,38 @@ proc callDummyFunc() =
 ### Array args
 proc arraySquareMeBaby() =
   var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-  let orig_ptr = cast[ptr UncheckedArray[float64]](orig[0].addr)
-  var xArray = jlArrayFromBuffer[float64](orig_ptr, @[orig.len])
-  var ret = toJlArray[float64](jlCall("squareMeBaby", xArray))
 
-  var len_ret = len(ret)
+  var
+    jlret = jlCall("squareMeBaby", orig)
+    ret = toJlArray[float64](jlret)
+    len_ret = len(ret)
+    rank_ret = ndims(ret)
   check len_ret == orig.len
-
-  var rank_ret = ndims(ret)
   check rank_ret == 1
 
-  var data_ret = dataArray(ret)
-  for i in 0..<orig.len:
-    check data_ret[i] == (i*i).float64
-
-  var seqData: seq[float64] = newSeq[float64](len_ret)
-  copyMem(seqData[0].unsafeAddr, data_ret, len_ret*sizeof(float64))
+  var seqData = jlret.to(seq[float64])
   check seqData == @[0.0, 1.0, 4.0, 9.0, 16.0, 25.0, 36.0, 49.0, 64.0, 81.0]
 
 proc arrayMutateMeBaby() =
-  var orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 
-  var data: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-  let data_ptr = cast[ptr UncheckedArray[float64]](data[0].addr)
-  var xArray = jlArrayFromBuffer[float64](data_ptr, @[data.len])
+  var
+    orig: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+    data: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+    xArray = jlArrayFromBuffer[float64](data)
   check not isNil(xArray)
 
-  var ret = jlCall("mutateMeByTen!", xArray)
+  var
+    ret = jlCall("mutateMeByTen!", xArray)
+    len_ret = len(xArray)
+    rank_ret = ndims(xArray)
+
   check not isNil(ret)
-
-  var len_ret = len(xArray)
   check len_ret == orig.len
-
-  var rank_ret = ndims(xArray)
   check rank_ret == 1
-
   check data == @[0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0]
   check data == orig.map(x => x*10)
 
-proc runArrayArgsTest() =
+proc runArrayArgsTest*() =
   suite "Array":
     teardown: jlGcCollect()
 
@@ -262,80 +245,82 @@ proc runArrayArgsTest() =
 ### Tensor Args
 proc tensorSquareMeBaby() =
   let dims = [18, 21, 33]
-  var orig: Tensor[float64] = ones[float64](dims)
-  var index = 0
+  var
+    orig: Tensor[float64] = ones[float64](dims)
+    index = 0
   for i in orig.mitems:
     i = index.float64 / 3.0
     inc(index)
-  var xTensor = jlArrayFromBuffer[float64](orig.dataArray(), orig.shape.toSeq)
+
+  var xTensor = jlArrayFromBuffer[float64](orig)
+
   block:
-    var len_ret = len(xTensor)
+    var
+      len_ret = len(xTensor)
+      rank_ret = ndims(xTensor)
     check len_ret == orig.size
-    var rank_ret = ndims(xTensor)
     check rank_ret == orig.rank
-    var d0 = dim(xTensor, 0)
-    var d1 = dim(xTensor, 1)
-    var d2 = dim(xTensor, 2)
+
+    var
+      d0 = dim(xTensor, 0)
+      d1 = dim(xTensor, 1)
+      d2 = dim(xTensor, 2)
     check @[d0, d1, d2] == orig.shape.toSeq
 
-  var retVal = jlCall("squareMeBaby", xTensor)
-  check not isNil(retVal)
-  var ret = toJlArray[float64](retVal)
-  var len_ret = len(ret)
+  var
+    ret = toJlArray[float64](jlCall("squareMeBaby", xTensor))
+    len_ret = len(ret)
+    rank_ret = ndims(ret)
   check len_ret == orig.size
-  var rank_ret = ndims(ret)
   check rank_ret == 3
-  var data_ret = dataArray(ret)
-  var tensorData: Tensor[float64] = newTensor[float64](dims)
-  copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
-  for i, v in enumerate(tensorData):
-    check v == (i/3)*(i/3)
+
+  var tensorData: Tensor[float64] = ret.to(Tensor[float])
+  check tensorData == square(orig)
 
 proc tensorMutateMeBaby() =
   let dims = [14, 12, 10]
-  var orig: Tensor[float64] = ones[float64](dims)
-  var index = 0
+  var
+    orig: Tensor[float64] = ones[float64](dims)
+    index = 0
   for i in orig.mitems:
     inc(index)
     i = index.float64 / 3.0
 
-  var xTensor = jlArrayFromBuffer[float64](orig.dataArray(), orig.shape.toSeq)
-  var ret = toJlArray[float64](jlCall("mutateMeByTen!", xTensor))
+  # Create an immutable tensor for comparaison with original
+  let tensorcmp = orig.clone()
+  var
+    ret = toJlArray[float64](jlCall("mutateMeByTen!", orig))
+    len_ret = len(ret)
+    rank_ret = ndims(ret)
   check not isNil(ret)
-
-  var len_ret = len(ret)
   check len_ret == orig.size
-  var rank_ret = ndims(ret)
   check rank_ret == 3
-  var data_ret = dataArray(ret)
-  var tensorData: Tensor[float64] = newTensor[float64](dims)
-  copyMem(tensorData.dataArray(), data_ret, len_ret*sizeof(float64))
-  check tensorData == orig
+  # Check result is correct
+  check orig == tensorcmp.map(x => x*10)
 
 proc tensorBuiltinRot180() =
-  var orig_tensor: Tensor[float64]
-  orig_tensor = newTensor[float64](4, 3)
-  var index = 0
+  var
+    orig_tensor = newTensor[float64](4, 3)
+    index = 0
   for i in orig_tensor.mitems:
     i = index.float64
     inc(index)
 
-  var xArray = jlArrayFromBuffer[float64](orig_tensor.dataArray(), orig_tensor.shape.toSeq)
+  var
+    xArray = jlArrayFromBuffer[float64](orig_tensor)
+    d0 = dim(xArray, 0).int
+    d1 = dim(xArray, 1).int
 
-  var d0 = dim(xArray, 0).int
-  var d1 = dim(xArray, 1).int
   check d0 == orig_tensor.shape[0]
   check d1 == orig_tensor.shape[1]
 
   var ret = toJlArray[float64](jlCall("rot180", xArray))
   check not isNil(ret)
 
-  var data_ret = dataArray(ret)
-  var tensorResData = newTensor[float64](4, 3)
-  copyMem(tensorResData.dataArray(), data_ret, orig_tensor.size*sizeof(float64))
+  var tensorResData = ret.to(Tensor[float64])
   check tensorResData == (11.0 -. orig_tensor)
 
-proc runTensorArgsTest() =
+proc runTensorArgsTest*() =
   suite "Tensor":
     teardown: jlGcCollect()
 
@@ -357,39 +342,49 @@ proc runExternalsTest*() =
     test "dummy":
       callDummyFunc()
 
-proc runMemLeakTest*() =
-  jlVmInit()
-  # run Externals include module so ran it first and only once
-  runExternalsTest()
-
-  let begin = getMonoTime()
-  let maxDuration = initDuration(seconds = 60'i64, nanoseconds = 0'i64)
-  var elapsed = initDuration(seconds = 0'i64, nanoseconds = 0'i64)
-
-  while elapsed < maxDuration:
-    elapsed = getMonoTime() - begin
-    runSimpleTests()
-    runTupleTest()
-    runArrayTest()
-    runArrayArgsTest()
-    runTensorArgsTest()
-
-  jlGcCollect()
-  echo GC_getStatistics()
-
-  jlVmExit(0)
-
 proc runTests*() =
   jlVmInit()
   # run Externals include module so ran it first and only once
   runExternalsTest()
-
   runSimpleTests()
   runTupleTest()
-  runArrayTest()
+  run1DArrayTest()
   runArrayArgsTest()
   runTensorArgsTest()
   jlVmExit(0)
 
 when isMainModule:
   runTests()
+
+## Mem Leak Tests
+import os
+import times
+import std/monotimes
+proc runMemLeakTest*(maxDuration: Duration) =
+  # Hello Julia
+  jlVmInit()
+
+  # run Externals include module so ran it first and only once
+  runExternalsTest()
+
+  let begin = getMonoTime()
+  var elapsed = initDuration(seconds = 0'i64, nanoseconds = 0'i64)
+  let deltaTest = initDuration(seconds = 10)
+  var maxDuration = maxDuration + 4*deltaTest
+
+  while elapsed <= maxDuration:
+    elapsed = getMonoTime() - begin
+    runTupleTest()
+    sleep(deltaTest.inMilliseconds().int)
+    run1DArrayTest()
+    sleep(deltaTest.inMilliseconds().int)
+    runArrayArgsTest()
+    sleep(deltaTest.inMilliseconds().int)
+    runTensorArgsTest()
+    sleep(deltaTest.inMilliseconds().int)
+
+  # Bye bye Julia
+  jlVmExit(0)
+  echo GC_getStatistics()
+  sleep(deltaTest.inMilliseconds().int)
+

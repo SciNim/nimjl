@@ -20,5 +20,4 @@ echo nimres
 doAssert myTup.nimTupKey1+1 == nimres.nimTupKey1
 doAssert myTup.nimTupKey2+1 == nimres.nimTupKey2
 
-
 jlVmExit() # Exit Julia VM. This can be done only once in the lifetime of your program.

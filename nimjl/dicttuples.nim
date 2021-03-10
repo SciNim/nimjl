@@ -18,15 +18,19 @@ proc jlTupleToNim*(val: JlValue, tup: var tuple) =
   keys = jlCall("collect", keys)
   # Tuple of JlSymbol
   # length(collect(keys(val)))
-  var nkeys = jlCall("length", keys).to(int)
   var show = getJlFunc("show")
   var sprint = getJlFunc("sprint")
-  # for i in 1..nkeys:
+  var nkeys = jlCall("length", keys).to(int)
   var i = 0
   for name, field in tup.fieldPairs:
     inc(i)
-    var key = jlCall("getindex", keys, i)
-    var keyName = jlCall(sprint, show, key).to(string)
+    if i > nkeys:
+      raise newException(JlError, "Tuple conversion from Julia to Nim failed ! Fields must identical")
+
+    var
+      key = jlCall("getindex", keys, i)
+      keyName = jlCall(sprint, show, key).to(string)
+
     removePrefix(keyName, ':')
     if keyName == name:
       var val = jlCall("getindex", val, key)

@@ -7,66 +7,58 @@ import private/basetypes_helpers
 import tables
 import json
 
-proc julia_unbox[T: SomeNumber|bool|pointer](value: JlValue): T {.inline.} =
-  when T is int8:
-    result = jl_unbox_int8(value)
-  elif T is int16:
-    result = jl_unbox_int16(value)
-  elif T is int32 or (T is int and sizeof(int) == sizeof(int32)):
-    result = jl_unbox_int32(value).T
-  elif T is int64 or (T is int and sizeof(int) == sizeof(int64)):
-    result = jl_unbox_int64(value).T
-  elif T is uint8:
-    result = jl_unbox_uint8(value)
-  elif T is uint16:
-    result = jl_unbox_uint16(value)
-  elif T is uint32 or (T is uint and sizeof(uint) == sizeof(uint32)):
-    result = jl_unbox_uint32(value)
-  elif T is uint64 or (T is uint and sizeof(uint) == sizeof(uint64)):
-    result = jl_unbox_uint64(value)
-  elif T is float32:
-    result = jl_unbox_float32(value)
-  elif T is float64:
-    result = jl_unbox_float64(value)
-  elif T is bool:
-    result = jl_unbox_bool(value)
-  elif T is pointer:
-    result = jl_unbox_voidpointer(value)
-  else:
-    raise newException(JlError, "Unboxing value failed. Type not supported.")
+{.push inline.}
+## Unbox
+proc julia_unbox(x: JlValue, T: typedesc[int8]): int8 = jl_unbox_int8(x)
+proc julia_unbox(x: JlValue, T: typedesc[int16]): int16 = jl_unbox_int16(x)
+proc julia_unbox(x: JlValue, T: typedesc[int32]): int32 = jl_unbox_int32(x)
+proc julia_unbox(x: JlValue, T: typedesc[int64]): int64 = jl_unbox_int64(x)
+proc julia_unbox(x: JlValue, T: typedesc[uint8]): uint8 = jl_unbox_uint8(x)
+proc julia_unbox(x: JlValue, T: typedesc[uint16]): uint16 = jl_unbox_uint16(x)
+proc julia_unbox(x: JlValue, T: typedesc[uint32]): uint32 = jl_unbox_uint32(x)
+proc julia_unbox(x: JlValue, T: typedesc[uint64]): uint64 = jl_unbox_uint64(x)
+proc julia_unbox(x: JlValue, T: typedesc[float32]): float32 = jl_unbox_float32(x)
+proc julia_unbox(x: JlValue, T: typedesc[float64]): float64 = jl_unbox_float64(x)
 
-proc julia_box[T: SomeNumber|string|pointer](value: T): JlValue {.inline.} =
-  when T is int8:
-    result = jl_box_int8(value)
-  elif T is int16:
-    result = jl_box_int16(value)
-  elif T is int32 or (T is int and sizeof(int) == sizeof(int32)):
-    result = jl_box_int32(value.T)
-  elif T is int64 or (T is int and sizeof(int) == sizeof(int64)):
-    result = jl_box_int64(value.T)
-  elif T is uint8:
-    result = jl_box_uint8(value)
-  elif T is uint16:
-    result = jl_box_uint16(value)
-  elif T is uint32 or (T is uint and sizeof(uint) == sizeof(uint32)):
-    result = jl_box_uint32(value)
-  elif T is uint64 or (T is uint and sizeof(uint) == sizeof(uint64)):
-    result = jl_box_uint64(value)
-  elif T is float32:
-    result = jl_box_float32(value)
-  elif T is float64:
-    result = jl_box_float64(value)
-  elif T is bool:
-    result = jl_box_bool(value)
-  elif T is pointer:
-    result = jl_box_voidpointer(value)
+proc julia_unbox(x: JlValue, T: typedesc[int]): int =
+  when sizeof(int) == sizeof(int64):
+    jl_unbox_int64(x).int
   else:
-    raise newException(JlError, "Boxing value failed. Type not supported.")
+    jl_unbox_int32(x).int
+
+proc julia_unbox(x: JlValue, T: typedesc[bool]): bool = jl_unbox_bool(x)
+proc julia_unbox(x: JlValue, T: typedesc[pointer]): bool = jl_unbox_voidpointer(x)
+
+## Box
+proc julia_box(x: int8): JlValue = jl_box_int8(x)
+proc julia_box(x: int16): JlValue = jl_box_int16(x)
+proc julia_box(x: int32): JlValue = jl_box_int32(x)
+proc julia_box(x: int64): JlValue = jl_box_int64(x)
+proc julia_box(x: uint8): JlValue = jl_box_uint8(x)
+proc julia_box(x: uint16): JlValue = jl_box_uint16(x)
+proc julia_box(x: uint32): JlValue = jl_box_uint32(x)
+proc julia_box(x: uint64): JlValue = jl_box_uint64(x)
+proc julia_box(x: float32): JlValue = jl_box_float32(x)
+proc julia_box(x: float64): JlValue = jl_box_float64(x)
+
+proc julia_box(x: JlValue, T: typedesc[int]): int =
+  when sizeof(int) == sizeof(int64):
+    jl_box_int64(x).int
+  else:
+    jl_box_int32(x).int
+
+proc julia_box(x: JlValue, T: typedesc[bool]): bool = jl_box_bool(x)
+proc julia_box(x: JlValue, T: typedesc[pointer]): bool = jl_box_voidpointer(x)
+
+proc julia_unbox[T](x: JlValue, t: var T) =
+  t = julia_unbox(x, typedesc(T))
+
+{.pop.}
 
 # API for box / unbox. Exported because it's part of Julia's API but it is recommendned to use converter API instead
 proc jlUnbox*[T](x: JlValue): T =
-  result = julia_unbox[T](x)
+  julia_unbox(x, result)
 
 proc jlBox*[T](val: T): JlValue =
-  result = julia_box[T](val)
+  julia_box(val)
 

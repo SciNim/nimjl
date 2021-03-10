@@ -3,11 +3,11 @@ import ../config
 
 ## Call functions
 {.push nodecl.}
-proc jl_get_function*(module: ptr jl_module, name: cstring): ptr jl_func {.importc:"jl_get_function".}
+proc jl_get_function*(module: ptr jl_module, name: cstring): ptr jl_func {.importc: "jl_get_function".}
 
-proc jl_call *(function: ptr jl_func, values: ptr ptr jl_value, nargs: cint): ptr jl_value {.importc:"jl_call".}
+proc jl_call *(function: ptr jl_func, values: ptr ptr jl_value, nargs: cint): ptr jl_value {.importc: "jl_call".}
 
-proc jl_call0*(function: ptr jl_func): ptr jl_value {.importc:"jl_call0".}
+proc jl_call0*(function: ptr jl_func): ptr jl_value {.importc: "jl_call0".}
 
 {.pop.}
 

@@ -35,16 +35,4 @@ proc jl_box_uint16*(value: uint16): ptr jl_value {.importc.}
 proc jl_box_uint8*(value: uint8): ptr jl_value {.importc.}
 {.pop.}
 
-# macro jl_unbox*(t: typedescvalue: ptr jl_value) : untyped =
-#   let gentype = getTypeInst(t)[1]
-#   let callStr = "jl_unbox_" & gentype.toStrLit().strVal
-#   echo callStr
-#   result = newCall(callStrvalue)
-#   echo result.repr
-#
-# macro jl_box*(t: typedescvalue: untyped): untyped =
-#   let gentype = getTypeInst(t)[1]
-#   let typeStr = gentype.toStrLit().strVal
-#   let callStr = "jl_box_" & typeStr
-#   result = newCall(callStrvalue)
-#
+

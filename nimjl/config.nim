@@ -16,8 +16,8 @@ const juliaDepPath* = juliaPath / "lib" / "julia"
 {.passL: "-Wl,-rpath," & juliaDepPath.}
 {.passL: "-ljulia".}
 
-static:
-  echo "juliaPath> ", juliaPath
-  echo "juliaIncludesPath> ", juliaIncludesPath
-  echo "juliaLibPath> ", juliaLibPath
+# static:
+#   echo "juliaPath> ", juliaPath
+#   echo "juliaIncludesPath> ", juliaIncludesPath
+#   echo "juliaLibPath> ", juliaLibPath
 
