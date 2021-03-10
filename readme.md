@@ -22,23 +22,30 @@ How to embed Julia w/ C :
 
 ## Next steps 
 
-* Use DotOperators for a close to native syntax
-* Improve Julia functions chaining
-* Test for nested types (Tuples containing Arrays or other Tuples etc.)
-* Handle row major vs column major transposition when using array
+* Improve function calling
+  * Use `.()` / DotOperators for a syntax that looks more "native" when calling function
+  * Find a solution for chaining Julia functions in one expression
+
+* Improve Julia Arrays usage from Nim
+  * Julia is mostly oriented towards numerical computing so Arrays are THE most important data structure to support
+  * Handle row major vs column major transposition when using array
+  * Implement alias to access common Julia function on the Array API (maybe in its own library ?)
+  * map / apply / reduce /fold
+  * Iterators
+
 * Expand support for non-trivial / non-POD types for Arrays / Tuples / Dict
-* Add a tag for tracing for Julia memory allocation 
+  * Add tests for nested types (Tuples containing Arrays or other Tuples etc.)
+
+* Add a tag for tracing for Julia memory allocation
 
 ## Limitations
 
 * Julia Init / Exit can only be called **once in the lifetime of your program**
 * Value conversion Nim ==> Julia are done **by copy** except for Arrays-like type that use a pre-allocated buffer.
 * Value conversion Julia => Nim s always done **by copy**
-
   * When using Arrays you can access the buffer as ``ptr UncheckedArray`` of the Julia Arrays with ``rawData()``. 
   * Using ``to(seq[T])`` or ``to(Tensor[T])`` perform a ``copyMem`` of ``jlArray.rawData()`` in your seq/Tensor 
 
-* Tuples/Arrays/Dict only tested with POD data types (``SomeNumber|string|bool`` types) 
 * Julia allocated arrays only goes up to 3 dimensions (but Arrays can be allocated in Nim)
 * Only supports Linux for now
 
