@@ -369,7 +369,7 @@ proc runMemLeakTest*(maxDuration: Duration) =
 
   let begin = getMonoTime()
   var elapsed = initDuration(seconds = 0'i64, nanoseconds = 0'i64)
-  let deltaTest = initDuration(seconds = 10)
+  let deltaTest = initDuration(seconds = 1)
   var maxDuration = maxDuration + 4*deltaTest
 
   while elapsed <= maxDuration:
