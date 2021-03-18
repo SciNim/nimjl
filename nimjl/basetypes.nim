@@ -1,6 +1,5 @@
 import config
 import private/basetypes_helpers
-import posix
 
 type
   JlValue* = ptr jl_value
@@ -18,7 +17,10 @@ var jlCoreModule *{.importc: "jl_core_module".}: JlModule
 var jlBaseModule *{.importc: "jl_base_module".}: JlModule
 var jlTopModule *{.importc: "jl_top_module".}: JlModule
 
+# TODO : Handle interrupt exception for SIGINT Throw ?
+# Currently, you need to define setControlCHook AFTER jlVmInit() or it won't take effect
 var jl_interrupt_exception{.importc: "jl_interrupt_exception".}: JlValue
+
 ## Init & Exit function
 proc jlVmInit*() {.nodecl, importc: "jl_init".}
 proc jlVmExit*(exit_code: cint = 0.cint) {.nodecl, importc: "jl_atexit_hook".}
@@ -27,17 +29,8 @@ proc jlVmExit*(exit_code: cint = 0.cint) {.nodecl, importc: "jl_atexit_hook".}
 proc jlExceptionHandler*() =
   let excpt : JlValue = jl_exception_occurred()
   if not isNil(excpt):
-    echo excpt == jl_interrupt_exception
     let msg = $(jl_exception_message())
     raise newException(JlError, msg)
-
-    # if excpt != jl_interrupt_exception:
-    #   echo "not ctrl-c"
-    #   let msg = $(jl_exception_message())
-    #   raise newException(JlError, msg)
-    # else:
-    #   echo "ctrl-c"
-    #   discard posix.raise(SIGINT)
   else:
     discard
 
