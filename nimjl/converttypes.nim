@@ -1,7 +1,6 @@
 import config
 import basetypes
 import boxunbox
-import dicttuples
 import arrays
 
 import json
@@ -18,11 +17,9 @@ proc toNimVal[T: SomeNumber|bool|pointer|string](x: JlValue, res: var T) =
 
 # Julia Tuple / Dict can't really be mapped to Nim's type so returning JsonNode is easier.
 # It introduces a "distinction" between to[T] -> T and to[T] -> JsonNode as return types
-proc toNimVal(x: JlValue, t: var tuple) =
-  jlTupleToNim(x, t)
-
-proc toNimVal[U, V](x: JlValue, tab: var Table[U, V]) =
-  jlDictToNim[U, V](x, tab)
+# Forward declare for cyclic import
+proc toNimVal(x: JlValue, t: var tuple)
+proc toNimVal[U, V](x: JlValue, tab: var Table[U, V])
 
 proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
   let x = toJlArray[T](x)
@@ -59,12 +56,6 @@ proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
     copyMem(unsafeAddr(locarr[0]), x.rawData(), nbytes)
 
 # Nim -> Julia
-proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue =
-  result = jlBox(val)
-
-proc nimValueToJlValue(val: string): JlValue =
-  result = nimStringToJlVal(val)
-
 # Avoid going throung template toJlVal pointer version when dealing with Julia known type
 # Is converter the right choice here ?
 converter nimValueToJlValue*[T](x: JlArray[T]): JlValue =
@@ -79,19 +70,21 @@ converter nimValueToJlValue(x: JlFunc): JlValue  =
 converter nimValueToJlValue(x: JlModule): JlValue  =
   result = cast[JlValue](x)
 
+proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue =
+  result = jlBox(val)
+
+proc nimValueToJlValue(val: string): JlValue =
+  result = nimStringToJlVal(val)
+
 proc nimValueToJlValue(x: JlValue): JlValue  =
   result = x
 
 # Complex stuff
-proc nimValueToJlValue(x: tuple): JlValue  =
-  result = nimToJlTuple(x)
-
 # Treat Nim object as Julia tuple
-proc nimValueToJlValue(x: object): JlValue  =
-  result = nimToJlTuple(x)
-
-proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue  =
-  result = nimTableToJlDict(x)
+# Forward declaration for cyclic import
+proc nimValueToJlValue(x: tuple): JlValue
+proc nimValueToJlValue(x: object): JlValue
+proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue
 
 proc nimValueToJlValue[T](x: seq[T]): JlValue  =
   result = nimValueToJlValue(
@@ -120,5 +113,25 @@ proc to*(x: JlValue, T: typedesc): T =
 proc toJlVal*[T](x: T): JlValue =
   ## Convert a generic Nim type to a JlValue
   nimValueToJlValue(x)
+
+
+# Recursive import strategy
+import dicttuples
+
+proc toNimVal(x: JlValue, t: var tuple) =
+  jlTupleToNim(x, t)
+
+proc toNimVal[U, V](x: JlValue, tab: var Table[U, V]) =
+  jlDictToNim[U, V](x, tab)
+
+proc nimValueToJlValue(x: tuple): JlValue  =
+  result = nimToJlTuple(x)
+
+# Treat Nim object as Julia tuple
+proc nimValueToJlValue(x: object): JlValue  =
+  result = nimToJlTuple(x)
+
+proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue  =
+  result = nimTableToJlDict(x)
 
 {.pop.}

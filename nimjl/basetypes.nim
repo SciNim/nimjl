@@ -11,17 +11,24 @@ type
 type
   JlError* = object of IOError
 
-var jlMainModule *{.importc: "jl_main_module", header: juliaHeader.}: JlModule
-var jlCoreModule *{.importc: "jl_core_module", header: juliaHeader.}: JlModule
-var jlBaseModule *{.importc: "jl_base_module", header: juliaHeader.}: JlModule
-var jlTopModule *{.importc: "jl_top_module", header: juliaHeader.}: JlModule
+{.push header: juliaHeader.}
+var jlMainModule *{.importc: "jl_main_module".}: JlModule
+var jlCoreModule *{.importc: "jl_core_module".}: JlModule
+var jlBaseModule *{.importc: "jl_base_module".}: JlModule
+var jlTopModule *{.importc: "jl_top_module".}: JlModule
+
+# TODO : Handle interrupt exception for SIGINT Throw ?
+# Currently, you need to define setControlCHook AFTER jlVmInit() or it won't take effect
+var jl_interrupt_exception{.importc: "jl_interrupt_exception".}: JlValue
 
 ## Init & Exit function
 proc jlVmInit*() {.nodecl, importc: "jl_init".}
 proc jlVmExit*(exit_code: cint = 0.cint) {.nodecl, importc: "jl_atexit_hook".}
+{.pop.}
 
 proc jlExceptionHandler*() =
-  if not isNil(jl_exception_occurred()):
+  let excpt : JlValue = jl_exception_occurred()
+  if not isNil(excpt):
     let msg = $(jl_exception_message())
     raise newException(JlError, msg)
   else:

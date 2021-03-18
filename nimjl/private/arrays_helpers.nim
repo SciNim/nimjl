@@ -2,20 +2,22 @@ import ../config
 import basetypes_helpers
 import strformat
 
-let
-  jl_bool_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_char_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_int8_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_uint8_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_int16_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_uint16_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_int32_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_uint32_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_int64_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_uint64_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_float32_type {.importc, header: juliaHeader.}: ptr jl_datatype
-  jl_float64_type {.importc, header: juliaHeader.}: ptr jl_datatype
+{.push header: juliaHeader.}
 
+let
+  jl_bool_type {.importc.}: ptr jl_datatype
+  jl_char_type {.importc.}: ptr jl_datatype
+  jl_int8_type {.importc.}: ptr jl_datatype
+  jl_uint8_type {.importc.}: ptr jl_datatype
+  jl_int16_type {.importc.}: ptr jl_datatype
+  jl_uint16_type {.importc.}: ptr jl_datatype
+  jl_int32_type {.importc.}: ptr jl_datatype
+  jl_uint32_type {.importc.}: ptr jl_datatype
+  jl_int64_type {.importc.}: ptr jl_datatype
+  jl_uint64_type {.importc.}: ptr jl_datatype
+  jl_float32_type {.importc.}: ptr jl_datatype
+  jl_float64_type {.importc.}: ptr jl_datatype
+{.pop.}
 ## Array bindings
 {.push nodecl.}
 proc jl_array_data*(values: ptr jl_array): pointer {.importc.}

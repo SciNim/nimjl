@@ -51,6 +51,13 @@ How to embed Julia w/ C :
 * Julia allocated arrays only goes up to 3 dimensions (but Arrays can be allocated in Nim)
 * Only supports Linux for now
 
+* Due to how the passing of link flags is done from Nim -> C compiler import multiple file that uses nimjl will result in link error:
+  * Typically the following will not resolve linkage correctly : 
+    * main.nim -> ``import folder/[filea, fileb]``
+    * folder/
+      * filea.nim -> ``import nimjl``
+      * fileb.nim -> ``import nimjl``
+
 # Examples
 
 Here is the basic API usage : 

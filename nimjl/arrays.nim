@@ -5,6 +5,7 @@ import private/basetypes_helpers
 
 import typetraits
 import arraymancer
+import sequtils
 
 
 proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =

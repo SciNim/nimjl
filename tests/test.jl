@@ -51,6 +51,18 @@ module custom_module
     return (A=1, B=2, C=3,)
   end
 
+  function nestedObjects(o)
+    if (o.a.dict["A"] == 1.0 && o.a.dict["B"] == 2.0)
+      if(o.a.dat == collect(1:1:10))
+        if o.b.x == 36 && o.b.y == 48 && o.b.z == 60
+          return true
+        end
+      end
+    end
+    return false
+
+  end
+
   export dummy
   export tupleTest
   export modString
@@ -59,4 +71,5 @@ module custom_module
   export makeMyTuple
   export squareMeBaby
   export mutateMeByTen!
+  export nestedObjects
 end

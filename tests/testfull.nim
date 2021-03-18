@@ -172,6 +172,27 @@ proc dictToTableTest() =
     check res[key1] == val2
     check res[key2] == val1
 
+proc nestedObjectsTest() =
+  type
+    A = object
+      dict : Table[string, float32]
+      dat: seq[int]
+
+    B = tuple
+      x: int
+      y: int
+      z: int
+
+    O = object
+      a: A
+      b: B
+
+  var o : O
+  o.a = A(dict: {"A": 1.0.float32,"B": 2.0.float32}.toTable, dat: toSeq(1..10))
+  o.b = (x: 36, y: 48, z: 60)
+  var res = jlCall("nestedObjects", o)
+  check res.to(bool)
+
 proc runTupleTest*() =
   suite "Tuples":
     teardown: jlGcCollect()
@@ -187,6 +208,9 @@ proc runTupleTest*() =
 
     test "invertDict":
       dictToTableTest()
+
+    test "nestedObjectsTuples":
+      nestedObjectsTest()
 
 
 ### Externals module & easy stuff
