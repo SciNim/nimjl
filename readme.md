@@ -36,7 +36,6 @@ How to embed Julia w/ C :
   * Iterators
 
 * Expand support for non-trivial / non-POD types for Arrays / Tuples / Dict
-  * Add tests for nested types (Tuples containing Arrays or other Tuples etc.)
 
 * Add a tag for tracing for Julia memory allocation
 
