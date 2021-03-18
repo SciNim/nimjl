@@ -447,13 +447,25 @@ void external_module()
   external_module_squareMeBaby();
 }
 
+#include <signal.h>
+static volatile int keepRunning = 1;
+
+void intHandler(int dummy) {
+  printf("#########################\n");
+  keepRunning = 0;
+}
+
 int main(int argc, char *argv[])
 {
+  signal(SIGINT, intHandler);
   jl_init();
+  while(keepRunning) {
+    jl_value_t *ret1 = jl_eval_string("println(sqrt(4.0))");
+  }
+  // external_module();
   // simple_eval_string();
   // simple_call();
   // arrays_1D();
   // arrays_2D();
-  external_module();
   jl_atexit_hook(0);
 }
