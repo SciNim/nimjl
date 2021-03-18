@@ -1,5 +1,10 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.4.2 - 2021_03_18
+===========================
+* Add support for nested objects
+* Use {.push header:juliaHeader.} when necessary
+
 Release v0.4.1 - 2021_03_10
 ===========================
 
