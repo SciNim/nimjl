@@ -1,4 +1,3 @@
-import config
 import basetypes
 import boxunbox
 import arrays
