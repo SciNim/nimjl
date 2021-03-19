@@ -1,6 +1,5 @@
 import os
 
-{.used.}
 const juliaPath* = getEnv("JULIA_PATH")
 const juliaIncludesPath* = juliaPath / "include" / "julia"
 const juliaHeader* = "julia.h"
@@ -19,8 +18,10 @@ const juliaLibName* = juliaLibPath / libPrefix & "julia" & libSuffix
 {.passL: "-L" & juliaDepPath.}
 {.passL: "-Wl,-rpath," & juliaDepPath.}
 {.link: juliaLibName}
+
 static:
   echo "juliaPath> ", juliaPath
   echo "juliaIncludesPath> ", juliaIncludesPath
   echo "juliaLibPath> ", juliaLibPath
+  echo "juliaLibName> ", juliaLibName
 
