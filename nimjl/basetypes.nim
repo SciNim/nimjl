@@ -11,7 +11,7 @@ type
 type
   JlError* = object of IOError
 
-{.push header: juliaHeader.}
+{.push header: juliaHeader, dynlib: juliaLibName.}
 var jlMainModule *{.importc: "jl_main_module".}: JlModule
 var jlCoreModule *{.importc: "jl_core_module".}: JlModule
 var jlBaseModule *{.importc: "jl_base_module".}: JlModule
