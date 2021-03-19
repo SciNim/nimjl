@@ -1,5 +1,7 @@
 # Nim-Julia bridge 
 
+![workflow](https://github.com/Clonkk/nimjl/actions/workflows/ci.yml/badge.svg)
+
 This is repo is a WIP to be able to call Julia function from Nim using the C-API of Julia.
 
 ## Prerequisite
