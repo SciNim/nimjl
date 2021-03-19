@@ -3,17 +3,30 @@ on:
   push:
 
 jobs:
-  default:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: install_nim
+      - name: "install_nim"
         id: install_nim
         uses: iffy/install-nim@v3
-      - name: install_julia
+      - name: "install_julia"
         id: install_julia
         uses: julia-actions/setup-julia@latest
-      - run: export JULIA_PATH=${{ steps.install_julia.julia-binddir }}/..
-      - run: echo $JULIA_PATH
+        with:
+          show-versioninfo: 'true'
+      - run: echo "${{ env.JULIA_PATH }}"
+        env:
+          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
+      - run: ls ${{ env.JULIA_PATH }}/include/julia
+        env:
+          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
+      - run: ls ${{ env.JULIA_PATH }}/lib
+        env:
+          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
       - run: nimble install -y
+        env:
+          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
       - run: testament r tests/testfull.nim
+        env:
+          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..

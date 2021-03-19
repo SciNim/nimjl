@@ -19,8 +19,8 @@ const juliaLibName* = juliaLibPath / libPrefix & "julia" & libSuffix
 {.passL: "-L" & juliaDepPath.}
 {.passL: "-Wl,-rpath," & juliaDepPath.}
 {.link: juliaLibName}
-# static:
-#   echo "juliaPath> ", juliaPath
-#   echo "juliaIncludesPath> ", juliaIncludesPath
-#   echo "juliaLibPath> ", juliaLibPath
+static:
+  echo "juliaPath> ", juliaPath
+  echo "juliaIncludesPath> ", juliaIncludesPath
+  echo "juliaLibPath> ", juliaLibPath
 
