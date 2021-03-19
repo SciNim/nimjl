@@ -12,7 +12,7 @@ jobs:
         uses: iffy/install-nim@v3
       - name: install_julia
         id: install_julia
-        uses: julia-actions/setup-julia@v1.5.4
+        uses: julia-actions/setup-julia@latest
       - run: export JULIA_PATH=${{ steps.install_julia.julia-binddir }}/..
       - run: echo $JULIA_PATH
       - run: nimble install -y
