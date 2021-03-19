@@ -1,0 +1,19 @@
+on:
+  pull_request:
+  push:
+
+jobs:
+  default:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install_nim
+        id: install_nim
+        uses: iffy/install-nim@v3
+      - name: install_julia
+        id: install_julia
+        uses: julia-actions/setup-julia@v1.5.4
+      - run: export JULIA_PATH=${{ steps.install_julia.julia-binddir }}/..
+      - run: echo $JULIA_PATH
+      - run: nimble install -y
+      - run: testament r tests/testfull.nim
