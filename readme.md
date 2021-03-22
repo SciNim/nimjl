@@ -11,6 +11,8 @@ This is repo is a WIP to be able to call Julia function from Nim using the C-API
   * To obtain the julia-bindir path execute: ``julia -E Sys.BINDIR``
 * Run ``nimble install`` or ``nimble develop`` 
 
+After this steps, ``$JULIA_PATH/include`` should points to Julia header and ``$JULIA_PATH/lib`` should point to ``libjulia.so``
+
 ## Ressources
 
 How to embed Julia w/ C :

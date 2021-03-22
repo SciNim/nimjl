@@ -10,3 +10,16 @@ license       = "MIT"
 # Dependencies
 requires "nim >= 1.2.0"
 requires "arraymancer"
+requires "shell"
+
+import os
+task finishSetup, "Setup JULIA_PATH":
+  echo("""To finish Nimjl setup, add "export JULIA_PATH=JULIA_BINDIR/.." to your .bashrc or .profile. """)
+  echo("JULIA_BINDIR=")
+  exec("julia -E Sys.BINDIR")
+
+after install:
+  finishSetupTask()
+
+after develop:
+  finishSetupTask()

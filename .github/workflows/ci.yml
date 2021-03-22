@@ -24,12 +24,9 @@ jobs:
       - run: ls ${{ env.JULIA_PATH }}/lib
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
-      - run: ls ${{ env.JULIA_PATH }}
-        env:
-          JULIA_PATH: julia-1.5.4/
       - run: nimble install -y
         env:
-          JULIA_PATH: julia-1.5.4/
+          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
       - run: testament r tests/testfull.nim
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
