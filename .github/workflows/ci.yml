@@ -18,10 +18,10 @@ jobs:
       - run: echo "${{ env.JULIA_PATH }}"
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
-      - run: ls ${{ env.JULIA_PATH }}/include/julia
+      - run: ls -l ${{ env.JULIA_PATH }}/include/julia
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
-      - run: ls ${{ env.JULIA_PATH }}/lib
+      - run: ls -l ${{ env.JULIA_PATH }}/lib
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
       - run: nimble install -y
