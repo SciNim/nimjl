@@ -28,7 +28,8 @@ How to embed Julia w/ C :
 
 ## Next steps 
 
-* Automate Julia download and installation if environment variable ``JULIA_PATH`` is not set
+* Add support for Options types
+* Add support for Enum types
 
 * Improve function calling
   * Use `.()` / DotOperators for a syntax that looks more "native" when calling function
@@ -40,8 +41,6 @@ How to embed Julia w/ C :
   * Implement alias to access common Julia function on the Array API (maybe in its own library ?)
   * map / apply / reduce /fold
   * Iterators
-
-* Expand support for non-trivial / non-POD types for Arrays / Tuples / Dict
 
 * Add a tag for tracing for Julia memory allocation
 
