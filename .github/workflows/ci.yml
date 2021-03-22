@@ -10,23 +10,34 @@ jobs:
       - name: "install_nim"
         id: install_nim
         uses: iffy/install-nim@v3
+      - name: "download_julia"
+        id: download_julia
+        run: curl https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.4-linux-x86_64.tar.gz --output julia.tar.gz
       - name: "install_julia"
         id: install_julia
-        uses: julia-actions/setup-julia@latest
-        with:
-          show-versioninfo: 'true'
-      - run: echo "${{ env.JULIA_PATH }}"
+        run: tar -xzf julia.tar.gz
+
+      # - name: "install_julia"
+      #   id: install_julia
+      #   uses: julia-actions/setup-julia@latest
+      #   with:
+      #     show-versioninfo: 'true'
+      # - run: echo "${{ env.JULIA_PATH }}"
+      #   env:
+      #     JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
+      # - run: ls ${{ env.JULIA_PATH }}/include/julia
+      #   env:
+      #     JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
+      # - run: ls ${{ env.JULIA_PATH }}/lib
+      #   env:
+      #     JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
+      - run: ls ${{ env.JULIA_PATH }}
         env:
-          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
-      - run: ls ${{ env.JULIA_PATH }}/include/julia
-        env:
-          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
-      - run: ls ${{ env.JULIA_PATH }}/lib
-        env:
-          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
+          JULIA_PATH: julia-1.5.4/
+
       - run: nimble install -y
         env:
-          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
+          JULIA_PATH: julia-1.5.4/
       - run: testament r tests/testfull.nim
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
