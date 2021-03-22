@@ -1,5 +1,8 @@
 import os
 
+# juliaPath should be parent folder of julia-bindir
+# Use julia -E Sys.BINDIR to get the path
+# Is it possible to resolve this at compile-time ?
 const juliaPath* = getEnv("JULIA_PATH")
 const juliaIncludesPath* = juliaPath / "include" / "julia"
 const juliaHeader* = "julia.h"
