@@ -10,7 +10,6 @@ license       = "MIT"
 # Dependencies
 requires "nim >= 1.2.0"
 requires "arraymancer"
-requires "shell"
 
 import os
 task finishSetup, "Setup JULIA_PATH":
