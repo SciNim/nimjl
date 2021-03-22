@@ -11,19 +11,21 @@ type jl_module *{.importc: "jl_module_t", header: juliaHeader.} = object
 type jl_datatype*{.importc: "jl_datatype_t", header: juliaHeader.} = object
 type jl_sym*{.importc: "jl_sym_t", header: juliaHeader.} = object
 
-proc jl_symbol*(symname: cstring): ptr jl_sym {.nodecl, importc: "jl_symbol".}
+{.push nodecl, dynlib: juliaLibName, header:juliaHeader.}
+proc jl_symbol*(symname: cstring): ptr jl_sym {.importc: "jl_symbol".}
 
-proc jl_eval_string*(code: cstring): ptr jl_value {.nodecl, importc.}
+proc jl_eval_string*(code: cstring): ptr jl_value {.importc.}
+
+## Error handler
+proc jl_exception_occurred*(): ptr jl_value {.importc.}
+
+proc jl_typeof_str*(v: ptr jl_value): cstring {.importc.}
+
+proc jl_string_ptr*(v: ptr jl_value): cstring {.importc.}
+{.pop.}
 
 proc jl_eval_string*(code: string): ptr jl_value =
   result = jl_eval_string(code.cstring)
-
-## Error handler
-proc jl_exception_occurred*(): ptr jl_value {.nodecl, importc.}
-
-proc jl_typeof_str*(v: ptr jl_value): cstring {.nodecl, importc.}
-
-proc jl_string_ptr*(v: ptr jl_value): cstring {.nodecl, importc.}
 
 proc jl_exception_message*(): cstring =
   result = jl_string_ptr(jl_eval_string("sprint(showerror, ccall(:jl_exception_occurred, Any, ()))"))

@@ -1,7 +1,12 @@
 import os
+import strutils
 
-{.used.}
-const juliaPath* = getEnv("JULIA_PATH")
+# juliaPath should be parent folder of julia-bindir
+# Use julia -E Sys.BINDIR to get the path
+# Is it possible to resolve this at compile-time ?
+
+const juliaBinPath = gorge("julia -E Sys.BINDIR").replace("\"", "")
+const juliaPath* = if not existsEnv("JULIA_PATH"): juliaBinPath.parentDir() else: getEnv("JULIA_PATH")
 const juliaIncludesPath* = juliaPath / "include" / "julia"
 const juliaHeader* = "julia.h"
 const juliaLibPath* = juliaPath / "lib"
@@ -18,9 +23,10 @@ const juliaLibName* = juliaLibPath / libPrefix & "julia" & libSuffix
 {.passL: "-Wl,-rpath," & juliaLibPath.}
 {.passL: "-L" & juliaDepPath.}
 {.passL: "-Wl,-rpath," & juliaDepPath.}
-{.link: juliaLibName}
+{.passL: "-ljulia".}
+
 # static:
 #   echo "juliaPath> ", juliaPath
 #   echo "juliaIncludesPath> ", juliaIncludesPath
 #   echo "juliaLibPath> ", juliaLibPath
-
+#   echo "juliaLibName> ", juliaLibName

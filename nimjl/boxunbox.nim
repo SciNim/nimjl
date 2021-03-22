@@ -1,5 +1,4 @@
 import basetypes
-import config
 
 import private/boxunbox_helpers
 import private/basetypes_helpers

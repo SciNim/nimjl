@@ -7,8 +7,8 @@ export basetypes
 import nimjl/boxunbox
 export boxunbox
 
-import nimjl/config
-export config
+# import nimjl/config
+# export config
 
 import nimjl/converttypes
 export converttypes

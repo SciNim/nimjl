@@ -1,4 +1,3 @@
-import config
 import basetypes
 import private/arrays_helpers
 import private/basetypes_helpers

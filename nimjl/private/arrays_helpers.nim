@@ -19,7 +19,7 @@ let
   jl_float64_type {.importc.}: ptr jl_datatype
 {.pop.}
 ## Array bindings
-{.push nodecl.}
+{.push nodecl, header: juliaHeader, dynlib: juliaLibName.}
 proc jl_array_data*(values: ptr jl_array): pointer {.importc.}
 proc jl_array_dim*(a: ptr jl_array, dim: cint): cint {.importc.}
 proc jl_array_len*(a: ptr jl_array): cint {.importc.}
