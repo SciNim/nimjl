@@ -8,7 +8,7 @@ This is repo is a WIP to be able to call Julia function from Nim using the C-API
 
 * Install Julia version 1.5.3 or above
 * ``julia`` executable must be in your path.
-  * By-default, ``nimjl`` will use ``$JULIA_BINDIR/..`` as path to the root installation folder of Julia.
+  * By-default, ``nimjl`` will use Julia's ``Sys.BINDIR`` parent directory as the installation folder of Julia.
   * If you want ``nimjl`` to use a specific Julia installation, set the environment variable ``JULIA_PATH`` to the root of the installation folder.
 * Run ``nimble install`` or ``nimble develop`` 
 
