@@ -1,5 +1,15 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.4.4 - 2021_03_25
+===========================
+* Add support for Option 
+* Fix boxing bool and voidpointer types
+* Improve test coverage
+
+Release v0.4.3 - 2021_03_18
+===========================
+* Add CI
+
 Release v0.4.2 - 2021_03_18
 ===========================
 * Add support for nested objects

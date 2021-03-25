@@ -28,7 +28,6 @@ How to embed Julia w/ C :
 
 ## Next steps 
 
-* Add support for Options types
 * Add support for Enum types
 
 * Improve function calling
