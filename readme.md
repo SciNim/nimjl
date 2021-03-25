@@ -8,7 +8,7 @@ This is repo is a WIP to be able to call Julia function from Nim using the C-API
 
 * Install Julia version 1.5.3 or above
 * ``julia`` executable must be in your path.
-  * By-default, ``nimjl`` will use ``$JULIA_BINDIR/..`` as path to the root installation folder of Julia.
+  * By-default, ``nimjl`` will use Julia's ``Sys.BINDIR`` parent directory as the installation folder of Julia.
   * If you want ``nimjl`` to use a specific Julia installation, set the environment variable ``JULIA_PATH`` to the root of the installation folder.
 * Run ``nimble install`` or ``nimble develop`` 
 
@@ -28,7 +28,7 @@ How to embed Julia w/ C :
 
 ## Next steps 
 
-* Automate Julia download and installation if environment variable ``JULIA_PATH`` is not set
+* Add support for Enum types
 
 * Improve function calling
   * Use `.()` / DotOperators for a syntax that looks more "native" when calling function
@@ -40,8 +40,6 @@ How to embed Julia w/ C :
   * Implement alias to access common Julia function on the Array API (maybe in its own library ?)
   * map / apply / reduce /fold
   * Iterators
-
-* Expand support for non-trivial / non-POD types for Arrays / Tuples / Dict
 
 * Add a tag for tracing for Julia memory allocation
 
