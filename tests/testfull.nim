@@ -1,5 +1,6 @@
 import unittest
 import sequtils
+import options
 import tables
 import sugar
 
@@ -102,7 +103,8 @@ proc run1DArrayTest*() =
 ## Tuple stuff
 proc tuplesTest() =
   block:
-    var jl_tuple = (a: 124, c: 67.32147)
+    var origtuple = (a: 123, b: some(-11.11e-3), c: 67.32147, d: some("azerty"), e: none(bool))
+    var jl_tuple = toJlVal(origtuple)
     var ret = jlCall("tupleTest", jl_tuple).to(bool)
     check ret
 
@@ -114,10 +116,13 @@ proc tuplesTest() =
 
   type TT = object
     a: int
+    b: Option[float]
     c: float
+    d: Option[string]
+    e: Option[bool]
 
   block:
-    var tt: TT = TT(a: 124, c: 67.32147)
+    var tt: TT = TT(a: 123, b: some(-11.11e-3), c: 67.32147, d: some("azerty"), e: none(bool))
     var ret = jlCall("tupleTest", tt).to(bool)
     check ret
 

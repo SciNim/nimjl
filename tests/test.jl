@@ -41,10 +41,22 @@ module custom_module
 
   function tupleTest(tt)
     ## test tuple args with specific values
-    if (tt.a == 124) && (tt.c - 67.32147 < 1e-12)
-      return true
+    if tt.a != 123
+      return false
     end
-    return false
+    if tt.b - (-11.11e-3) > 1e-12
+      return false
+    end
+    if tt.c - 67.32147 > 1e-12
+      return false
+    end
+    if tt.d != "azerty"
+      return false
+    end
+    if tt.e != nothing
+      return false
+    end
+    return true
   end
 
   function makeMyTuple()

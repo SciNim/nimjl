@@ -4,15 +4,16 @@ import arrays
 
 import json
 import tables
+import options
 import arraymancer
 
 {.push inline.}
 ## Julia -> Nim
-proc toNimVal[T: SomeNumber|bool|pointer|string](x: JlValue, res: var T) =
-  when T is string:
-    res = jlValToString(x)
-  else:
-    res = jlUnbox[T](x)
+proc toNimVal[T: SomeNumber|bool|pointer](x: JlValue, res: var T) =
+  res = jlUnbox[T](x)
+
+proc toNimVal(x: JlValue, res: var string) =
+  res = jlValToString(x)
 
 # Julia Tuple / Dict can't really be mapped to Nim's type so returning JsonNode is easier.
 # It introduces a "distinction" between to[T] -> T and to[T] -> JsonNode as return types
@@ -84,6 +85,7 @@ proc nimValueToJlValue(x: JlValue): JlValue  =
 proc nimValueToJlValue(x: tuple): JlValue
 proc nimValueToJlValue(x: object): JlValue
 proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue
+proc nimValueToJlValue[T](x: Option[T]): JlValue
 
 proc nimValueToJlValue[T](x: seq[T]): JlValue  =
   result = nimValueToJlValue(
@@ -122,6 +124,12 @@ proc toNimVal(x: JlValue, t: var tuple) =
 
 proc toNimVal[U, V](x: JlValue, tab: var Table[U, V]) =
   jlDictToNim[U, V](x, tab)
+
+proc nimValueToJlValue[T](x: Option[T]): JlValue  =
+  if isSome(x):
+    result = toJlVal(get(x))
+  else:
+    result = jlEval("nothing")
 
 proc nimValueToJlValue(x: tuple): JlValue  =
   result = nimToJlTuple(x)
