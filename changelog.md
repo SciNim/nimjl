@@ -5,6 +5,7 @@ Release v0.4.4 - 2021_03_25
 * Add support for Option 
 * Fix boxing bool and voidpointer types
 * Improve test coverage
+* Add examples to ci
 
 Release v0.4.3 - 2021_03_22
 ===========================
