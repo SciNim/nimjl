@@ -6,7 +6,7 @@ Release v0.4.4 - 2021_03_25
 * Fix boxing bool and voidpointer types
 * Improve test coverage
 
-Release v0.4.3 - 2021_03_18
+Release v0.4.3 - 2021_03_22
 ===========================
 * Add CI
 
