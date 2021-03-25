@@ -27,3 +27,6 @@ jobs:
       - run: testament r tests/testfull.nim
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
+      - run: testament c examples
+        env:
+          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
