@@ -4,7 +4,7 @@ import config
 ## GC Functions to root
 ## Must be inline
 type
-  JlGcCollection = enum
+  JlGcCollection {.pure, size: sizeof(cint), importc: "jl_gc_collection_t", header: juliaHeader.} = enum
     jlGcAuto = 0 # JL_GC_AUTO
     jlGcFull = 1 # JL_GC_FULL
     jlGcIncremental = 2 # JL_GC_INCREMENTAL
