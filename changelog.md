@@ -1,5 +1,11 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.4.5 - 2021_04_02
+===========================
+* Fixed char* / const char* with clang issue
+* Fixed enum for jlGcCollect not being properly defined
+* Add flags to run valgrind and msan if need be
+
 Release v0.4.4 - 2021_03_25
 ===========================
 * Add support for Option 
