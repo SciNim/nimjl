@@ -1,5 +1,5 @@
 import ../config
-import basetypes_helpers
+import jlcore
 
 ## Box & Unbox
 {.push nodecl, header: juliaHeader, dynlib: juliaLibName.}

@@ -1,5 +1,5 @@
 import config
-import private/basetypes_helpers
+import private/jlcore
 
 type
   JlValue* = ptr jl_value
@@ -11,7 +11,7 @@ type
 type
   JlError* = object of IOError
 
-{.push header: juliaHeader, dynlib: juliaLibName.}
+{.push header: juliaHeader.}
 var jlMainModule *{.importc: "jl_main_module".}: JlModule
 var jlCoreModule *{.importc: "jl_core_module".}: JlModule
 var jlBaseModule *{.importc: "jl_base_module".}: JlModule
@@ -20,7 +20,6 @@ var jlTopModule *{.importc: "jl_top_module".}: JlModule
 # TODO : Handle interrupt exception for SIGINT Throw ?
 # Currently, you need to define setControlCHook AFTER jlVmInit() or it won't take effect
 # var jl_interrupt_exception{.importc: "jl_interrupt_exception".}: JlValue
-
 {.pop.}
 
 # Init & Exit function
@@ -39,8 +38,6 @@ proc jlVmExit*(exit_code: cint = 0.cint) =
     jl_atexit_hook(exit_code)
     return
   raise newException(JlError, "jl_atexit_hook() must be called once per process")
-
-
 
 proc jlExceptionHandler*() =
   let excpt : JlValue = jl_exception_occurred()

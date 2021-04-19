@@ -1,6 +1,5 @@
 import config
 
-
 ## GC Functions to root
 ## Must be inline
 type
@@ -18,7 +17,6 @@ proc jlGcIsEnabled*(): cint {.importc: "jl_gc_is_enabled".}
 
 proc jlGcCollect*() =
   jl_gc_collect(jlGcFull)
-
 
 ## Inline is really important here for stack preservation
 {.push nodecl, inline, dynlib: juliaPath, header: juliaHeader.}

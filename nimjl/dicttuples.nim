@@ -1,5 +1,5 @@
-import basetypes
-import functions
+import coretypes
+import modfuncs
 
 import tables
 import strutils

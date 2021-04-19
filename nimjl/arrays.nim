@@ -1,6 +1,6 @@
-import basetypes
-import private/arrays_helpers
-import private/basetypes_helpers
+import coretypes
+import private/jlcore
+import private/jlarrays
 
 import typetraits
 import arraymancer

@@ -1,5 +1,5 @@
 import ../config
-import basetypes_helpers
+import jlcore
 import strformat
 
 {.push header: juliaHeader.}
@@ -18,6 +18,7 @@ let
   jl_float32_type {.importc.}: ptr jl_datatype
   jl_float64_type {.importc.}: ptr jl_datatype
 {.pop.}
+
 ## Array bindings
 {.push nodecl, header: juliaHeader, dynlib: juliaLibName.}
 proc jl_array_data*(values: ptr jl_array): pointer {.importc.}
