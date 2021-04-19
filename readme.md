@@ -24,7 +24,9 @@ How to embed Julia w/ C :
 
 * ``legacy/`` folder contains previous experiment and examples of wrapping in C. 
 
-* ``tests/testfull.nim`` contains several test suite and examples
+* ``tests/testfull.nim`` is thet test suite 
+
+* ``examples/`` contains several examples
 
 ## Next steps 
 
@@ -46,20 +48,13 @@ How to embed Julia w/ C :
 ## Limitations
 
 * Julia Init / Exit can only be called **once in the lifetime of your program**
-* Value conversion Nim ==> Julia are done **by copy** except for Arrays-like type that use a pre-allocated buffer.
+* Value conversion Nim ==> Julia are done **by copy** **except for Arrays** type that use a pre-allocated buffer.
 * Value conversion Julia => Nim s always done **by copy**
   * When using Arrays you can access the buffer as ``ptr UncheckedArray`` of the Julia Arrays with ``rawData()``. 
   * Using ``to(seq[T])`` or ``to(Tensor[T])`` perform a ``copyMem`` of ``jlArray.rawData()`` in your seq/Tensor 
 
 * Julia allocated arrays only goes up to 3 dimensions (but Arrays can be allocated in Nim)
 * Only supports Linux for now
-
-* Due to how the passing of link flags is done from Nim -> C compiler import multiple file that uses nimjl will result in link error:
-  * Typically the following will not resolve linkage correctly : 
-    * main.nim -> ``import folder/[filea, fileb]``
-    * folder/
-      * filea.nim -> ``import nimjl``
-      * fileb.nim -> ``import nimjl``
 
 # Examples
 
