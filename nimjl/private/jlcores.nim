@@ -3,7 +3,7 @@ import strutils
 import strformat
 
 {.used.}
-{.push header: juliaHeader.}
+{.push header: JuliaHeader.}
 # Types
 type jl_value *{.importc: "jl_value_t", pure, final.} = object
 type jl_array *{.importc: "jl_array_t", pure, final.} = object
@@ -13,7 +13,7 @@ type jl_datatype*{.importc: "jl_datatype_t", pure, final.} = object
 type jl_sym*{.importc: "jl_sym_t", pure, final.} = object
 {.pop.}
 
-{.push nodecl, header: juliaHeader, dynlib: juliaLibName.}
+{.push nodecl, header: JuliaHeader, dynlib: JuliaLibName.}
 proc jl_symbol*(symname: cstring): ptr jl_sym {.importc: "jl_symbol".}
 
 proc jl_eval_string*(code: cstring): ptr jl_value {.importc: "jl_eval_string".}

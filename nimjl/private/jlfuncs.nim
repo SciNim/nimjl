@@ -2,7 +2,7 @@ import jlcores
 import ../config
 
 ## Call functions
-{.push nodecl, header: juliaHeader, dynlib: juliaLibName.}
+{.push nodecl, header: JuliaHeader, dynlib: JuliaLibName.}
 proc jl_get_function*(module: ptr jl_module, name: cstring): ptr jl_func {.importc: "jl_get_function".}
 
 proc jl_call *(function: ptr jl_func, values: ptr ptr jl_value, nargs: cint): ptr jl_value {.importc: "jl_call".}

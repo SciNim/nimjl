@@ -3,12 +3,12 @@ import config
 ## GC Functions to root
 ## Must be inline
 type
-  JlGcCollection {.pure, size: sizeof(cint), importc: "jl_gc_collection_t", header: juliaHeader.} = enum
+  JlGcCollection {.pure, size: sizeof(cint), importc: "jl_gc_collection_t", header: JuliaHeader.} = enum
     jlGcAuto = 0 # JL_GC_AUTO
     jlGcFull = 1 # JL_GC_FULL
     jlGcIncremental = 2 # JL_GC_INCREMENTAL
 
-{.push dynlib: juliaLibName, header: juliaHeader.}
+{.push dynlib: JuliaLibName, header: JuliaHeader.}
 ## Force gc to run on everything
 proc jlGcCollect*(v: JlGcCollection) {.importc: "jl_gc_collect".}
 proc jlGcEnable*(toggle: cint): cint {.importc: "jl_gc_enable".}
@@ -19,7 +19,7 @@ proc jlGcCollect*() =
   jl_gc_collect(jlGcFull)
 
 ## Inline is really important here for stack preservation
-{.push nodecl, inline, dynlib: juliaPath, header: juliaHeader.}
+{.push nodecl, inline, dynlib: JuliaLibName, header: JuliaHeader.}
 proc julia_gc_push1*(a: pointer) {.importc: "JL_GC_PUSH1".}
 
 proc julia_gc_push2*(a: pointer, b: pointer) {.importc: "JL_GC_PUSH2".}
