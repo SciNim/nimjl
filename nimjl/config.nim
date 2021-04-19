@@ -32,7 +32,7 @@ const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
 {.passL: "-ljulia".}
 
 # Check Julia >= 1.6
-when JuliaMajorVersion >= 1 and JuliaMinorVersion >= 6:
+when (JuliaMajorVersion, JuliaMinorVersion, JuliaPatchVersion) >= (1, 6, 0):
   const internalJuliaLibName* = JuliaDepPath / libPrefix & "Julia-internal" & libSuffix
   {.passL: "-ljulia-internal".}
 
