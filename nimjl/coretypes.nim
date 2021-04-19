@@ -1,5 +1,5 @@
 import config
-import private/jlcore
+import private/jlcores
 
 type
   JlValue* = ptr jl_value
@@ -12,10 +12,11 @@ type
   JlError* = object of IOError
 
 {.push header: juliaHeader.}
-var jlMainModule *{.importc: "jl_main_module".}: JlModule
-var jlCoreModule *{.importc: "jl_core_module".}: JlModule
-var jlBaseModule *{.importc: "jl_base_module".}: JlModule
-var jlTopModule *{.importc: "jl_top_module".}: JlModule
+var
+  jlMain*{.importc: "jl_main_module".}: JlModule
+  jlCore*{.importc: "jl_core_module".}: JlModule
+  jlBase*{.importc: "jl_base_module".}: JlModule
+  jlTop*{.importc: "jl_top_module".}: JlModule
 
 # TODO : Handle interrupt exception for SIGINT Throw ?
 # Currently, you need to define setControlCHook AFTER jlVmInit() or it won't take effect

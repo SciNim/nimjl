@@ -1,4 +1,4 @@
-import jlcore
+import jlcores
 import ../config
 
 ## Call functions

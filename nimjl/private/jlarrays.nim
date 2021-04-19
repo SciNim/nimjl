@@ -1,5 +1,5 @@
 import ../config
-import jlcore
+import jlcores
 import strformat
 
 {.push header: juliaHeader.}

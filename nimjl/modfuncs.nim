@@ -3,7 +3,7 @@ import private/jlfuncs
 import strformat
 
 proc getJlFunc*(funcname: string): JlFunc =
-  result = jl_get_function(jlMainModule, funcname)
+  result = jl_get_function(jlMain, funcname)
   jlExceptionHandler()
   if isNil(result):
     raise newException(JlError, &"Function {funcname} does not exists.")
@@ -23,8 +23,7 @@ proc jlCall*(jlmod: JlModule, jlfuncname: string, va: varargs[JlValue, toJlVal])
   result = jlCall(f, va)
 
 proc jlCall*(jlfuncname: string, va: varargs[JlValue, toJlVal]): JlValue =
-  result = jlCall(jlMainModule, jlfuncname, va)
-
+  result = jlCall(jlMain, jlfuncname, va)
 
 ## Check for nil result
 proc jlInclude*(filename: string) =

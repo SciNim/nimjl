@@ -1,5 +1,5 @@
 import coretypes
-import private/jlcore
+import private/jlcores
 import private/jlarrays
 
 import typetraits
