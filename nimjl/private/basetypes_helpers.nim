@@ -26,6 +26,9 @@ when defined(cpp):
   proc jl_string_ptr*(v: ptr jl_value): cstring {.importcpp: "const_cast<char*>(jl_string_ptr(@))".}
 else:
   proc jl_string_ptr*(v: ptr jl_value): cstring {.importc.}
+
+proc jl_init*() {.importc: "jl_init".}
+proc jl_atexit_hook*(exit_code: cint) {.importc: "jl_atexit_hook".}
 {.pop.}
 
 proc jl_eval_string*(code: string): ptr jl_value =
