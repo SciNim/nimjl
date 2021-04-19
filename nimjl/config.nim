@@ -36,8 +36,8 @@ when JuliaMajorVersion >= 1 and JuliaMinorVersion >= 6:
   const internalJuliaLibName* = JuliaDepPath / libPrefix & "Julia-internal" & libSuffix
   {.passL: "-ljulia-internal".}
 
-static:
-  echo "JuliaPath> ", JuliaPath
-  echo "JuliaIncludesPath> ", JuliaIncludesPath
-  echo "JuliaLibPath> ", JuliaLibPath
-  echo "JuliaLibName> ", JuliaLibName
+# static:
+#   echo "JuliaPath> ", JuliaPath
+#   echo "JuliaIncludesPath> ", JuliaIncludesPath
+#   echo "JuliaLibPath> ", JuliaLibPath
+#   echo "JuliaLibName> ", JuliaLibName
