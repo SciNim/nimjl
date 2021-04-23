@@ -13,11 +13,12 @@ const JuliaLibPath* = JuliaPath / "lib"
 const JuliaDepPath* = JuliaPath / "lib" / "julia"
 
 const JlVersionCmd = JuliaPath / "bin" / "julia" & " -E VERSION"
-const JuliaVersion = gorge(JlVersionCmd).split("\"")[1].split(".") # Result has the form ["v", "1.6.0", ""] -> splitting [1] yiels ["1", "6, "0"]
-const JuliaMajorVersion = JuliaVersion[0].parseInt
-const JuliaMinorVersion = JuliaVersion[1].parseInt
-const JuliaPatchVersion = JuliaVersion[2].parseInt
-
+const JuliaVersion = gorge(JlVersionCmd).split("\"")[1].split(".")
+  # For release : result has the form ["v", "1.6.0", ""] -> splitting [1] yiels ["1", "6, "0"]
+  # For dev: result has the form ["v", "1.7.0-DEV", "667"] -> splitting [1] yiels ["1", "7, "0-DEV", "667"]
+const JuliaMajorVersion* = JuliaVersion[0].parseInt
+const JuliaMinorVersion* = JuliaVersion[1].parseInt
+const JuliaPatchVersion* = if not JuliaVersion[2].contains("DEV"): JuliaVersion[2].parseInt else: JuliaVersion[3].parseInt
 const libPrefix = "lib"
 const libSuffix = ".so"
 const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
@@ -31,8 +32,8 @@ const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
 {.passL: "-Wl,-rpath," & JuliaDepPath.}
 {.passL: "-ljulia".}
 
-# Check Julia >= 1.6
-when (JuliaMajorVersion, JuliaMinorVersion, JuliaPatchVersion) >= (1, 6, 0):
+# Workaround for Julia 1.6.0
+when (JuliaMajorVersion, JuliaMinorVersion, JuliaPatchVersion) == (1, 6, 0):
   const internalJuliaLibName* = JuliaDepPath / libPrefix & "Julia-internal" & libSuffix
   {.passL: "-ljulia-internal".}
 

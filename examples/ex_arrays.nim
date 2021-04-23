@@ -8,7 +8,7 @@ proc main() =
   jlVmInit() # Initialize Julia VM. This should be done once in the lifetime of your program.
   block sort:
     var seqRand: seq[int64] = newSeqWith(12, rand(100)).map(x => x.int64)
-    echo seqRand
+    echo "Unsorted seqRand=", seqRand
     # Can manually convert Nim array to Julia array without copy
     var jlRandArray = jlArrayFromBuffer(seqRand)
     # Return a sorted version of the array and do not modify original
@@ -26,29 +26,19 @@ proc main() =
       # toJlArray performs a JlValue -> JlArray conversion
       let
         jlResArray = res.toJlArray(int64)
-        arrLen = jlResArray.len()
-        resArray = jlResArray.getRawData()
-
-      # rawData() return a ptr UncheckedArray[T] from a JlArray
-      stdout.write("@[")
-      for i in 0..<arrLen:
-        stdout.write(resArray[i])
-        if i != arrLen-1:
-          stdout.write(", ")
-      stdout.write("]\n")
-
+      echo "Sorted jlResArray=", jlResArray
     # End of Template equivalent to :
     # julia gc pop and julia gc push need to be in the same scope
     # julia_gc_pop()
 
   block sort:
     var seqRand: seq[int64] = newSeqWith(12, rand(100)).map(x => x.int64)
-    echo seqRand
+    echo "Unsorted seqRand=", seqRand
     # sort! (notice the "!") modify the original array
     # Can automatically convert seq
     discard jlCall("sort!", seqRand)
     # Notice how arrays are passed by buffer and thus this has modified the original seq
-    echo seqRand
+    echo "Sorted seqRand=", seqRand
 
   jlVmExit() # Exit Julia VM. This can be done only once in the lifetime of your program.
 
