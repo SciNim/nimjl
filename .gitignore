@@ -2,5 +2,6 @@ bin/
 .vscode
 tests/testfull
 tests/testleak
+tests/test_sugar
 testresults/
 nimcache/
