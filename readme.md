@@ -30,18 +30,30 @@ How to embed Julia w/ C :
 
 ## Next steps 
 
-* Add support for Enum types
+Julia is mostly oriented towards numerical computing so Arrays are THE most important data structure to support
+### In-progress
+* Improve Julia Arrays interop. from Nim
 
-* Improve function calling
-  * Use `.()` / DotOperators for a syntax that looks more "native" when calling function
-  * Find a solution for chaining Julia functions in one expression
+TODO List :
+  * Create JlArray from Nim openArray in one-liner : ``toJlArray[T](input: openArray[T]) = # ...``
+  * Support Julia ``Base.view``, ``Base.getindex``, ``Base.setindex!`` (ref. https://docs.julialang.org/en/v1/base/arrays/#Base.view) as ``[]`` and ``[]=`` syntax.
+    * Create macros for slices support
 
-* Improve Julia Arrays usage from Nim
-  * Julia is mostly oriented towards numerical computing so Arrays are THE most important data structure to support
-  * Handle row major vs column major transposition when using array
-  * Implement alias to access common Julia function on the Array API (maybe in its own library ?)
+  * Create Array API with most common proc
+    * Implement Matrix calc. operators : `*`, `+`, `-`, `/`, "Dotted operator" ``*.``, ``+.``, ``-.``, ``/.``
+    * Implement ``asType`` function mapped ``Base.reinterpret`` (ref. https://docs.julialang.org/en/v1/base/arrays/#Base.reinterpret) and ``reshape`` with ``Base.reshape``
+  * Handle row major vs column major transposition
   * map / apply / reduce /fold
   * Iterators
+  * GPU Support ?
+
+### Backlog
+
+* Add support for Enum types
+
+* Map mutable struct to Nim object
+
+* Support Julia chaining syntax
 
 * Add a tag for tracing for Julia memory allocation
 
