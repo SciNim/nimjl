@@ -1,10 +1,11 @@
-import coretypes
-import private/jlcores
-import private/jlarrays
+import ./coretypes
+import ./private/jlcores
+import ./private/jlarrays
 
-import typetraits
 import arraymancer
-import sequtils
+
+import std/typetraits
+import std/sequtils
 
 
 proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =
@@ -49,5 +50,10 @@ proc jlArrayFromBuffer*[T](data: Tensor[T]): JlArray[T] =
 # Julia allocated array
 proc allocJlArray*[T](dims: openArray[int]): JlArray[T] =
   ## Create a Julia Array managed by Julia GC
-  result = julia_alloc_array[T](dims)
+  result = julia_alloc_array(dims, T)
+
+# Julia allocated array
+proc allocJlArray*(dims: openArray[int], T: typedesc): JlValue =
+  ## Create a Julia Array managed by Julia GC
+  result = cast[JlValue](julia_alloc_array(dims, T))
 

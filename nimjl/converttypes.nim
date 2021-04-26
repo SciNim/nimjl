@@ -1,11 +1,12 @@
-import coretypes
-import boxunbox
-import arrays
+import ./coretypes
+import ./boxunbox
+import ./arrays
 
-import json
-import tables
-import options
 import arraymancer
+
+import std/json
+import std/tables
+import std/options
 
 {.push inline.}
 ## Julia -> Nim

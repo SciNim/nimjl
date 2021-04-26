@@ -1,5 +1,5 @@
-import os
-import strutils
+import std/os
+import std/strutils
 
 # JuliaPath should be parent folder of Julia-bindir
 # Use Julia -E Sys.BINDIR to get the path
@@ -18,7 +18,7 @@ const JuliaVersion = gorge(JlVersionCmd).split("\"")[1].split(".")
   # For dev: result has the form ["v", "1.7.0-DEV", "667"] -> splitting [1] yiels ["1", "7, "0-DEV", "667"]
 const JuliaMajorVersion* = JuliaVersion[0].parseInt
 const JuliaMinorVersion* = JuliaVersion[1].parseInt
-const JuliaPatchVersion* = if not JuliaVersion[2].contains("DEV"): JuliaVersion[2].parseInt else: JuliaVersion[3].parseInt
+const JuliaPatchVersion* = JuliaVersion[2].parseInt
 const libPrefix = "lib"
 const libSuffix = ".so"
 const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix

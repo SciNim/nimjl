@@ -1,9 +1,9 @@
-import coretypes
-import private/jlcores
-import private/jlboxunbox
+import ./coretypes
+import ./private/jlcores
+import ./private/jlboxunbox
 
-import tables
-import json
+import std/tables
+import std/json
 
 {.push inline.}
 ## Unbox

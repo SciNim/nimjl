@@ -1,5 +1,5 @@
 import ../config
-import jlcores
+import ./jlcores
 
 ## Box & Unbox
 {.push nodecl, header: JuliaHeader, dynlib: JuliaLibName.}

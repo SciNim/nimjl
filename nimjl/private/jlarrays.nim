@@ -1,6 +1,6 @@
 import ../config
-import jlcores
-import strformat
+import ./jlcores
+import std/strformat
 
 {.push header: JuliaHeader.}
 let
@@ -81,7 +81,7 @@ proc julia_make_array*[T](data: ptr UncheckedArray[T], dims: openArray[int]): pt
   var array_type = julia_apply_array_type[T](dims.len)
   result = jl_ptr_to_array(array_type, data, jl_eval_string(dimStr), 0.cint)
 
-proc julia_alloc_array*[T](dims: openArray[int]): ptr jl_array =
+proc julia_alloc_array*(dims: openArray[int], T: typedesc): ptr jl_array =
   case dims.len
   of 1:
     var array_type = julia_apply_array_type[T](1)

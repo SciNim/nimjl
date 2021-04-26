@@ -1,10 +1,10 @@
-import coretypes
-import private/jlfuncs
-import strformat
+import ./coretypes
+import ./private/jlfuncs
+import std/strformat
 
 # Get a function
 proc getJlFunc*(funcname: string): JlFunc =
-  result = jl_get_function(jlMain, funcname)
+  result = jl_get_function(JlMain, funcname)
   jlExceptionHandler()
   if isNil(result):
     raise newException(JlError, &"Function {funcname} does not exists.")
@@ -32,7 +32,7 @@ proc jlCall*(jlmod: JlModule, jlfuncname: string, va: varargs[JlValue, toJlVal])
   result = jlCall(f, va)
 
 proc jlCall*(jlfuncname: string, va: varargs[JlValue, toJlVal]): JlValue =
-  result = jlCall(jlMain, jlfuncname, va)
+  result = jlCall(JlMain, jlfuncname, va)
 
 # Include file or use module
 # Check for nil result

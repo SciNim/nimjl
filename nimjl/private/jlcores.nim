@@ -1,6 +1,6 @@
 import ../config
-import strutils
-import strformat
+import std/strutils
+import std/strformat
 
 {.used.}
 {.push header: JuliaHeader.}

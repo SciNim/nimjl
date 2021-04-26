@@ -1,4 +1,4 @@
-import config
+import ./config
 
 ## GC Functions to root
 ## Must be inline

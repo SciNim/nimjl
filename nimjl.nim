@@ -22,3 +22,5 @@ export gc
 import nimjl/modfuncs
 export modfuncs
 
+import nimjl/interop
+export interop
