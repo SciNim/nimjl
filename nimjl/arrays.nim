@@ -1,6 +1,7 @@
 import ./coretypes
 import ./private/jlcores
 import ./private/jlarrays
+import ./modfuncs
 
 import arraymancer
 
@@ -26,6 +27,9 @@ proc ndims*[T](x: JlArray[T]): int =
 
 proc dim*[T](x: JlArray[T], dim: int): int =
   result = jl_array_dim(x, dim.cint)
+
+proc size*[T](x: JlArray[T]): JlArray[int] =
+  result = jlCall("size", cast[JlValue](x)).toJlArray(int)
 
 proc shape*[T](x: JlArray[T]): seq[int] =
   for i in 0..<x.ndims():
