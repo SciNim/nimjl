@@ -34,7 +34,7 @@ proc boxUnbox() =
 
 proc callJulia() =
   var x = jlBox[float64](4.0)
-  var f = getJlFunc(jlBase, "sqrt");
+  var f = getJlFunc(JlBase, "sqrt");
   var res = jlCall(f, x)
   check jlUnbox[float64](res) == 2.0
   check jlUnbox[float64](x) == 4.0
@@ -65,7 +65,7 @@ proc jlArray1D() =
     for i in 0..<len(x):
       xData[i] = i.float64
 
-    var reverse = getJlFunc(jlBase, "reverse!")
+    var reverse = getJlFunc(JlBase, "reverse!")
     var res = jlCall(reverse, x)
     check not isNil(res)
 

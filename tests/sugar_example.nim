@@ -26,7 +26,7 @@ proc main() =
     # echo ">> ", arr2d.shape()
     echo ">> ", arr2d[_, 1]
     echo ">> ", arr2d[_.._, 1]
-    echo ">> ", arr2d[_.._|2, 1]
+    echo ">> ", arr2d[_.._|+2, 1]
   Julia.exit()
 
 main()

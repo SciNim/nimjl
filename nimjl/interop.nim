@@ -140,7 +140,8 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
   ## or "slicer" if there are SteppedSlices
 
   echo "\n------------------\nOriginal tree"
-  echo args.treerepr
+  # echo args.treerepr
+  echo args.repr
   var r = newNimNode(nnkArglist)
   var ndim = 0
   for nnk in children(args):
@@ -363,7 +364,9 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
     else:
       r.add(nnk)
   echo "\nAfter modif"
-  echo r.treerepr
+  # echo r.treerepr
+  echo r.repr
+  echo "======================"
   # echo r.astGenRepr
   return r
 

@@ -32,8 +32,8 @@ const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
 {.passL: "-Wl,-rpath," & JuliaDepPath.}
 {.passL: "-ljulia".}
 
-# Workaround for Julia 1.6.0
-when (JuliaMajorVersion, JuliaMinorVersion, JuliaPatchVersion) == (1, 6, 0):
+# Workaround for Julia 1.6.0 and 1.6.1
+when (JuliaMajorVersion, JuliaMinorVersion) == (1, 6) and (JuliaPatchVersion == 0 or JuliaPatchVersion == 1):
   const internalJuliaLibName* = JuliaDepPath / libPrefix & "Julia-internal" & libSuffix
   {.passL: "-ljulia-internal".}
 
