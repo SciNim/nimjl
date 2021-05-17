@@ -7,7 +7,7 @@ export coretypes
 import nimjl/boxunbox
 export boxunbox
 
-# import nimjl/config
+import nimjl/config
 # export config
 
 import nimjl/converttypes
@@ -24,3 +24,12 @@ export modfuncs
 
 import nimjl/interop
 export interop
+
+# Uncomment for debugging
+# once:
+#   echo "Nimjl> Using Julia install: ", JuliaPath
+# static:
+# echo "JuliaIncludesPath> ", JuliaIncludesPath
+# echo "JuliaLibPath> ", JuliaLibPath
+# echo "JuliaLibName> ", JuliaLibName
+

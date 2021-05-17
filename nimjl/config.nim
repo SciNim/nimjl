@@ -1,12 +1,12 @@
 import std/os
 import std/strutils
 
-# JuliaPath should be parent folder of Julia-bindir
-# Use Julia -E Sys.BINDIR to get the path
-# Is it possible to resolve this at compile-time ?
-
 const JuliaBinPath = gorge("julia -E Sys.BINDIR").replace("\"", "")
-const JuliaPath* = if not existsEnv("JULIA_PATH"): JuliaBinPath.parentDir() else: getEnv("JULIA_PATH")
+
+# JuliaPath should be parent folder of Julia-bindir
+# This is resolved AT COMPILE TIME. Therefore, using the environment of the machine that compile.
+# If you want to ship a binary, you need to install in a fixed path and pass this path using -d:JuliaPath="/path/to/Julia"
+const JuliaPath* {.strdefine.} = if not existsEnv("JULIA_PATH"): JuliaBinPath.parentDir() else: getEnv("JULIA_PATH")
 const JuliaIncludesPath* = JuliaPath / "include" / "julia"
 const JuliaHeader* = "julia.h"
 const JuliaLibPath* = JuliaPath / "lib"
@@ -38,8 +38,3 @@ when (JuliaMajorVersion, JuliaMinorVersion) == (1, 6) and (JuliaPatchVersion == 
   const internalJuliaLibName* = JuliaDepPath / libPrefix & "Julia-internal" & libSuffix
   {.passL: "-ljulia-internal".}
 
-# static:
-#   echo "JuliaPath> ", JuliaPath
-#   echo "JuliaIncludesPath> ", JuliaIncludesPath
-#   echo "JuliaLibPath> ", JuliaLibPath
-#   echo "JuliaLibName> ", JuliaLibName
