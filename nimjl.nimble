@@ -1,7 +1,6 @@
 # Nimjl
 # Licensed and distributed under MIT license (license terms in the root directory or at http://opensource.org/licenses/MIT).
-
-version       = "0.5.1"
+version       = "0.5.0"
 author        = "Regis Caillaud"
 description   = "Nim Julia bridge"
 license       = "MIT"
