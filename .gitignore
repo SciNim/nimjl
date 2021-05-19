@@ -1,7 +1,10 @@
 bin/
 .vscode
-tests/testfull
-tests/testleak
-tests/test_sugar
+testfull
+testleak
+teststacktrace
 testresults/
 nimcache/
+
+sugar_example
+sugar_example.nim

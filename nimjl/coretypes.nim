@@ -1,5 +1,6 @@
 import ./config
 import ./private/jlcores
+import ./private/jlfuncs
 
 type
   JlValue* = ptr jl_value
@@ -40,10 +41,17 @@ proc jlVmExit*(exit_code: cint = 0.cint) =
     return
   raise newException(JlError, "jl_atexit_hook() must be called once per process")
 
+proc jlStacktrace*() =
+  let stacktrace_func = jl_get_function(JlMain, "stacktrace")
+  let stacktrace = julia_exec_func(stacktrace_func)
+  let println_func = jl_get_function(JlMain, "println")
+  discard julia_exec_func(println_func, stacktrace)
+
 proc jlExceptionHandler*() =
   let excpt : JlValue = jl_exception_occurred()
   if not isNil(excpt):
     let msg = $(jl_exception_message())
+    jlStacktrace()
     raise newException(JlError, msg)
   else:
     discard

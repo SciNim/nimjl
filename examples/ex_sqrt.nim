@@ -5,7 +5,8 @@ jlVmInit() # Initialize Julia VM. This should be done once in the lifetime of yo
 
 var myval = 4.0'f64
 # Call Julia function "sqrt" and convert the result to a float
-var res = jlCall("sqrt", myval).to(float64)
+# This syntax also works to call a function directly from a Julia modfule
+var res = JlBase.sqrt(myval).to(float64)
 echo res # 2.0
 doAssert res == sqrt(myval)
 

@@ -5,14 +5,14 @@ import nimjl
 
 randomize()
 proc main() =
-  jlVmInit() # Initialize Julia VM. This should be done once in the lifetime of your program.
+  Julia.init() # Initialize Julia VM. This should be done once in the lifetime of your program.
   block sort:
     var seqRand: seq[int64] = newSeqWith(12, rand(100)).map(x => x.int64)
     echo "Unsorted seqRand=", seqRand
     # Can manually convert Nim array to Julia array without copy
     var jlRandArray = jlArrayFromBuffer(seqRand)
     # Return a sorted version of the array and do not modify original
-    var res = jlCall("sort", jlRandArray)
+    var res = Julia.sort(jlRandArray)
 
     # Since the "res" value has been allocated by Julia, it depends on JL's garbage collector
     # Read more about this topic here : https://docs.julialang.org/en/v1/manual/embedding/index.html#Memory-Management
@@ -35,12 +35,13 @@ proc main() =
     var seqRand: seq[int64] = newSeqWith(12, rand(100)).map(x => x.int64)
     echo "Unsorted seqRand=", seqRand
     # sort! (notice the "!") modify the original array
+    # Due to ! you cannot use implicit syntax Jula.func here
     # Can automatically convert seq
     discard jlCall("sort!", seqRand)
     # Notice how arrays are passed by buffer and thus this has modified the original seq
     echo "Sorted seqRand=", seqRand
 
-  jlVmExit() # Exit Julia VM. This can be done only once in the lifetime of your program.
+  Julia.exit() # Exit Julia VM. This can be done only once in the lifetime of your program.
 
 when isMainModule:
   main()

@@ -19,7 +19,7 @@ proc lastindex[T](x: JlArray[T], dim: int): int =
 
 template makerange[T](x: JlArray[T], start, stop, step : int) : untyped =
   # Step = 0 is absurd
-  var step = if step != 0: step else: 1
+  # var step = if step != 0: step else: 1
   if step > 0:
     toSeq(countup(start, stop, step))
   else:
@@ -28,6 +28,7 @@ template makerange[T](x: JlArray[T], start, stop, step : int) : untyped =
 
 
 # This comes from arraymancer
+# |2 syntax is parsed but not used for now
 macro desugar*[T](x: JlArray[T], args: untyped): void =
   ## Transform all syntactic sugar in arguments to integer or SteppedSlices
   ## It will then be dispatched to "atIndex" (if specific integers)
@@ -128,7 +129,7 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
       ## [_.._, 3] into [Span, 3]
       r.add(quote do: JlColon())
 
-    elif nnk0_inf_dotdot and nnk1_joker and nnk20_bar_all and nnk21_joker:
+    elif nnk0_inf_dotdot and nnk1_joker and nnk21_joker: #and nnk20_bar_all :
       ## [_.._|2, 3] into [0..^1|2, 3]
       ## [_.._|+2, 3] into [0..^1|2, 3]
       ## [_.._|-2 doesn't make sense and will throw out of bounds
@@ -138,6 +139,7 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
         quote do:
           makerange(`x`, firstindex(`x`, `ndim`), lastindex(`x`, `ndim`), `step`)
       )
+
     elif nnk0_inf_dotdot_all and nnk1_joker and nnk20_bar_all:
       ## [_..10|1, 3] into [0..10|1, 3]
       ## [_..^10|1, 3] into [0..^10|1, 3]   # ..^ directly creating SteppedSlices may introduce issues in seq[0..^10]
@@ -163,7 +165,6 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
           quote do:
             makerange(`x`, firstindex(`x`, `ndim`), lastindex(`x`, `ndim`)-`stop`+1, `step`)
         )
-
     elif nnk0_inf_dotdot_all and nnk1_joker:
       ## Identical as above but force step as 1
       ## [_..10, 3] into [0..10|1, 3]
@@ -255,6 +256,7 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
     elif nnk0_pre_hat:
       ## [^2, 3] into [^2..^2|1, 3]
       r.add(prefix(infix(nnk[1], "..^", infix(nnk[1], "|", newIntLitNode(1))), "^"))
+
     else:
       r.add(nnk)
   echo "\nAfter modif"
