@@ -33,20 +33,23 @@ How to embed Julia w/ C :
 ## Next steps 
 
 Julia is mostly oriented towards numerical computing so Arrays are THE most important data structure to support
-### In-progress
-* Improve Julia Arrays interop. from Nim
 
-TODO List :
-  * Create JlArray from Nim openArray in one-liner : ``toJlArray[T](input: openArray[T]) = # ...``
+### In-progress
+
+Mostly quality-of-life improvements, especially when handling arrays.
+
+* Improve Julia Arrays interop. from Nim.
   * Support Julia ``Base.view``, ``Base.getindex``, ``Base.setindex!`` (ref. https://docs.julialang.org/en/v1/base/arrays/#Base.view) as ``[]`` and ``[]=`` syntax.
     * Create macros for slices support
 
   * Create Array API with most common proc
     * Implement Matrix calc. operators : `*`, `+`, `-`, `/`, "Dotted operator" ``*.``, ``+.``, ``-.``, ``/.``
     * Implement ``asType`` function mapped ``Base.reinterpret`` (ref. https://docs.julialang.org/en/v1/base/arrays/#Base.reinterpret) and ``reshape`` with ``Base.reshape``
+
   * Handle row major vs column major transposition
   * map / apply / reduce /fold
   * Iterators
+
   * GPU Support ?
 
 ### Backlog
@@ -76,27 +79,17 @@ Here is the basic API usage :
 ```nim
 import nimjl
 
-jlVmInit() # Initialize Julia VM. This should be done once in the lifetime of your program.
+Julia.init() # Initialize Julia VM. This should be done once in the lifetime of your program.
 
 var myval = 4.0'f64
 # Call Julia function "sqrt" and convert the result to a float
-var res = jlCall("sqrt", myval).to(float64)
+var res = Julia.sqrt(myval).to(float64)
 echo res # 2.0
 
-jlVmExit() # Exit Julia VM. This can be done only once in the lifetime of your program.
+Julia.exit() # Exit Julia VM. This can be done only once in the lifetime of your program.
 ```
 
-Take a look at ``tests/testfull.nim`` and the ``examples/`` folder for  more examples. 
-
-## Checking Memory Leak
-
-The test ``tests/testleak.nim`` run the full tests suites (with multiple allocations in both Nim and Julia) continuously for 60 seconds.
-At the end of each test, Julia's garbage collector is called manually and a bash script trace the graph of memory and virtual memory (Linux only).
-This is to make sure that Julia's memory get cleaned up on exit and that there is on weird GC interaction that makes memory consumption increase over time when using the Julia VM.
-
-If there is a simpler way to do this, feel free to open a PR ! 
-
-![](memgraph.png)
+Take a look at the ``examples/`` folder for  more examples. 
 
 # Documentation
 

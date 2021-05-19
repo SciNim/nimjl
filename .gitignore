@@ -1,10 +1,16 @@
-bin/
 .vscode
+bin/
 testfull
 testleak
 teststacktrace
+
 testresults/
 nimcache/
 
+install/
+third_party/
+
 sugar_example
 sugar_example.nim
+
+memgraph.png

@@ -1,5 +1,10 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.5.0 - 2021_05_XX
+===========================
+* Add Nim interop syntax
+* Started work on indexing Julia Arrays natively
+
 Release v0.4.5 - 2021_04_02
 ===========================
 * Fixed char* / const char* with clang issue
