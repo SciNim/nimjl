@@ -1,8 +1,8 @@
 import ../config
-import basetypes_helpers
+import ./jlcores
 
 ## Box & Unbox
-{.push nodecl, header: juliaHeader, dynlib: juliaLibName.}
+{.push nodecl, header: JuliaHeader, dynlib: JuliaLibName.}
 proc jl_unbox_float64*(value: ptr jl_value): float64 {.importc.}
 proc jl_unbox_float32*(value: ptr jl_value): float32 {.importc.}
 

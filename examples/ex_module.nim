@@ -2,7 +2,7 @@ import nimjl
 
 type MyTuple = tuple[nimTupKey1: int, nimTupKey2: int]
 
-jlVmInit() # Initialize Julia VM. This should be done once in the lifetime of your program.
+Julia.init() # Initialize Julia VM. This should be done once in the lifetime of your program.
 
 # Include Julia file
 jlInclude("ex_module.jl")
@@ -11,7 +11,7 @@ jlUseModule(".nimjlExample")
 
 # Look, you can pass Nim tuple to Julia
 var mytup: MyTuple = (nimTupKey1: 1, nimTupKey2: 2)
-var res = jlCall("customFunction", mytup)
+var res = Julia.customFunction(mytup)
 var nimres = res.to(MyTuple)
 
 echo myTup
@@ -20,4 +20,4 @@ echo nimres
 doAssert myTup.nimTupKey1+1 == nimres.nimTupKey1
 doAssert myTup.nimTupKey2+1 == nimres.nimTupKey2
 
-jlVmExit() # Exit Julia VM. This can be done only once in the lifetime of your program.
+Julia.exit() # Exit Julia VM. This can be done only once in the lifetime of your program.

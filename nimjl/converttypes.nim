@@ -1,11 +1,12 @@
-import basetypes
-import boxunbox
-import arrays
+import ./coretypes
+import ./boxunbox
+import ./arrays
 
-import json
-import tables
-import options
 import arraymancer
+
+import std/json
+import std/tables
+import std/options
 
 {.push inline.}
 ## Julia -> Nim
@@ -31,14 +32,13 @@ proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
     raise newException(JlError, "Tensor only support up to 6 dimensions")
   tensor = newTensor[T](x.shape)
   if x.len > 0:
-    let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
-    copyMem(tensor.get_offset_ptr(), x.getRawData(), nbytes)
+    # Can create a view as well
+    let tmp = fromBuffer[T](x.getRawData(), x.shape())
+    tensor = tmp.clone()
+    # let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
+    # copyMem(tensor.get_offset_ptr(), x.getRawData(), nbytes)
 
 proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
-  # Tensor tmp version
-  # var tmp : Tensor[T]
-  # toNimVal(x, tmp)
-  # locseq = tmp.toSeq
   let x = toJlArray[T](x)
   if x.ndims > 1:
     raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
@@ -142,3 +142,18 @@ proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue  =
   result = nimTableToJlDict(x)
 
 {.pop.}
+import modfuncs
+proc `$`*(val: JlValue) : string =
+  jlCall("string", val).to(string)
+
+proc `$`*(val: JlModule) : string =
+  jlCall("string", val).to(string)
+
+proc `$`*[T](val: JlArray[T]) : string =
+  jlCall("string", val).to(string)
+
+proc `$`*(val: JlFunc) : string =
+  jlCall("string", val).to(string)
+
+proc `$`*(val: JlSym) : string =
+  jlCall("string", val).to(string)

@@ -1,32 +1,40 @@
-import os
-import strutils
+import std/os
+import std/strutils
 
-# juliaPath should be parent folder of julia-bindir
-# Use julia -E Sys.BINDIR to get the path
-# Is it possible to resolve this at compile-time ?
+const JuliaBinPath = gorge("julia -E Sys.BINDIR").replace("\"", "")
 
-const juliaBinPath = gorge("julia -E Sys.BINDIR").replace("\"", "")
-const juliaPath* = if not existsEnv("JULIA_PATH"): juliaBinPath.parentDir() else: getEnv("JULIA_PATH")
-const juliaIncludesPath* = juliaPath / "include" / "julia"
-const juliaHeader* = "julia.h"
-const juliaLibPath* = juliaPath / "lib"
-const juliaDepPath* = juliaPath / "lib" / "julia"
+# JuliaPath should be parent folder of Julia-bindir
+# This is resolved AT COMPILE TIME. Therefore, using the environment of the machine that compile.
+# If you want to ship a binary, you need to install in a fixed path and pass this path using -d:JuliaPath="/path/to/Julia"
+const JuliaPath* {.strdefine.} = if not existsEnv("JULIA_PATH"): JuliaBinPath.parentDir() else: getEnv("JULIA_PATH")
+const JuliaIncludesPath* = JuliaPath / "include" / "julia"
+const JuliaHeader* = "julia.h"
+const JuliaLibPath* = JuliaPath / "lib"
+const JuliaDepPath* = JuliaPath / "lib" / "julia"
 
+const JlVersionCmd = JuliaPath / "bin" / "julia" & " -E VERSION"
+const JuliaVersion = gorge(JlVersionCmd).split("\"")[1].split(".")
+  # For release : result has the form ["v", "1.6.0", ""] -> splitting [1] yiels ["1", "6, "0"]
+  # For dev: result has the form ["v", "1.7.0-DEV", "667"] -> splitting [1] yiels ["1", "7, "0-DEV", "667"]
+const JuliaMajorVersion* = JuliaVersion[0].parseInt
+const JuliaMinorVersion* = JuliaVersion[1].parseInt
+const JuliaPatchVersion* = JuliaVersion[2].parseInt
 const libPrefix = "lib"
 const libSuffix = ".so"
-const juliaLibName* = juliaLibPath / libPrefix & "julia" & libSuffix
+const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
 
 # TODO: handle more platform
-{.passC: " -DJULIA_ENABLE_THREADING=1".}
-{.passC: "-I" & juliaIncludesPath.}
-{.passL: "-L" & juliaLibPath.}
-{.passL: "-Wl,-rpath," & juliaLibPath.}
-{.passL: "-L" & juliaDepPath.}
-{.passL: "-Wl,-rpath," & juliaDepPath.}
+{.passC: " -DJulia_ENABLE_THREADING=1".}
+{.passC: "-I" & JuliaIncludesPath.}
+{.passL: "-L" & JuliaLibPath.}
+{.passL: "-Wl,-rpath," & JuliaLibPath.}
+{.passL: "-L" & JuliaDepPath.}
+{.passL: "-Wl,-rpath," & JuliaDepPath.}
 {.passL: "-ljulia".}
 
-# static:
-#   echo "juliaPath> ", juliaPath
-#   echo "juliaIncludesPath> ", juliaIncludesPath
-#   echo "juliaLibPath> ", juliaLibPath
-#   echo "juliaLibName> ", juliaLibName
+# Workaround for Julia 1.6.0 and 1.6.1
+# See https://github.com/JuliaLang/julia/issues/40524
+when (JuliaMajorVersion, JuliaMinorVersion) == (1, 6) and (JuliaPatchVersion == 0 or JuliaPatchVersion == 1):
+  const internalJuliaLibName* = JuliaDepPath / libPrefix & "Julia-internal" & libSuffix
+  {.passL: "-ljulia-internal".}
+

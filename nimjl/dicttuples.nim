@@ -1,8 +1,8 @@
-import basetypes
-import functions
+import ./coretypes
+import ./modfuncs
 
-import tables
-import strutils
+import std/tables
+import std/strutils
 
 
 proc jlTupleToNim*(val: JlValue, tup: var tuple) =
@@ -50,10 +50,10 @@ import converttypes
 proc nimToJlTuple*(v: tuple|object): JlValue =
   result = jlEval("NamedTuple()")
   for name, field in v.fieldPairs:
-    result = jlCall(jlBaseModule, "setindex", result, toJlVal(field), jlSym(name))
+    result = jlCall(JlBase, "setindex", result, toJlVal(field), jlSym(name))
 
 proc nimTableToJlDict*[U, V: string|SomeNumber](tab: Table[U, V]): JlValue =
   result = jlEval("Dict()")
   for name, field in tab:
-    discard jlCall(jlBaseModule, "setindex!", result, toJlVal(field), name)
+    discard jlCall(JlBase, "setindex!", result, toJlVal(field), name)
 
