@@ -1,2 +1,4 @@
 legacy/cexamples/* linguist-vendored
 legacy/cfunccall/* linguist-vendored
+legacy/cfunccall/src/* linguist-vendored
+legacy/cfunccall/src/csrc* linguist-vendored
