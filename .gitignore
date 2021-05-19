@@ -3,6 +3,7 @@ bin/
 testfull
 testleak
 teststacktrace
+legacy
 
 testresults/
 nimcache/
