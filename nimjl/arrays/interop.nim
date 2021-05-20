@@ -1,5 +1,6 @@
 import ../arrays
 import ../types
+import ../cores
 
 import ../private/jlarrays
 import ../private/jlcores
@@ -90,3 +91,30 @@ proc toJlArray*[T: seq|array](oa: openarray[T]): auto =
   copyMem(cast[ptr jl_array](res).jl_array_data(), unsafeAddr(oa[0]), nbytes)
   arrays.toJlArray(res, BaseType)
 
+proc firstindex*[T](val: JlArray[T], dim: int) : int =
+  Julia.firstindex(val, dim).to(int)
+
+proc lastindex*[T](val: JlArray[T], dim: int) : int =
+  Julia.lastindex(val, dim).to(int)
+
+proc iterate*[T](val: JlArray[T]): JlValue =
+  result = JlMain.iterate(val)
+  if result == JlNothing or len(result) != 2:
+    raise newException(JlError, "Non-iterable Array. This shouldn't be possible, but reality and life are often strange.")
+
+proc iterate*[T](val: JlArray[T], state: JlValue): JlValue =
+  result = JlMain.iterate(val, state)
+
+iterator items*[T](val: JlArray[T]): T =
+  var it = iterate(val)
+  while it != JlNothing:
+    yield it.getindex(1).to(T)
+    it = iterate(val, it.getindex(2))
+
+iterator enumerate*[T](val: JlArray[T]): (int, T) =
+  var it = iterate(val)
+  var i = 0
+  while it != JlNothing:
+    yield (i, it.getindex(1).to(T))
+    it = iterate(val, it.getindex(2))
+    inc(i)

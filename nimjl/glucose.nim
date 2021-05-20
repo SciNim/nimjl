@@ -105,24 +105,18 @@ proc len*(val: JlValue) : int =
 proc firstindex*(val: JlValue) : int =
   Julia.firstindex(val).to(int)
 
-proc firstindex*[T](val: JlArray[T], dim: int) : int =
-  Julia.firstindex(val, dim).to(int)
-
 proc lastindex*(val: JlValue) : int =
   Julia.lastindex(val).to(int)
-
-proc lastindex*[T](val: JlArray[T], dim: int) : int =
-  Julia.lastindex(val, dim).to(int)
 
 template getindex*(val: JlValue, idx: varargs[untyped]) : JlValue =
   Julia.getindex(val, idx)
 
-proc iterate(val: JlValue) : JlValue  =
+proc iterate*(val: JlValue) : JlValue  =
   result = JlMain.iterate(val)
   if result == JlNothing or len(result) != 2:
     raise newException(JlError, "Non-iterable value")
 
-proc iterate(val: JlValue, state: JlValue) : JlValue =
+proc iterate*(val: JlValue, state: JlValue) : JlValue =
   result = JlMain.iterate(val, state)
 
 iterator items*(val: JlValue) : JlValue =
@@ -139,16 +133,3 @@ iterator enumerate*(val: JlValue) : (int, JlValue) =
     it = iterate(val, it.getindex(2))
     inc(i)
 
-# iterator items*[T](val: JlArray[T]) : T=
-#   var it = iterate(val)
-#   while it != JlNothing:
-#     yield it.getindex(1).to(T)
-#     it = iterate(val, it.getindex(2))
-#
-# iterator enumerate*[T](val: JlArray[T]) : (int, T) =
-#   var it = iterate(val)
-#   var i = 0
-#   while it != JlNothing:
-#     yield (i, it.getindex(1).to(T))
-#     it = iterate(val, it.getindex(2))
-#     inc(i)

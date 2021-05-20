@@ -1,43 +1,37 @@
 import ../types
 import ../functions
+import ./interop
 
 import std/macros
 import std/sequtils
 
-# TODO FINISH THIS
-# This file is not exported and is still a WIP
-
 {.experimental: "views".}
+
 proc JlColon(): JlValue =
   jlCall(JlBase, "Colon")
 
-proc firstindex[T](x: JlArray[T], dim: int): int =
-  jlCall("firstindex", x, dim).to(int)
+proc makerange(x: JlValue, start, stop: int, step : int) : JlValue =
+  let makerangestr = (&"{start}:{step}:{stop}")
+  # echo ">> ", makerangestr
+  jlEval(makerangestr)
 
-proc lastindex[T](x: JlArray[T], dim: int): int =
-  jlCall("lastindex", x, dim).to(int)
-
-template makerange[T](x: JlArray[T], start, stop, step : int) : untyped =
-  # Step = 0 is absurd
-  # var step = if step != 0: step else: 1
-  if step > 0:
-    toSeq(countup(start, stop, step))
-  else:
-    let step = abs(step)
-    toSeq(countdown(stop, start, step))
-
+proc makerange(x: JlValue, start, stop: int) : JlValue =
+  let makerangestr = (&"{start}:{stop}")
+  # echo ">> ", makerangestr
+  jlEval(makerangestr)
 
 # This comes from arraymancer
 # |2 syntax is parsed but not used for now
-macro desugar*[T](x: JlArray[T], args: untyped): void =
-  ## Transform all syntactic sugar in arguments to integer or SteppedSlices
-  ## It will then be dispatched to "atIndex" (if specific integers)
-  ## or "slicer" if there are SteppedSlices
+macro desugar*(x: JlValue, args: untyped): void =
+  ## Transform all syntactic sugar in arguments to integer or slices
 
-  echo "\n------------------\nOriginal tree"
+  # echo "\n------------------\nOriginal tree"
   # echo args.treerepr
   echo args.repr
+  echo "----------------------"
+
   var r = newNimNode(nnkArglist)
+  # for nnk in children(args):
   var ndim = 0
   for nnk in children(args):
     inc(ndim)
@@ -79,7 +73,7 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
       eqIdent(nnk[1], "_")
     )
 
-    # Node is of the form "_ `op` *"
+    # Node is of the form "_ `op`^*"
     let nnk10_hat = (
       nnk.kind == nnkInfix and
       nnk[1].kind == nnkPrefix and
@@ -214,9 +208,8 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
       )
     elif nnk0_inf_dotdot and nnk20_bar_min and nnk21_joker:
       ## Raise error on [5.._|-1, 3]
-      raise newException(IndexDefect, "Please use explicit end of range " &
-                       "instead of `_` " &
-                       "when the steps are negative")
+      raise newException(IndexDefect, "Please use explicit end of makerange instead of `_` when the steps are negative")
+
     elif nnk0_inf_dotdot_all and nnk10_hat and nnk20_bar_all:
       # We can skip the parenthesis in the AST
       ## [^1..2|-1, 3] into [^(1..2|-1), 3]
@@ -224,10 +217,12 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
       let start = nnk[1][1]
       let stop = nnk[1][2]
       let step = nnk[2] # Should be < 0
+
       r.add(
         quote do:
           makerange(`x`, `start`, `stop`, `step`)
       )
+
     elif nnk0_inf_dotdot_all and nnk10_hat:
       # We can skip the parenthesis in the AST
       ## [^1..2*3, 3] into [^(1..2*3|1), 3]
@@ -240,26 +235,70 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
       let step = -1 # Should be < 0
       r.add(
         quote do:
-          makerange(`x`, `start`, `stop`, `step`)
+          makerange(`x`, lastindex(`x`, `ndim`)-`start`+1, `stop`, `step`)
       )
 
     # TODO Finish this
     elif nnk0_inf_dotdot_all and nnk20_bar_all:
       ## [1..10|1] as is
       ## [1..^10|1] as is
-      r.add(nnk)
+      let start = nnk[1]
+      let stop = nnk[2][1]
+      let step = nnk[2][2]
+
+      if nnk0_inf_dotdot:
+        r.add(
+          quote do:
+            makerange(`x`, `start`, `stop`, `step`)
+        )
+      elif nnk0_inf_dotdot_inf:
+        let step = nnk[2][2]
+        r.add(
+          quote do:
+            makerange(`x`, `start`, `stop`-1, `step`)
+        )
+      elif nnk0_inf_dotdot_alt:
+        let step = nnk[2][2]
+        r.add(
+          quote do:
+            makerange(`x`, `start`, lastindex(`x`, `ndim`)-`stop`+1, `step`)
+        )
+
     elif nnk0_inf_dotdot_all:
       ## [1..10, 3] to [1..10|1, 3]
       ## [1..^10, 3] to [1..^10|1, 3]
       ## [1..<10, 3] to [1..<10|1, 3]
-      r.add(infix(nnk[1], $nnk[0], infix(nnk[2], "|", newIntLitNode(1))))
+      # r.add(infix(nnk[1], $nnk[0], infix(nnk[2], "|", newIntLitNode(1))))
+      let start = nnk[1]
+      let stop = nnk[2]
+      if nnk0_inf_dotdot:
+        r.add(
+          quote do:
+            makerange(`x`, `start`, `stop`)
+        )
+      elif nnk0_inf_dotdot_inf:
+        r.add(
+          quote do:
+            makerange(`x`, `start`, `stop`-1)
+        )
+      elif nnk0_inf_dotdot_alt:
+        r.add(
+          quote do:
+            makerange(`x`, `start`, lastindex(`x`, `ndim`)-`stop`+1)
+        )
+
     elif nnk0_pre_hat:
       ## [^2, 3] into [^2..^2|1, 3]
-      r.add(prefix(infix(nnk[1], "..^", infix(nnk[1], "|", newIntLitNode(1))), "^"))
+      # r.add(prefix(infix(nnk[1], "..^", infix(nnk[1], "|", newIntLitNode(1))), "^"))
+      let stop = nnk[1]
+      r.add(
+        quote do:
+          lastindex(`x`, `ndim`) - `stop` + 1
+      )
 
     else:
       r.add(nnk)
-  echo "\nAfter modif"
+  # echo "\nAfter modif"
   # echo r.treerepr
   echo r.repr
   echo "======================"
@@ -269,14 +308,14 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
 macro `[]`*[T](x: JlArray[T], args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
-    jlCall("getindex", `x`, `new_args`) #.toJlArray(T)
+    jlCall("getindex", `x`, `new_args`).toJlArray(T)
 
 macro `[]`*[T](x: var JlArray[T], args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
-    jlCall("view", `x`, `new_args`) #.toJlArray(T)
+    jlCall("view", `x`, `new_args`).toJlArray(T)
 
 macro `[]=`*[T](x: JlArray[T], args: varargs[untyped], val: T) =
   let new_args = getAST(desugar(x, args))
   quote do:
-    discard jlCall("setindex!", `x`, `val`, `new_args`) #.toJlArray(T)
+    discard jlCall("setindex!", `x`, `val`, `new_args`).toJlArray(T)
