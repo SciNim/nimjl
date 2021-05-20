@@ -3,8 +3,8 @@
 import ./types
 import ./cores
 import ./functions
-import ./sugar/converttypes
 
+import ./sugar/converttypes
 import ./private/jlcores
 
 type Julia* = object
@@ -22,7 +22,7 @@ template `.`*(jlmod: JlModule, funcname: untyped, args: varargs[JlValue, toJlVal
   jlCall(jlmod, astToStr(funcname), args)
 
 # typeof is taken by Nim already
-proc jltypeof*(jl: type Julia, x: JlValue): JlValue =
+proc jltypeof*(x: JlValue): JlValue =
   jlCall("typeof", x)
 
 proc `$`*(val: JlValue) : string =
@@ -41,11 +41,9 @@ proc `$`*(val: JlSym) : string =
   jlCall("string", val).to(string)
 
 # Julia operators
-
 # Unary operator
 proc `+`*(val: JlValue) : JlValue =
   Julia.`+`(val)
-
 # Minus unary operator
 proc `-`*(val: JlValue) : JlValue =
   Julia.`-`(val)
@@ -104,10 +102,21 @@ proc `!==`*(val1, val2: JlValue) : bool =
 proc len*(val: JlValue) : int =
   Julia.length(val).to(int)
 
-proc getindex*(val: JlValue, idx: int) : JlValue =
+proc firstindex*(val: JlValue) : int =
+  Julia.firstindex(val).to(int)
+
+proc firstindex*[T](val: JlArray[T], dim: int) : int =
+  Julia.firstindex(val, dim).to(int)
+
+proc lastindex*(val: JlValue) : int =
+  Julia.lastindex(val).to(int)
+
+proc lastindex*[T](val: JlArray[T], dim: int) : int =
+  Julia.lastindex(val, dim).to(int)
+
+template getindex*(val: JlValue, idx: varargs[untyped]) : JlValue =
   Julia.getindex(val, idx)
 
-# let Iterators* = jlGetModule("Iterators")
 proc iterate(val: JlValue) : JlValue  =
   result = JlMain.iterate(val)
   if result == JlNothing or len(result) != 2:
@@ -130,6 +139,16 @@ iterator enumerate*(val: JlValue) : (int, JlValue) =
     it = iterate(val, it.getindex(2))
     inc(i)
 
-
-export converttypes
-
+# iterator items*[T](val: JlArray[T]) : T=
+#   var it = iterate(val)
+#   while it != JlNothing:
+#     yield it.getindex(1).to(T)
+#     it = iterate(val, it.getindex(2))
+#
+# iterator enumerate*[T](val: JlArray[T]) : (int, T) =
+#   var it = iterate(val)
+#   var i = 0
+#   while it != JlNothing:
+#     yield (i, it.getindex(1).to(T))
+#     it = iterate(val, it.getindex(2))
+#     inc(i)

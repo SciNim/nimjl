@@ -1,4 +1,7 @@
 import ./private/jlgc
+# Some of those private function can still be useful
+# A power user confident enough to interact with garbage collector can handle a few private functions
+export jlgc
 
 proc jlGcCollect*() =
   jl_gc_collect(jlGcFull)

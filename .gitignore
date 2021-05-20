@@ -2,7 +2,7 @@
 bin/
 testfull
 testleak
-teststacktrace
+testindex
 legacy
 
 testresults/
@@ -10,8 +10,5 @@ nimcache/
 
 install/
 third_party/
-
-sugar_example
-sugar_example.nim
 
 memgraph.png

@@ -16,9 +16,10 @@ export functions
 import nimjl/glucose
 export glucose
 
-# import nimjl/config
-# export config
+import nimjl/sugar/converttypes
+export converttypes
 
+# import nimjl/config
 # Uncomment for debugging
 # once:
 #   echo "Nimjl> Using Julia install: ", JuliaPath
