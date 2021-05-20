@@ -65,4 +65,5 @@ proc jlGetModule*(modname: string): JlModule =
     raise newException(JlError, "&Cannot load module {modname}")
   result = cast[JlModule](tmp)
 
-
+# JlNothing is handy to have
+template JlNothing*() : JlValue = jlEval("nothing")

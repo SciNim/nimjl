@@ -136,7 +136,7 @@ proc nimValueToJlValue[T](x: Option[T]): JlValue  =
   if isSome(x):
     result = toJlVal(get(x))
   else:
-    result = jlEval("nothing")
+    result = JlNothing
 
 proc nimValueToJlValue(x: tuple): JlValue  =
   result = nimToJlTuple(x)

@@ -362,6 +362,38 @@ proc runTensorArgsTest*() =
     test "external_module : rot180[Tensor]":
       tensorBuiltinRot180()
 
+proc arrayIterator() =
+  block:
+    var xx = toSeq(0..<10).toJlArray()
+    var i = 0
+    for x in xx:
+      check x.to(int) == i
+      check x == toJlValue(i)
+      inc(i)
+
+  block:
+    var refxx = toSeq(0..<10)
+    var xx = toSeq(0..<10).toJlArray()
+    for i, x in enumerate(xx):
+      check x.to(int) == refxx[i]
+      check x == toJlValue(refxx[i])
+
+proc tupleIterator() =
+  var xx = (1, 3, 5, 7, 9, 11,).toJlValue()
+  var i = 1
+  for x in xx:
+    check x.to(int) == i
+    inc(i)
+    inc(i)
+
+proc runIteratorsTest*() =
+  suite "Iterators":
+    teardown: jlGcCollect()
+    test "Array Iterators":
+      arrayIterator()
+    test "Tuple Iterators":
+      tupleIterator()
+
 proc runExternalsTest*() =
   suite "external module":
     teardown: jlGcCollect()
@@ -380,6 +412,7 @@ proc runTests*() =
   run1DArrayTest()
   runArrayArgsTest()
   runTensorArgsTest()
+  runIteratorsTest()
   jlVmExit(0)
 
 when isMainModule:
@@ -410,6 +443,8 @@ proc runMemLeakTest*(maxDuration: Duration) =
     runArrayArgsTest()
     sleep(deltaTest.inMilliseconds().int)
     runTensorArgsTest()
+    sleep(deltaTest.inMilliseconds().int)
+    runIteratorsTest()
     sleep(deltaTest.inMilliseconds().int)
 
   # Bye bye Julia

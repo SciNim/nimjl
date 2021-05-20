@@ -40,11 +40,96 @@ proc `$`*(val: JlFunc) : string =
 proc `$`*(val: JlSym) : string =
   jlCall("string", val).to(string)
 
-let Iterators* = jlGetModule("Iterators")
+# Julia operators
+
+# Unary operator
+proc `+`*(val: JlValue) : JlValue =
+  Julia.`+`(val)
+
+# Minus unary operator
+proc `-`*(val: JlValue) : JlValue =
+  Julia.`-`(val)
+
+# Arithmetic
+proc `+`*(val1, val2: JlValue) : JlValue =
+  Julia.`+`(val1, val2)
+
+proc `-`*(val1, val2: JlValue) : JlValue =
+  Julia.`-`(val1, val2)
+
+proc `*`*(val1, val2: JlValue) : JlValue =
+  Julia.`*`(val1, val2)
+
+proc `/`*(val1, val2: JlValue) : JlValue =
+  Julia.`/`(val1, val2)
+
+proc `%`*(val1, val2: JlValue) : JlValue =
+  Julia.`%`(val1, val2)
+
+# Boolean and / or
+proc `and`*(val1, val2: JlValue) : JlValue =
+  Julia.`&&`(val1, val2)
+
+proc `or`*(val1, val2: JlValue) : JlValue =
+  Julia.`||`(val1, val2)
+
+# Bits && ||
+proc bitand*(val1, val2: JlValue) : JlValue =
+  Julia.`&`(val1, val2)
+
+proc bitor*(val1, val2: JlValue) : JlValue =
+  Julia.`|`(val1, val2)
+
+proc equal*(val1, val2: JlValue) : bool =
+  Julia.`==`(val1, val2).to(bool)
+
+# Comparaison
+template `==`*(val1, val2: JlValue) : bool =
+  val1.equal(val2)
+
+proc `!=`*(val1, val2: JlValue) : bool =
+  Julia.`!=`(val1, val2).to(bool)
+
+proc `!==`*(val1, val2: JlValue) : bool =
+  Julia.`!==`(val1, val2).to(bool)
+
+# Assignment
+# TODO
+# +=, -=, /=, *=
+#
+# Dot operators
+# TODO
+# ., .*, ./, .+, .- etc..
+
+proc len*(val: JlValue) : int =
+  Julia.length(val).to(int)
+
+proc getindex*(val: JlValue, idx: int) : JlValue =
+  Julia.getindex(val, idx)
+
+# let Iterators* = jlGetModule("Iterators")
+proc iterate(val: JlValue) : JlValue  =
+  result = JlMain.iterate(val)
+  if result == JlNothing or len(result) != 2:
+    raise newException(JlError, "Non-iterable value")
+
+proc iterate(val: JlValue, state: JlValue) : JlValue =
+  result = JlMain.iterate(val, state)
+
 iterator items*(val: JlValue) : JlValue =
-  var it = Iterators.Stateful(val)
-  while not JlBase.done(it).to(bool):
-    yield JlBase.next(it)
+  var it = iterate(val)
+  while it != JlNothing:
+    yield it.getindex(1)
+    it = iterate(val, it.getindex(2))
+
+iterator enumerate*(val: JlValue) : (int, JlValue) =
+  var it = iterate(val)
+  var i = 0
+  while it != JlNothing:
+    yield (i, it.getindex(1))
+    it = iterate(val, it.getindex(2))
+    inc(i)
+
 
 export converttypes
 
