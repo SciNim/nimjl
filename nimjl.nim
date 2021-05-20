@@ -1,29 +1,23 @@
 import nimjl/arrays
 export arrays
 
-import nimjl/coretypes
-export coretypes
+import nimjl/cores
+export cores
 
-import nimjl/boxunbox
-export boxunbox
-
-import nimjl/config
-# export config
-
-import nimjl/converttypes
-export converttypes
-
-import nimjl/dicttuples
-export dicttuples
+import nimjl/types
+export types
 
 import nimjl/gc
 export gc
 
-import nimjl/modfuncs
-export modfuncs
+import nimjl/functions
+export functions
 
-import nimjl/interop
-export interop
+import nimjl/glucose
+export glucose
+
+# import nimjl/config
+# export config
 
 # Uncomment for debugging
 # once:

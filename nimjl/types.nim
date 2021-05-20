@@ -18,7 +18,6 @@ var
   JlBase*{.importc: "jl_base_module".}: JlModule
   JlTop*{.importc: "jl_top_module".}: JlModule
 
-# TODO : Handle interrupt exception for SIGINT Throw ?
 # Currently, you need to define setControlCHook AFTER jlVmInit() or it won't take effect
 # var jl_interrupt_exception{.importc: "jl_interrupt_exception".}: JlValue
 {.pop.}

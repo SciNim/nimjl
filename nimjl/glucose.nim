@@ -3,11 +3,10 @@
 import ./types
 import ./cores
 import ./functions
+import ./sugar/converttypes
 
-import ./sugar/conversions
-import private/jlcores
+import ./private/jlcores
 
-# Pretty syntax to call Julia function
 type Julia* = object
 
 proc init*(jl: type Julia) =
@@ -41,13 +40,11 @@ proc `$`*(val: JlFunc) : string =
 proc `$`*(val: JlSym) : string =
   jlCall("string", val).to(string)
 
-export conversions
+let Iterators* = jlGetModule("Iterators")
+iterator items*(val: JlValue) : JlValue =
+  var it = Iterators.Stateful(val)
+  while not JlBase.done(it).to(bool):
+    yield JlBase.next(it)
 
-import ./sugar/boxunbox
-export boxunbox
-
-import ./sugar/dicttuples
-export dicttuples
-
-
+export converttypes
 

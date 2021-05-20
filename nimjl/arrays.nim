@@ -8,7 +8,6 @@ import arraymancer
 import std/typetraits
 import std/sequtils
 
-
 proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =
   result = cast[ptr jl_array](x)
 

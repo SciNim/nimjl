@@ -1,4 +1,5 @@
 import ../private/jlcores
+import ../cores
 import ../types
 import ../arrays
 
@@ -117,6 +118,11 @@ proc toJlVal*[T](x: T): JlValue =
   ## Convert a generic Nim type to a JlValue
   nimValueToJlValue(x)
 
+proc toJlValue*[T](x: T): JlValue =
+  ## Alias for toJlVal
+  ## Added for consistency with JlValue type name
+  toJlVal[T](x)
+
 # Recursive import strategy
 import ./dicttuples
 
@@ -130,7 +136,7 @@ proc nimValueToJlValue[T](x: Option[T]): JlValue  =
   if isSome(x):
     result = toJlVal(get(x))
   else:
-    result = jl_eval_string("nothing")
+    result = jlEval("nothing")
 
 proc nimValueToJlValue(x: tuple): JlValue  =
   result = nimToJlTuple(x)
@@ -144,3 +150,5 @@ proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue  =
 
 {.pop.}
 
+export boxunbox
+export dicttuples

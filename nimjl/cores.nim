@@ -1,6 +1,5 @@
-import ./private/jlcores
-import ./private/jlfuncs
 import ./types
+import ./private/jlcores
 
 import std/strformat
 
@@ -25,38 +24,34 @@ proc jlVmExit*(exit_code: cint = 0.cint) =
 proc jlSym*(symname: string): JlSym =
   result = jl_symbol(symname.cstring)
 
-# Julia Error handling
-proc jlStacktrace*() =
-  let println= jl_get_function(JlMain, "println")
-  let backtrace= jl_get_function(JlMain, "backtrace")
-
-  let trace = julia_exec_func(backtrace)
-
-  discard julia_exec_func(println, trace)
-  let lookup= jl_get_function(JlMain, "lookup")
-
 proc jlExceptionHandler*() =
   let excpt : JlValue = jl_exception_occurred()
   if not isNil(excpt):
     let msg = $(jl_exception_message())
-    jlStacktrace()
     raise newException(JlError, msg)
   else:
     discard
+
+# Include file or use module
+# Check for nil result
+proc jlInclude*(filename: string) =
+  discard jl_eval_string(&"include(\"{filename}\")")
+  jlExceptionHandler()
+
+proc jlUseModule*(modname: string) =
+  discard jl_eval_string(&"using {modname}")
+  jlExceptionHandler()
+
+# Just for convenience since Julia funciton is called using
+proc jlUsing*(modname: string) =
+  jlUseModule(modname)
+
+proc jlGetModule*(modname: string): JlModule =
+  result = cast[JlModule](jl_eval_string(modname))
+  jlExceptionHandler()
 
 # Eval function that checkes error
 proc jlEval*(code: string): JlValue =
   result = jl_eval_string(code)
   jlExceptionHandler()
-
-# Include file or use module
-# Check for nil result
-proc jlInclude*(filename: string) =
-  let tmp = jlEval(&"include(\"{file_name}\")")
-
-proc jlUseModule*(modname: string) =
-  let tmp = jlEval(&"using {modname}")
-
-proc jlGetModule*(modname: string): JlModule =
-  result = cast[JlModule](jlEval(modname))
 
