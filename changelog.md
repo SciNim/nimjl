@@ -1,6 +1,12 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
-Release v0.5.0 - 2021_05_XX
+Release v0.5.1 - 2021_05_XX
+===========================
+* Added operators
+* Added iterators
+* Added toJlValue as an alias to toJlVal for consistency
+
+Release v0.5.0 - 2021_05_19
 ===========================
 * Add Nim interop syntax
 * Started work on indexing Julia Arrays natively
