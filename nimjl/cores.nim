@@ -32,26 +32,37 @@ proc jlExceptionHandler*() =
   else:
     discard
 
+# Eval function that checkes error
+proc jlEval*(code: string): JlValue =
+  result = jl_eval_string(code)
+  jlExceptionHandler()
+
 # Include file or use module
 # Check for nil result
 proc jlInclude*(filename: string) =
-  discard jl_eval_string(&"include(\"{filename}\")")
-  jlExceptionHandler()
+  let tmp = jlEval(&"include(\"{filename}\")")
+  if tmp.isNil:
+    raise newException(JlError, "&Cannot include file {filename}")
 
 proc jlUseModule*(modname: string) =
-  discard jl_eval_string(&"using {modname}")
-  jlExceptionHandler()
+  let tmp = jlEval(&"using {modname}")
+  if tmp.isNil:
+    raise newException(JlError, "&Cannot use module {modname}")
 
 # Just for convenience since Julia funciton is called using
 proc jlUsing*(modname: string) =
   jlUseModule(modname)
 
-proc jlGetModule*(modname: string): JlModule =
-  result = cast[JlModule](jl_eval_string(modname))
-  jlExceptionHandler()
+# Import can be useful
+proc jlImport*(modname: string) =
+  let tmp = jlEval(&"import {modname}")
+  if tmp.isNil:
+    raise newException(JlError, "&Cannot import module {modname}")
 
-# Eval function that checkes error
-proc jlEval*(code: string): JlValue =
-  result = jl_eval_string(code)
-  jlExceptionHandler()
+proc jlGetModule*(modname: string): JlModule =
+  let tmp = jlEval(modname)
+  if tmp.isNil:
+    raise newException(JlError, "&Cannot load module {modname}")
+  result = cast[JlModule](tmp)
+
 

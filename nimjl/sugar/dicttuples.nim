@@ -45,7 +45,7 @@ proc jlDictToNim*[U, V: string|SomeNumber|bool](val: JlValue, tab: var Table[U, 
     tab[key.to(U)] = val.to(V)
 
 # Recursive import strategy
-import ./conversions
+import ./converttypes
 # Tuple helpers -> result is memory managed by Julia's GC
 # Convert object as tuple ?
 proc nimToJlTuple*(v: tuple|object): JlValue =
