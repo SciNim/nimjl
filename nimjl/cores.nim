@@ -1,28 +1,8 @@
-import ./config
 import ./private/jlcores
 import ./private/jlfuncs
+import ./types
 
-type
-  JlValue* = ptr jl_value
-  JlModule* = ptr jl_module
-  JlFunc* = ptr jl_func
-  JlArray*[T] = ptr jl_array
-  JlSym* = ptr jl_sym
-
-type
-  JlError* = object of IOError
-
-{.push header: JuliaHeader.}
-var
-  JlMain*{.importc: "jl_main_module".}: JlModule
-  JlCore*{.importc: "jl_core_module".}: JlModule
-  JlBase*{.importc: "jl_base_module".}: JlModule
-  JlTop*{.importc: "jl_top_module".}: JlModule
-
-# TODO : Handle interrupt exception for SIGINT Throw ?
-# Currently, you need to define setControlCHook AFTER jlVmInit() or it won't take effect
-# var jl_interrupt_exception{.importc: "jl_interrupt_exception".}: JlValue
-{.pop.}
+import std/strformat
 
 # Init & Exit function
 proc jlVmInit*() =
@@ -41,11 +21,15 @@ proc jlVmExit*(exit_code: cint = 0.cint) =
     return
   raise newException(JlError, "jl_atexit_hook() must be called once per process")
 
+# Julia Error handling
 proc jlStacktrace*() =
-  let stacktrace_func = jl_get_function(JlMain, "stacktrace")
-  let stacktrace = julia_exec_func(stacktrace_func)
-  let println_func = jl_get_function(JlMain, "println")
-  discard julia_exec_func(println_func, stacktrace)
+  let println= jl_get_function(JlMain, "println")
+  let backtrace= jl_get_function(JlMain, "backtrace")
+
+  let trace = julia_exec_func(backtrace)
+
+  discard julia_exec_func(println, trace)
+  let lookup= jl_get_function(JlMain, "lookup")
 
 proc jlExceptionHandler*() =
   let excpt : JlValue = jl_exception_occurred()
@@ -56,16 +40,30 @@ proc jlExceptionHandler*() =
   else:
     discard
 
-## Basic eval function
+# Eval function
 proc jlEval*(code: string): JlValue =
   result = jl_eval_string(code)
   jlExceptionHandler()
 
+# String conversion
 proc nimStringToJlVal*(v: string): JlValue =
   result = jlvalue_from_string(v)
-
 proc jlValToString*(v: JlValue): string =
   result = jlvalue_to_string(v)
 
+# Convert a string to Julia Symbol
 proc jlSym*(symname: string): JlSym =
   result = jl_symbol(symname.cstring)
+
+# Include file or use module
+# Check for nil result
+proc jlInclude*(filename: string) =
+  let tmp = jlEval(&"include(\"{file_name}\")")
+  assert not tmp.isNil()
+
+proc jlUseModule*(modname: string) =
+  let tmp = jlEval(&"using {modname}")
+  assert not tmp.isNil()
+
+proc jlGetModule*(modname: string): JlModule =
+  result = cast[JlModule](jlEval(modname))

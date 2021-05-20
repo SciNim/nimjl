@@ -1,7 +1,7 @@
-import ./coretypes
+import ./types
 import ./private/jlcores
 import ./private/jlarrays
-import ./modfuncs
+import ./functions
 
 import arraymancer
 
@@ -61,5 +61,4 @@ proc allocJlArray*(dims: openArray[int], T: typedesc): JlValue =
   ## Create a Julia Array managed by Julia GC
   result = cast[JlValue](julia_alloc_array(dims, T))
 
-# import arrays/indexing
-# export indexing
+

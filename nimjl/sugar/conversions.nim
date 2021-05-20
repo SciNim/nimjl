@@ -1,12 +1,13 @@
-import ./coretypes
-import ./boxunbox
-import ./arrays
+import ../types
+import ../cores
+import ../arrays
 
-import arraymancer
+import ./boxunbox
 
 import std/json
 import std/tables
 import std/options
+import arraymancer
 
 {.push inline.}
 ## Julia -> Nim
@@ -115,9 +116,8 @@ proc toJlVal*[T](x: T): JlValue =
   ## Convert a generic Nim type to a JlValue
   nimValueToJlValue(x)
 
-
 # Recursive import strategy
-import dicttuples
+import ./dicttuples
 
 proc toNimVal(x: JlValue, t: var tuple) =
   jlTupleToNim(x, t)
@@ -142,18 +142,4 @@ proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue  =
   result = nimTableToJlDict(x)
 
 {.pop.}
-import modfuncs
-proc `$`*(val: JlValue) : string =
-  jlCall("string", val).to(string)
 
-proc `$`*(val: JlModule) : string =
-  jlCall("string", val).to(string)
-
-proc `$`*[T](val: JlArray[T]) : string =
-  jlCall("string", val).to(string)
-
-proc `$`*(val: JlFunc) : string =
-  jlCall("string", val).to(string)
-
-proc `$`*(val: JlSym) : string =
-  jlCall("string", val).to(string)

@@ -1,5 +1,5 @@
-import ../coretypes
-import ../modfuncs
+import ../types
+import ../functions
 
 import std/macros
 import std/sequtils

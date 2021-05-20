@@ -1,5 +1,7 @@
-import ./coretypes
 import ./private/jlfuncs
+import ./types
+import ./cores
+
 import std/strformat
 
 # Get a function
@@ -34,15 +36,3 @@ proc jlCall*(jlmod: JlModule, jlfuncname: string, va: varargs[JlValue, toJlVal])
 proc jlCall*(jlfuncname: string, va: varargs[JlValue, toJlVal]): JlValue =
   result = jlCall(JlMain, jlfuncname, va)
 
-# Include file or use module
-# Check for nil result
-proc jlInclude*(filename: string) =
-  let tmp = jlEval(&"include(\"{file_name}\")")
-  assert not tmp.isNil()
-
-proc jlUseModule*(modname: string) =
-  let tmp = jlEval(&"using {modname}")
-  assert not tmp.isNil()
-
-proc jlGetModule*(modname: string): JlModule =
-  result = cast[JlModule](jlEval(modname))

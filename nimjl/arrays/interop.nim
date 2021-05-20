@@ -1,32 +1,13 @@
-import ./arrays
-import ./coretypes
-import ./modfuncs
+import ../arrays
+import ../types
 
-import private/jlarrays
-import private/jlcores
+import ../private/jlarrays
+import ../private/jlcores
 
 import std/macros
 import std/sequtils
 
-# Pretty syntax to call Julia function
-type Julia* = object
-
-proc init*(jl: type Julia) =
-  jlVmInit()
-
-proc exit*(jl: type Julia, exitcode: int = 0) =
-  jlVmExit(exitcode.cint)
-
-template `.`*(jl: type Julia, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
-  jlCall(astToStr(funcname), args)
-
-template `.`*(jlmod: JlModule, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
-  jlCall(jlmod, astToStr(funcname), args)
-
-# typeof is taken by Nim already
-proc jltypeof*(jl: type Julia, x: JlValue): JlValue =
-  jlCall("typeof", x)
-# # This section is copyrighted from Arraymancer and Flambeau
+# # This section is copied from Arraymancer and Flambeau
 # # ---------------------------------------------------------
 # # Helpers proc
 func getShape[T](s: openArray[T], parent_shape: seq[int] = @[]): seq[int] =

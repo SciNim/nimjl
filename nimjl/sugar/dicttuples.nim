@@ -1,5 +1,6 @@
-import ./coretypes
-import ./modfuncs
+import ../cores
+import ../types
+import ../functions
 
 import std/tables
 import std/strutils
@@ -44,7 +45,7 @@ proc jlDictToNim*[U, V: string|SomeNumber|bool](val: JlValue, tab: var Table[U, 
     tab[key.to(U)] = val.to(V)
 
 # Recursive import strategy
-import converttypes
+import ./conversions
 # Tuple helpers -> result is memory managed by Julia's GC
 # Convert object as tuple ?
 proc nimToJlTuple*(v: tuple|object): JlValue =
