@@ -1,5 +1,5 @@
+import ../private/jlcores
 import ../types
-import ../cores
 import ../arrays
 
 import ./boxunbox
@@ -10,12 +10,13 @@ import std/options
 import arraymancer
 
 {.push inline.}
+
 ## Julia -> Nim
 proc toNimVal[T: SomeNumber|bool|pointer](x: JlValue, res: var T) =
   res = jlUnbox[T](x)
 
 proc toNimVal(x: JlValue, res: var string) =
-  res = jlValToString(x)
+  res = jlvalue_to_string(x)
 
 # Julia Tuple / Dict can't really be mapped to Nim's type so returning JsonNode is easier.
 # It introduces a "distinction" between to[T] -> T and to[T] -> JsonNode as return types
@@ -75,7 +76,7 @@ proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue =
   result = jlBox(val)
 
 proc nimValueToJlValue(val: string): JlValue =
-  result = nimStringToJlVal(val)
+  result = jlvalue_from_string(val)
 
 proc nimValueToJlValue(x: JlValue): JlValue  =
   result = x
@@ -129,7 +130,7 @@ proc nimValueToJlValue[T](x: Option[T]): JlValue  =
   if isSome(x):
     result = toJlVal(get(x))
   else:
-    result = jlEval("nothing")
+    result = jl_eval_string("nothing")
 
 proc nimValueToJlValue(x: tuple): JlValue  =
   result = nimToJlTuple(x)

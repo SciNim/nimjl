@@ -21,6 +21,10 @@ proc jlVmExit*(exit_code: cint = 0.cint) =
     return
   raise newException(JlError, "jl_atexit_hook() must be called once per process")
 
+# Convert a string to Julia Symbol
+proc jlSym*(symname: string): JlSym =
+  result = jl_symbol(symname.cstring)
+
 # Julia Error handling
 proc jlStacktrace*() =
   let println= jl_get_function(JlMain, "println")
@@ -40,30 +44,19 @@ proc jlExceptionHandler*() =
   else:
     discard
 
-# Eval function
+# Eval function that checkes error
 proc jlEval*(code: string): JlValue =
   result = jl_eval_string(code)
   jlExceptionHandler()
-
-# String conversion
-proc nimStringToJlVal*(v: string): JlValue =
-  result = jlvalue_from_string(v)
-proc jlValToString*(v: JlValue): string =
-  result = jlvalue_to_string(v)
-
-# Convert a string to Julia Symbol
-proc jlSym*(symname: string): JlSym =
-  result = jl_symbol(symname.cstring)
 
 # Include file or use module
 # Check for nil result
 proc jlInclude*(filename: string) =
   let tmp = jlEval(&"include(\"{file_name}\")")
-  assert not tmp.isNil()
 
 proc jlUseModule*(modname: string) =
   let tmp = jlEval(&"using {modname}")
-  assert not tmp.isNil()
 
 proc jlGetModule*(modname: string): JlModule =
   result = cast[JlModule](jlEval(modname))
+

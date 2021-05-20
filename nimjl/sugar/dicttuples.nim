@@ -1,4 +1,4 @@
-import ../cores
+import ../private/jlcores
 import ../types
 import ../functions
 
@@ -49,12 +49,12 @@ import ./conversions
 # Tuple helpers -> result is memory managed by Julia's GC
 # Convert object as tuple ?
 proc nimToJlTuple*(v: tuple|object): JlValue =
-  result = jlEval("NamedTuple()")
+  result = jl_eval_string("NamedTuple()")
   for name, field in v.fieldPairs:
-    result = jlCall(JlBase, "setindex", result, toJlVal(field), jlSym(name))
+    result = jlCall(JlBase, "setindex", result, toJlVal(field), jl_symbol(name.cstring))
 
 proc nimTableToJlDict*[U, V: string|SomeNumber](tab: Table[U, V]): JlValue =
-  result = jlEval("Dict()")
+  result = jl_eval_string("Dict()")
   for name, field in tab:
     discard jlCall(JlBase, "setindex!", result, toJlVal(field), name)
 
