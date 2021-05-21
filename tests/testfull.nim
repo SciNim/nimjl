@@ -7,6 +7,8 @@ import sugar
 import arraymancer
 import nimjl
 
+import ./indexingtests
+
 proc simpleEvalString() =
   var test = jlEval("sqrt(4.0)")
   check jlUnbox[float64](test) == 2.0
@@ -362,6 +364,48 @@ proc runTensorArgsTest*() =
     test "external_module : rot180[Tensor]":
       tensorBuiltinRot180()
 
+proc arrayIterator() =
+  block:
+    var xx = toSeq(0..<10).toJlArray()
+    var i = 0
+    for x in xx:
+      check x == i
+      inc(i)
+  block:
+    var refxx = toSeq(0..<10)
+    var xx = toSeq(0..<10).toJlArray()
+    var refi = 0
+    for i, x in enumerate(xx):
+      check i == refi
+      check x == refxx[i]
+      inc(refi)
+
+proc tupleIterator() =
+  var xx = (1, 3, 5, 7, 9, 11,).toJlValue()
+  block:
+    var refx = 1
+    for x in xx:
+      check x.to(int) == refx
+      inc(refx)
+      inc(refx)
+
+  block:
+    var refi = 0
+    var refxx = @[1, 3, 5, 7, 9, 11]
+    for i, x in enumerate(xx):
+      check i == refi
+      check x.to(int) == refxx[i]
+      check x == toJlValue(refxx[i])
+      inc(refi)
+
+proc runIteratorsTest*() =
+  suite "Iterators":
+    teardown: jlGcCollect()
+    # test "Array Iterators":
+    #   arrayIterator()
+    test "Tuple Iterators":
+      tupleIterator()
+
 proc runExternalsTest*() =
   suite "external module":
     teardown: jlGcCollect()
@@ -380,6 +424,8 @@ proc runTests*() =
   run1DArrayTest()
   runArrayArgsTest()
   runTensorArgsTest()
+  runIteratorsTest()
+  runIndexingTest()
   jlVmExit(0)
 
 when isMainModule:
@@ -410,6 +456,8 @@ proc runMemLeakTest*(maxDuration: Duration) =
     runArrayArgsTest()
     sleep(deltaTest.inMilliseconds().int)
     runTensorArgsTest()
+    sleep(deltaTest.inMilliseconds().int)
+    runIteratorsTest()
     sleep(deltaTest.inMilliseconds().int)
 
   # Bye bye Julia

@@ -1,6 +1,7 @@
-import ./coretypes
-import ./private/jlcores
-import ./private/jlboxunbox
+import ../private/jlcores
+import ../private/jlboxunbox
+
+import ../types
 
 import std/tables
 import std/json

@@ -1,35 +1,27 @@
 import nimjl/arrays
 export arrays
 
-import nimjl/coretypes
-export coretypes
+import nimjl/cores
+export cores
 
-import nimjl/boxunbox
-export boxunbox
-
-import nimjl/config
-# export config
-
-import nimjl/converttypes
-export converttypes
-
-import nimjl/dicttuples
-export dicttuples
+import nimjl/types
+export types
 
 import nimjl/gc
 export gc
 
-import nimjl/modfuncs
-export modfuncs
+import nimjl/functions
+export functions
 
-import nimjl/interop
-export interop
+import nimjl/glucose
+export glucose
 
-# Uncomment for debugging
-# once:
-#   echo "Nimjl> Using Julia install: ", JuliaPath
-# static:
-# echo "JuliaIncludesPath> ", JuliaIncludesPath
-# echo "JuliaLibPath> ", JuliaLibPath
-# echo "JuliaLibName> ", JuliaLibName
+import nimjl/sugar/converttypes
+export converttypes
 
+import nimjl/sugar/valindexing
+export valindexing
+
+import nimjl/config
+static:
+  debugEcho "Nimjl> Using Julia install: ", JuliaPath

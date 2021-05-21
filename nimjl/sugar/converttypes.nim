@@ -1,20 +1,24 @@
-import ./coretypes
-import ./boxunbox
-import ./arrays
+import ../private/jlcores
+import ../cores
+import ../types
+import ../arrays
 
-import arraymancer
+import ./boxunbox
 
 import std/json
 import std/tables
 import std/options
+import arraymancer
 
 {.push inline.}
+
+# POD types
 ## Julia -> Nim
 proc toNimVal[T: SomeNumber|bool|pointer](x: JlValue, res: var T) =
   res = jlUnbox[T](x)
 
 proc toNimVal(x: JlValue, res: var string) =
-  res = jlValToString(x)
+  res = jlvalue_to_string(x)
 
 # Julia Tuple / Dict can't really be mapped to Nim's type so returning JsonNode is easier.
 # It introduces a "distinction" between to[T] -> T and to[T] -> JsonNode as return types
@@ -22,8 +26,8 @@ proc toNimVal(x: JlValue, res: var string) =
 proc toNimVal(x: JlValue, t: var tuple)
 proc toNimVal[U, V](x: JlValue, tab: var Table[U, V])
 
-proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
-  let x = toJlArray[T](x)
+# Array, Seq, Tensor
+proc toNimVal[T](x: JlArray[T], tensor: var Tensor[T]) =
   # This is possible but relies on keep Julia's memory intact
   # I believe a copyMem is cleaner and safer
   # tensor = fromBuffer(x, x.shape)
@@ -38,8 +42,7 @@ proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
     # let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
     # copyMem(tensor.get_offset_ptr(), x.getRawData(), nbytes)
 
-proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
-  let x = toJlArray[T](x)
+proc toNimVal[T](x: JlArray[T], locseq: var seq[T]) =
   if x.ndims > 1:
     raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
@@ -47,15 +50,26 @@ proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
   if x.len() > 0:
     copyMem(unsafeAddr(locseq[0]), x.getRawData(), nbytes)
 
-proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
-  let x = toJlArray[T](x)
+proc toNimVal[I, T](x: JlArray[T], locarr: var array[I, T]) =
   if x.ndims > 1:
     raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   if x.len() > 0:
     copyMem(unsafeAddr(locarr[0]), x.rawData(), nbytes)
 
-# Nim -> Julia
+proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
+  let x = toJlArray[T](x)
+  toNimVal(x, tensor)
+
+proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
+  let x = toJlArray[T](x)
+  toNimVal(x, locseq)
+
+proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
+  let x = toJlArray[T](x)
+  toNimVal(x, locarr)
+
+  # Nim -> Julia
 # Avoid going throung template toJlVal pointer version when dealing with Julia known type
 # Is converter the right choice here ?
 converter nimValueToJlValue*[T](x: JlArray[T]): JlValue =
@@ -74,7 +88,7 @@ proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue =
   result = jlBox(val)
 
 proc nimValueToJlValue(val: string): JlValue =
-  result = nimStringToJlVal(val)
+  result = jlvalue_from_string(val)
 
 proc nimValueToJlValue(x: JlValue): JlValue  =
   result = x
@@ -87,7 +101,7 @@ proc nimValueToJlValue(x: object): JlValue
 proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue
 proc nimValueToJlValue[T](x: Option[T]): JlValue
 
-proc nimValueToJlValue[T](x: seq[T]): JlValue  =
+proc nimValueToJlValue[T](x: openarray[T]): JlValue  =
   result = nimValueToJlValue(
     jlArrayFromBuffer(x)
   )
@@ -104,6 +118,13 @@ proc nimValueToJlValue[T](x: Tensor[T]): JlValue  =
   )
 
 # Public API
+proc to*[U](x: JlArray[U], T: typedesc): T =
+  when T is void:
+    discard
+  else:
+    toNimVal(x, result)
+
+
 proc to*(x: JlValue, T: typedesc): T =
   ## Copy a JlValue into a Nim type
   when T is void:
@@ -115,9 +136,13 @@ proc toJlVal*[T](x: T): JlValue =
   ## Convert a generic Nim type to a JlValue
   nimValueToJlValue(x)
 
+proc toJlValue*[T](x: T): JlValue =
+  ## Alias for toJlVal
+  ## Added for consistency with JlValue type name
+  toJlVal[T](x)
 
 # Recursive import strategy
-import dicttuples
+import ./dicttuples
 
 proc toNimVal(x: JlValue, t: var tuple) =
   jlTupleToNim(x, t)
@@ -129,7 +154,7 @@ proc nimValueToJlValue[T](x: Option[T]): JlValue  =
   if isSome(x):
     result = toJlVal(get(x))
   else:
-    result = jlEval("nothing")
+    result = JlNothing
 
 proc nimValueToJlValue(x: tuple): JlValue  =
   result = nimToJlTuple(x)
@@ -142,18 +167,6 @@ proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue  =
   result = nimTableToJlDict(x)
 
 {.pop.}
-import modfuncs
-proc `$`*(val: JlValue) : string =
-  jlCall("string", val).to(string)
 
-proc `$`*(val: JlModule) : string =
-  jlCall("string", val).to(string)
-
-proc `$`*[T](val: JlArray[T]) : string =
-  jlCall("string", val).to(string)
-
-proc `$`*(val: JlFunc) : string =
-  jlCall("string", val).to(string)
-
-proc `$`*(val: JlSym) : string =
-  jlCall("string", val).to(string)
+export boxunbox
+export dicttuples

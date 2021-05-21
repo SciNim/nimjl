@@ -1,32 +1,18 @@
-import ./arrays
-import ./coretypes
-import ./modfuncs
+import ../arrays
+import ../types
+import ../cores
+import ../functions
+import ../glucose
 
-import private/jlarrays
-import private/jlcores
+import ../private/jlcores
 
 import std/macros
 import std/sequtils
+import std/algorithm
 
-# Pretty syntax to call Julia function
-type Julia* = object
+{.experimental: "views".}
 
-proc init*(jl: type Julia) =
-  jlVmInit()
-
-proc exit*(jl: type Julia, exitcode: int = 0) =
-  jlVmExit(exitcode.cint)
-
-template `.`*(jl: type Julia, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
-  jlCall(astToStr(funcname), args)
-
-template `.`*(jlmod: JlModule, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
-  jlCall(jlmod, astToStr(funcname), args)
-
-# typeof is taken by Nim already
-proc jltypeof*(jl: type Julia, x: JlValue): JlValue =
-  jlCall("typeof", x)
-# # This section is copyrighted from Arraymancer and Flambeau
+# # This section is copied from Arraymancer and Flambeau
 # # ---------------------------------------------------------
 # # Helpers proc
 func getShape[T](s: openArray[T], parent_shape: seq[int] = @[]): seq[int] =
@@ -69,8 +55,8 @@ proc product[T](s: seq[T]): T =
 # End of copyrighted section
 
 # TODO GC-Root this OR Disable Julia GC and works with Nim GC
-proc toJlArrayView*[T](oa: openarray[T]): lent JlArray[T] =
-  ## Interpret an openarray as a CPU Tensor
+proc toJlArrayView*[T: SomeNumber](oa: openarray[T]): lent JlArray[T] =
+  ## Interpret an openarray as a Julia Array
   ## Important:
   ##   the buffer is shared.
   ##   There is no copy but modifications are shared
@@ -83,29 +69,82 @@ proc toJlArrayView*[T](oa: openarray[T]): lent JlArray[T] =
   return jlArrayFromBuffer[T](oa)
 
 proc toJlArray*[T: SomeNumber](oa: openarray[T]): JlArray[T] =
-  ## Interpret an openarray as a CPU Tensor
+  ## Interpret an openarray as a Julia Array
   ##
   ## Input:
   ##      - An array or a seq
   ## Result:
   ##      - A view Tensor of the same shape
-  # toArrayFromScalar[T](oa).toJlArray[T]()
   let shape = getShape(oa)
   let nbytes = shape.product()*(sizeof(T) div sizeof(byte))
   result = allocJlArray[T](shape)
   copyMem(unsafeAddr(result.getRawData()[0]), unsafeAddr(oa[0]), nbytes)
 
 proc toJlArray*[T: seq|array](oa: openarray[T]): auto =
-  ## Interpret an openarray as a CPU Tensor
+  ## Interpret an openarray as a Julia Array
   ##
   ## Input:
   ##      - An array or a seq
   ## Result:
   ##      - A view Tensor of the same shape
   let shape = getShape(oa)
-  let nbytes = shape.product()*(sizeof(T) div sizeof(byte))
   type BaseType = getBaseType(T)
-  var res = allocJlArray(shape, BaseType)
-  copyMem(cast[ptr jl_array](res).jl_array_data(), unsafeAddr(oa[0]), nbytes)
-  arrays.toJlArray(res, BaseType)
+  result = allocJlArray[BaseType](shape)
+  var data = result.getRawData()
+  var i = 0
+  for val in flatIter(oa):
+    data[i] = val
+    inc(i)
 
+# Utility
+proc firstindex*[T](val: JlArray[T], dim: int) : int =
+  jlCall("firstindex", val, dim).to(int)
+
+proc lastindex*[T](val: JlArray[T], dim: int) : int =
+  jlCall("lastindex", val, dim).to(int)
+
+proc iterate*[T](val: JlArray[T]): JlValue =
+  result = jlCall("iterate", val)
+  if result == JlNothing or len(result) != 2:
+    raise newException(JlError, "Non-iterable Array. This shouldn't be possible, but reality and life are often strange.")
+
+proc iterate*[T](val: JlArray[T], state: JlValue): JlValue =
+  result = jlCall("iterate", val, state)
+
+proc transpose*[T](x: JlArray[T]) : JlArray[T] =
+  result = jlCall("transpose", x).toJlArray(T)
+
+proc reshape*[T](x: JlArray[T], dims: JlArray[int]) : JlArray[T] =
+  result = jlCall("reshape", x, dims).toJlArray(T)
+
+proc reshape*[T](x: JlArray[T], dims: openarray[int]) : JlArray[T] =
+  result = jlCall("reshape", x, dims).toJlArray(T)
+
+proc reverse*[T](x: JlArray[T]) : JlArray[T] =
+  result = jlCall("reverse", x).toJlArray(T)
+
+# TODO map typedesc to Julia type
+# proc asType*[T](x: JlArray[T], U: typedesc) : JlArray[U] =
+#   result = jlCall("reinterpret", U, x)
+#
+proc swapMemoryOrder*[T](x: JlArray[T]) : JlArray[T] =
+  let revshape = reverse(size(x))
+  var invdim : seq[int]
+  for i in countdown(ndims(x), 1):
+    invdim.add i
+  let tmp = reshape(x, revshape)
+  result = jlCall("permutedims", tmp, invdim).toJlArray(T).transpose()
+
+iterator items*[T](val: JlArray[T]): T =
+  var it = iterate(val)
+  while it != JlNothing:
+    yield it.getindex(1).to(T)
+    it = iterate(val, it.getindex(2))
+
+iterator enumerate*[T](val: JlArray[T]): (int, T) =
+  var it = iterate(val)
+  var i = 0
+  while it != JlNothing:
+    yield (i, it.getindex(1).to(T))
+    it = iterate(val, it.getindex(2))
+    inc(i)

@@ -1,13 +1,12 @@
-import ./coretypes
+import ./types
 import ./private/jlcores
 import ./private/jlarrays
-import ./modfuncs
+import ./functions
 
 import arraymancer
 
 import std/typetraits
 import std/sequtils
-
 
 proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =
   result = cast[ptr jl_array](x)
@@ -61,5 +60,9 @@ proc allocJlArray*(dims: openArray[int], T: typedesc): JlValue =
   ## Create a Julia Array managed by Julia GC
   result = cast[JlValue](julia_alloc_array(dims, T))
 
-# import arrays/indexing
-# export indexing
+import ./arrays/interop
+export interop
+
+import ./arrays/indexing
+export indexing
+
