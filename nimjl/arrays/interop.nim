@@ -1,6 +1,8 @@
 import ../arrays
 import ../types
 import ../cores
+import ../functions
+import ../glucose
 
 import ../private/jlarrays
 import ../private/jlcores
@@ -98,12 +100,12 @@ proc lastindex*[T](val: JlArray[T], dim: int) : int =
   Julia.lastindex(val, dim).to(int)
 
 proc iterate*[T](val: JlArray[T]): JlValue =
-  result = JlMain.iterate(val)
+  result = jlCall("iterate", val)
   if result == JlNothing or len(result) != 2:
     raise newException(JlError, "Non-iterable Array. This shouldn't be possible, but reality and life are often strange.")
 
 proc iterate*[T](val: JlArray[T], state: JlValue): JlValue =
-  result = JlMain.iterate(val, state)
+  result = jlCall("iterate", val, state)
 
 iterator items*[T](val: JlArray[T]): T =
   var it = iterate(val)

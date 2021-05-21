@@ -367,8 +367,7 @@ proc arrayIterator() =
     var xx = toSeq(0..<10).toJlArray()
     var i = 0
     for x in xx:
-      check x.to(int) == i
-      check x == toJlValue(i)
+      check x == i
       inc(i)
   block:
     var refxx = toSeq(0..<10)
@@ -376,8 +375,7 @@ proc arrayIterator() =
     var refi = 0
     for i, x in enumerate(xx):
       check i == refi
-      check x.to(int) == refxx[i]
-      check x == toJlValue(refxx[i])
+      check x == refxx[i]
       inc(refi)
 
 proc tupleIterator() =
