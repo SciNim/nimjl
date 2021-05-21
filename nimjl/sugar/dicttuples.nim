@@ -48,21 +48,22 @@ proc jlDictToNim*[U, V: string|SomeNumber|bool](val: JlValue, tab: var Table[U, 
 import ./converttypes
 # Tuple helpers -> result is memory managed by Julia's GC
 # Convert object as tuple ?
-proc nimToUnnamedJlTuple*(v: tuple): JlValue =
+proc nimToUnnamedJlTuple(v: tuple): JlValue =
   var tupStr = $v
   result = jlEval(tupStr)
 
-proc nimToNamedJlTuple*(v: tuple|object): JlValue =
+proc nimToNamedJlTuple(v: tuple|object): JlValue =
   result = jlEval("NamedTuple()")
   for name, field in v.fieldPairs:
     result = jlCall(JlBase, "setindex", result, toJlVal(field), jlSym(name))
 
 proc isNamedTuple(v: tuple) : bool =
-  var i = 1
+  var i = 0
   for name, field in v.fieldPairs:
     if name != &"Field{i}":
-      return false
-  return true
+      return true
+    inc(i)
+  return false
 
 proc nimToJlTuple*(v: tuple): JlValue =
   if isNamedTuple(v):
