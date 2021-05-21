@@ -19,12 +19,6 @@ export glucose
 import nimjl/sugar/converttypes
 export converttypes
 
-# import nimjl/config
-# Uncomment for debugging
-# once:
-#   echo "Nimjl> Using Julia install: ", JuliaPath
-# static:
-# echo "JuliaIncludesPath> ", JuliaIncludesPath
-# echo "JuliaLibPath> ", JuliaLibPath
-# echo "JuliaLibName> ", JuliaLibName
-
+import nimjl/config
+static:
+  debugEcho "Nimjl> Using Julia install: ", JuliaPath
