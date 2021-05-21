@@ -5,7 +5,7 @@ import std/macros
 import std/strformat
 
 proc JlColon(): JlValue =
-  Julia.Colon()
+  JlMain.Colon()
 
 proc makerange(x: JlValue, start, stop: int, step : int) : JlValue =
   let makerangestr = (&"{start}:{step}:{stop}")
@@ -304,6 +304,5 @@ macro desugar*(x: JlValue, args: untyped): void =
 macro `[]`*(x: JlValue, args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
-    # jlCall("getindex", `x`, `new_args`)
-    Julia.getindex(`x`, `new_args`)
+    JlMain.getindex(`x`, `new_args`)
 

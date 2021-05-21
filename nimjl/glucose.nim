@@ -15,6 +15,9 @@ proc init*(jl: type Julia) =
 proc exit*(jl: type Julia, exitcode: int = 0) =
   jlVmExit(exitcode.cint)
 
+# macro loadModule*(jl: type Julia, modname: untyped) =
+# TODO generate a proc ``modname`` that returns module
+
 template `.`*(jl: type Julia, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
   jlCall(astToStr(funcname), args)
 

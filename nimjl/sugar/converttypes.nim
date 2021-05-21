@@ -101,7 +101,7 @@ proc nimValueToJlValue(x: object): JlValue
 proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue
 proc nimValueToJlValue[T](x: Option[T]): JlValue
 
-proc nimValueToJlValue[T](x: seq[T]): JlValue  =
+proc nimValueToJlValue[T](x: openarray[T]): JlValue  =
   result = nimValueToJlValue(
     jlArrayFromBuffer(x)
   )
