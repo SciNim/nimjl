@@ -39,14 +39,10 @@ Julia is mostly oriented towards numerical computing so Arrays are THE most impo
 Mostly quality-of-life improvements, especially when handling arrays.
 
 * Improve Julia Arrays interop. from Nim.
-  * Support Julia ``Base.view``, ``Base.getindex``, ``Base.setindex!`` (ref. https://docs.julialang.org/en/v1/base/arrays/#Base.view) as ``[]`` and ``[]=`` syntax.
-    * Create macros for slices support
-
   * Create Array API with most common proc
     * Implement Matrix calc. operators : `*`, `+`, `-`, `/`, "Dotted operator" ``*.``, ``+.``, ``-.``, ``/.``
     * Implement ``asType`` function mapped ``Base.reinterpret`` (ref. https://docs.julialang.org/en/v1/base/arrays/#Base.reinterpret) and ``reshape`` with ``Base.reshape``
 
-  * Handle row major vs column major transposition
   * map / apply / reduce /fold
   * Iterators
 

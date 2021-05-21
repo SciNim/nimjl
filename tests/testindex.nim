@@ -175,5 +175,4 @@ proc main() =
   Julia.exit()
 
 when isMainModule:
-  when defined(tindex):
-    main()
+  main()
