@@ -94,10 +94,10 @@ proc toJlArray*[T: seq|array](oa: openarray[T]): auto =
   arrays.toJlArray(res, BaseType)
 
 proc firstindex*[T](val: JlArray[T], dim: int) : int =
-  Julia.firstindex(val, dim).to(int)
+  jlCall("firstindex", val, dim).to(int)
 
 proc lastindex*[T](val: JlArray[T], dim: int) : int =
-  Julia.lastindex(val, dim).to(int)
+  jlCall("lastindex", val, dim).to(int)
 
 proc iterate*[T](val: JlArray[T]): JlValue =
   result = jlCall("iterate", val)

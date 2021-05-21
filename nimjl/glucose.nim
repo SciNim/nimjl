@@ -79,11 +79,19 @@ proc bitor*(val1, val2: JlValue) : JlValue =
   Julia.`|`(val1, val2)
 
 proc equal*(val1, val2: JlValue) : bool =
-  Julia.`==`(val1, val2).to(bool)
+  jlCall("==", val1, val2).to(bool)
 
-# Comparaison
+# # Comparaison
 template `==`*(val1, val2: JlValue) : bool =
   val1.equal(val2)
+
+proc equal*[T](val1, val2: JlArray[T]) : bool =
+  jlCall("==", val1, val2).to(bool)
+
+# # Comparaison
+template `==`*[T](val1, val2: JlArray[T]) : bool =
+  val1.equal(val2)
+
 
 proc `!=`*(val1, val2: JlValue) : bool =
   Julia.`!=`(val1, val2).to(bool)

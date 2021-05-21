@@ -12,6 +12,7 @@ import arraymancer
 
 {.push inline.}
 
+# POD types
 ## Julia -> Nim
 proc toNimVal[T: SomeNumber|bool|pointer](x: JlValue, res: var T) =
   res = jlUnbox[T](x)
@@ -25,8 +26,8 @@ proc toNimVal(x: JlValue, res: var string) =
 proc toNimVal(x: JlValue, t: var tuple)
 proc toNimVal[U, V](x: JlValue, tab: var Table[U, V])
 
-proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
-  let x = toJlArray[T](x)
+# Array, Seq, Tensor
+proc toNimVal[T](x: JlArray[T], tensor: var Tensor[T]) =
   # This is possible but relies on keep Julia's memory intact
   # I believe a copyMem is cleaner and safer
   # tensor = fromBuffer(x, x.shape)
@@ -41,8 +42,7 @@ proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
     # let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
     # copyMem(tensor.get_offset_ptr(), x.getRawData(), nbytes)
 
-proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
-  let x = toJlArray[T](x)
+proc toNimVal[T](x: JlArray[T], locseq: var seq[T]) =
   if x.ndims > 1:
     raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
@@ -50,15 +50,26 @@ proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
   if x.len() > 0:
     copyMem(unsafeAddr(locseq[0]), x.getRawData(), nbytes)
 
-proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
-  let x = toJlArray[T](x)
+proc toNimVal[I, T](x: JlArray[T], locarr: var array[I, T]) =
   if x.ndims > 1:
     raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   if x.len() > 0:
     copyMem(unsafeAddr(locarr[0]), x.rawData(), nbytes)
 
-# Nim -> Julia
+proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
+  let x = toJlArray[T](x)
+  toNimVal(x, tensor)
+
+proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
+  let x = toJlArray[T](x)
+  toNimVal(x, locseq)
+
+proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
+  let x = toJlArray[T](x)
+  toNimVal(x, locarr)
+
+  # Nim -> Julia
 # Avoid going throung template toJlVal pointer version when dealing with Julia known type
 # Is converter the right choice here ?
 converter nimValueToJlValue*[T](x: JlArray[T]): JlValue =
@@ -107,6 +118,13 @@ proc nimValueToJlValue[T](x: Tensor[T]): JlValue  =
   )
 
 # Public API
+proc to*[U](x: JlArray[U], T: typedesc): T =
+  when T is void:
+    discard
+  else:
+    toNimVal(x, result)
+
+
 proc to*(x: JlValue, T: typedesc): T =
   ## Copy a JlValue into a Nim type
   when T is void:
