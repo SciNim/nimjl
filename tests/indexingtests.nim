@@ -55,7 +55,6 @@ proc indextuple() =
       let tmp = tup[1..^4]
       check tmp == (1, 2, 3, 4, 5, 6, 7, 8, 9).toJlValue()
 
-
 proc index1darray() =
   suite "Index 1D Array":
     setup:
@@ -167,11 +166,14 @@ proc index2darray() =
       let tmp = locarray[1..^4, 1]
       check tmp == [1, 2, 3, 4, 5, 6, 7, 8, 9].toJlArray()
 
-proc main() =
-  Julia.init()
+proc runIndexingTest*() =
   indextuple()
   index1darray()
   index2darray()
+
+proc main() =
+  Julia.init()
+  runIndexingTest()
   Julia.exit()
 
 when isMainModule:

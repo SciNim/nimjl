@@ -7,6 +7,8 @@ import sugar
 import arraymancer
 import nimjl
 
+import ./indexingtests
+
 proc simpleEvalString() =
   var test = jlEval("sqrt(4.0)")
   check jlUnbox[float64](test) == 2.0
@@ -423,6 +425,7 @@ proc runTests*() =
   runArrayArgsTest()
   runTensorArgsTest()
   runIteratorsTest()
+  runIndexingTest()
   jlVmExit(0)
 
 when isMainModule:
