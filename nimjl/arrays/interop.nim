@@ -4,7 +4,6 @@ import ../cores
 import ../functions
 import ../glucose
 
-import ../private/jlarrays
 import ../private/jlcores
 
 import std/macros
@@ -89,7 +88,6 @@ proc toJlArray*[T: seq|array](oa: openarray[T]): auto =
   ## Result:
   ##      - A view Tensor of the same shape
   let shape = getShape(oa)
-  let nbytes = shape.product()*(sizeof(T) div sizeof(byte))
   type BaseType = getBaseType(T)
   result = allocJlArray[BaseType](shape)
   var data = result.getRawData()

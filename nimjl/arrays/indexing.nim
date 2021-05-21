@@ -5,7 +5,7 @@ import ../glucose
 import ./interop
 
 import std/macros
-import std/[sequtils, strformat]
+import std/[strformat]
 
 {.experimental: "views".}
 
@@ -29,8 +29,8 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
 
   # echo "\n------------------\nOriginal tree"
   # echo args.treerepr
-  echo args.repr
-  echo "----------------------"
+  # echo args.repr
+  # echo "----------------------"
 
   var r = newNimNode(nnkArglist)
   # for nnk in children(args):
@@ -302,8 +302,8 @@ macro desugar*[T](x: JlArray[T], args: untyped): void =
       r.add(nnk)
   # echo "\nAfter modif"
   # echo r.treerepr
-  echo r.repr
-  echo "======================"
+  # echo r.repr
+  # echo "======================"
   # echo r.astGenRepr
   return r
 

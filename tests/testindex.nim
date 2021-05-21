@@ -1,84 +1,60 @@
 import sequtils
 import unittest
 import nimjl
-import nimjl/sugar/valindexing
-import nimjl/arrays/indexing
-
-proc checkTup(tup: JlValue) =
-  let reftup = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12).toJlValue()
-  if jltypeof(tup) != jltypeof(reftup):
-    echo jltypeof(tup)
-    echo jltypeof(reftup)
-    echo tup
-    echo reftup
-    assert(false)
-  echo ""
 
 proc indextuple() =
   suite "Index Tuple":
     setup:
       let tup = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12).toJlValue()
 
-    test "RunMeBaby":
-      echo "[^2]"
-      echo "---------------------"
-      echo ">> ", tup[^2]
-      checkTup(tup)
+    test "[^2]":
+      let tmp = tup[^2]
+      check tmp == toJlValue(11)
 
-      echo "[_]"
-      echo "---------------------"
-      echo ">> ", tup[_]
-      checkTup(tup)
+    test "[_]":
+      let tmp = tup[_]
+      check tmp == tup
 
-      echo "[2]"
-      echo "---------------------"
-      echo ">> ", tup[2]
-      checkTup(tup)
+    test "[2]":
+      let tmp = tup[2]
+      check tmp == toJlValue(2)
 
-      echo "[_.._]"
-      echo "---------------------"
-      echo ">> ", tup[_.._]
-      checkTup(tup)
+    test "[_.._]":
+      let tmp = tup[_.._]
+      check tmp == tup
 
-      echo "[2.._]"
-      echo "---------------------"
-      echo ">> ", tup[2.._]
-      checkTup(tup)
+    test "[2.._]":
+      let tmp = tup[2.._]
+      check tmp == (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12).toJlValue()
 
-      echo "[_.._|+2]"
-      echo "---------------------"
-      echo ">> ", tup[_.._|+2]
-      checkTup(tup)
+    test "[_.._|+2]":
+      let tmp = tup[_.._|+2]
+      check tmp == (1, 3, 5, 7, 9, 11).toJlValue()
 
-      echo "[1..9|+2]"
-      echo "---------------------"
-      echo ">> ", tup[1..9|+2]
-      checkTup(tup)
+    test "[1..9|+2]":
+      let tmp = tup[1..9|+2]
+      check tmp == (1, 3, 5, 7, 9).toJlValue()
 
-      echo "[1..<9|+2]"
-      echo "---------------------"
-      echo ">> ", tup[1..<9|+2]
-      checkTup(tup)
+    test "[1..<9|+2]":
+      let tmp = tup[1..<9|+2]
+      check tmp == (1, 3, 5, 7).toJlValue()
 
-      echo "[1..^2|+2]"
-      echo "---------------------"
-      echo ">> ", tup[1..^2|+2]
-      checkTup(tup)
+    test "[1..^2|+2]":
+      let tmp = tup[1..^2|+2]
+      check tmp == (1, 3, 5, 7, 9, 11).toJlValue()
 
-      echo "[1..6]"
-      echo "---------------------"
-      echo ">> ", tup[1..6]
-      checkTup(tup)
+    test "[1..6]":
+      let tmp = tup[1..6]
+      check tmp == (1, 2, 3, 4, 5, 6).toJlValue()
 
-      echo "[1..<8]"
-      echo "---------------------"
-      echo ">> ", tup[1..<8]
-      checkTup(tup)
+    test "[1..<8]":
+      let tmp = tup[1..<8]
+      check tmp == (1, 2, 3, 4, 5, 6, 7).toJlValue()
 
-      echo "[1..^4]"
-      echo "---------------------"
-      echo ">> ", tup[1..^4]
-      checkTup(tup)
+    test "[1..^4]":
+      let tmp = tup[1..^4]
+      check tmp == (1, 2, 3, 4, 5, 6, 7, 8, 9).toJlValue()
+
 
 proc index1darray() =
   suite "Index 1D Array":

@@ -60,8 +60,9 @@ proc allocJlArray*(dims: openArray[int], T: typedesc): JlValue =
   ## Create a Julia Array managed by Julia GC
   result = cast[JlValue](julia_alloc_array(dims, T))
 
-import arrays/interop
+import ./arrays/interop
 export interop
-# import arrays/indexing
-# export indexing
+
+import ./arrays/indexing
+export indexing
 

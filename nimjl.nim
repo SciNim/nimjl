@@ -19,6 +19,9 @@ export glucose
 import nimjl/sugar/converttypes
 export converttypes
 
+import nimjl/sugar/valindexing
+export valindexing
+
 import nimjl/config
 static:
   debugEcho "Nimjl> Using Julia install: ", JuliaPath

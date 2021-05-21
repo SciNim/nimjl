@@ -24,8 +24,8 @@ macro desugar*(x: JlValue, args: untyped): void =
 
   # echo "\n------------------\nOriginal tree"
   # echo args.treerepr
-  echo args.repr
-  echo "----------------------"
+  # echo args.repr
+  # echo "----------------------"
 
   var r = newNimNode(nnkArglist)
   # for nnk in children(args):
@@ -296,13 +296,15 @@ macro desugar*(x: JlValue, args: untyped): void =
       r.add(nnk)
   # echo "\nAfter modif"
   # echo r.treerepr
-  echo r.repr
-  echo "======================"
+  # echo r.repr
+  # echo "======================"
   # echo r.astGenRepr
   return r
 
-macro `[]`*(x: JlValue, args: varargs[untyped]): untyped =
+macro op_square_bracket*(x: JlValue, args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
     JlMain.getindex(`x`, `new_args`)
 
+template `[]`*(x: JlValue, args: varargs[untyped]) : untyped =
+  op_square_bracket(x, args)
