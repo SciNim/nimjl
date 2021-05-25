@@ -48,7 +48,7 @@ proc callJulia() =
     check res == toJlValue(2.0)
     check jlUnbox[float64](res) == 2.0
 
-proc runSimpleTests() =
+proc runSimpleTests*() =
   suite "Basic stuff":
     teardown: jlGcCollect()
     test "nim_eval_string":
@@ -59,8 +59,6 @@ proc runSimpleTests() =
 
     test "jlCall":
       callJulia()
-
-
 
 proc jlArray1D() =
   let ARRAY_LEN = 1000
@@ -197,10 +195,17 @@ proc runTests*() =
 
 when defined(checkMemLeak):
   import memleaktest
+  import std/strutils
+  import std/os
 
 when isMainModule:
   Julia.init()
-  runTests()
   when defined(checkMemLeak):
-    runMemLeakTest()
+    var
+      srcPath = currentSourcePath()
+      srcName = srcPath.extractFilename()
+    srcName.removeSuffix(".nim")
+    runMemLeakTest(srcName)
+  else:
+    runTests()
   Julia.exit()
