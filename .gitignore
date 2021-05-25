@@ -2,10 +2,11 @@
 bin/
 
 testfull
-indexingtests
-iteratorstests
+indexingtest
+iteratorstest
 memleaktest
-arraymancertensortests
+arraymancertensortest
+conversionstest
 
 testresults/
 nimcache/

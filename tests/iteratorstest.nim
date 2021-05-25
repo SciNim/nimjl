@@ -45,10 +45,9 @@ proc runIteratorsTest*() =
     test "Tuple Iterators":
       tupleIterator()
 
-proc main() =
+when isMainModule:
+  import ./testfull
   Julia.init()
+  runExternalsTest()
   runIteratorsTest()
   Julia.exit()
-
-when isMainModule:
-  main()

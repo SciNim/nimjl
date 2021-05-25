@@ -124,10 +124,9 @@ proc runIndexingTest*() =
     var_index1darray()
     var_index2darray()
 
-proc main() =
+when isMainModule:
+  import ./testfull
   Julia.init()
+  runExternalsTest()
   runIndexingTest()
   Julia.exit()
-
-when isMainModule:
-  main()

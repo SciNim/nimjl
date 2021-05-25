@@ -97,10 +97,11 @@ proc runTensorArgsTest*() =
     test "external_module : rot180[Tensor]":
       tensorBuiltinRot180()
 
-proc main() =
+when isMainModule:
+  import ./testfull
   Julia.init()
+  runExternalsTest()
   runTensorArgsTest()
   Julia.exit()
 
-when isMainModule:
-  main()
+
