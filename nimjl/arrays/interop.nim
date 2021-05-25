@@ -131,7 +131,8 @@ proc fill*[T](x: T, dims: varargs[int]) : JlArray[T] =
 
 # TODO map typedesc to Julia type
 proc asType*[T](x: JlArray[T], U: typedesc) : JlArray[U] =
-  result = jlCall("reinterpret", U, x)
+  let tmp = newSeq[U](1).toJlArray()
+  result = jlCall("convert", jltypeof(tmp), x).toJlArray(U)
 
 proc swapMemoryOrder*[T](x: JlArray[T]) : JlArray[T] =
   let revshape = reverse(size(x))

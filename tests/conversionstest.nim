@@ -1,0 +1,130 @@
+import std/unittest
+import std/options
+import std/tables
+import std/sequtils
+
+import nimjl
+
+## Tuple stuff
+proc tuplesTest() =
+  block:
+    var origtuple = (a: 123, b: some(-11.11e-3), c: 67.32147, d: some("azerty"), e: none(bool))
+    var jl_tuple = toJlVal(origtuple)
+    var ret = Julia.tupleTest(jl_tuple).to(bool)
+    check ret
+
+  block:
+    var res = Julia.makeMyTuple().to(tuple[A: int, B: int, C: int])
+    check res.A == 1
+    check res.B == 2
+    check res.C == 3
+
+  type TT = object
+    a: int
+    b: Option[float]
+    c: float
+    d: Option[string]
+    e: Option[bool]
+
+  block:
+    var tt: TT = TT(a: 123, b: some(-11.11e-3), c: 67.32147, d: some("azerty"), e: none(bool))
+    var ret = Julia.tupleTest(tt).to(bool)
+    check ret
+
+proc stringModTest() =
+  var inputStr = "This is a nice string, isn't it ?"
+  var res = Julia.modString(inputStr).to(string)
+  check inputStr & " This is an amazing string" == res
+
+proc tableToDictTest() =
+  block StrNumTable:
+    var
+      key1 = "t0acq"
+      val1 = 14
+      key2 = "xOrigin"
+      val2 = 3.48
+      dict: Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
+    var res = Julia.printDict(dict, key1, val1, key2, val2)
+    check res.to(bool)
+
+  block NumTable:
+    var
+      key1 = 11
+      val1 = 14.144'f64
+      key2 = 12
+      val2 = 3.48'f64
+      dict: Table[int, float64] = {key1: val1, key2: val2}.toTable
+    var res = Julia.printDict(dict, key1, val1, key2, val2)
+    check res.to(bool)
+
+proc dictToTableTest() =
+  block StrNumTable:
+    var
+      key1 = "t0acq"
+      val1 = 14.0
+      key2 = "xOrigin"
+      val2 = 3.48
+      dict: Table[string, float] = {key1: val1.float, key2: val2.float}.toTable
+    var jlres = Julia.`dictInvert!`(dict, key1, val1, key2, val2)
+    var res = jlres.to(Table[string, float])
+    check res[key1] == val2
+    check res[key2] == val1
+
+  block NumTable:
+    var
+      key1 = 11
+      val1 = 14.144'f64
+      key2 = 12
+      val2 = 3.48'f64
+      dict: Table[int, float64] = {key1: val1, key2: val2}.toTable
+    var jlres = Julia.`dictInvert!`(dict, key1, val1, key2, val2)
+    var res = jlres.to(Table[int, float])
+    check res[key1] == val2
+    check res[key2] == val1
+
+proc nestedObjectsTest() =
+  type
+    A = object
+      dict : Table[string, float32]
+      dat: seq[int]
+
+    B = tuple
+      x: int
+      y: int
+      z: int
+
+    O = object
+      a: A
+      b: B
+
+  var o : O
+  o.a = A(dict: {"A": 1.0.float32,"B": 2.0.float32}.toTable, dat: toSeq(1..10))
+  o.b = (x: 36, y: 48, z: 60)
+  var res = Julia.nestedObjects(o)
+  check res.to(bool)
+
+proc runConversionsTest*() =
+  suite "Converions":
+    teardown: jlGcCollect()
+
+    test "Tuples":
+      tuplesTest()
+
+    test "String":
+      stringModTest()
+
+    test "dictTest":
+      tableToDictTest()
+
+    test "invertDict":
+      dictToTableTest()
+
+    test "nestedObjectsTuples":
+      nestedObjectsTest()
+
+when isMainModule:
+  import ./testfull
+  Julia.init()
+  runExternalsTest()
+  runConversionsTest()
+  Julia.exit()

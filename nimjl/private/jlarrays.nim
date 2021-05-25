@@ -1,22 +1,10 @@
 import ../config
+import ../types
 import ./jlcores
 import std/strformat
 
-{.push header: JuliaHeader.}
-let
-  jl_bool_type {.importc.}: ptr jl_datatype
-  jl_char_type {.importc.}: ptr jl_datatype
-  jl_int8_type {.importc.}: ptr jl_datatype
-  jl_int16_type {.importc.}: ptr jl_datatype
-  jl_int32_type {.importc.}: ptr jl_datatype
-  jl_int64_type {.importc.}: ptr jl_datatype
-  jl_uint8_type {.importc.}: ptr jl_datatype
-  jl_uint16_type {.importc.}: ptr jl_datatype
-  jl_uint32_type {.importc.}: ptr jl_datatype
-  jl_uint64_type {.importc.}: ptr jl_datatype
-  jl_float32_type {.importc.}: ptr jl_datatype
-  jl_float64_type {.importc.}: ptr jl_datatype
-{.pop.}
+template julia_type(arg: typedesc): ptr jl_datatype =
+  jlType(arg)
 
 ## Array bindings
 {.push nodecl, header: JuliaHeader, dynlib: JuliaLibName.}
@@ -36,37 +24,6 @@ proc jl_alloc_array_3d*(atype: ptr jl_value, nr: csize_t, nc: csize_t, z: csize_
 ## Handle apply Array type mechanics
 proc jl_apply_array_type(x: ptr jl_value, ndims: csize_t): ptr jl_value {.importc: "jl_apply_array_type".}
 {.pop.}
-
-template julia_type(T: typedesc[int8]): ptr jl_datatype = jl_int8_type
-template julia_type(T: typedesc[int16]): ptr jl_datatype = jl_int16_type
-template julia_type(T: typedesc[int32]): ptr jl_datatype = jl_int32_type
-template julia_type(T: typedesc[int64]): ptr jl_datatype = jl_int64_type
-
-template julia_type(T: typedesc[int]): ptr jl_datatype =
-  when sizeof(T) == sizeof(int64):
-    julia_type(int64)
-  elif sizeof(T) == sizeof(int32):
-    julia_type(int32)
-  else:
-    {.error: "Unsupported sizeof(uint)".}
-
-template julia_type(T: typedesc[uint8]): ptr jl_datatype = jl_uint8_type
-template julia_type(T: typedesc[uint16]): ptr jl_datatype = jl_uint16_type
-template julia_type(T: typedesc[uint32]): ptr jl_datatype = jl_uint32_type
-template julia_type(T: typedesc[uint64]): ptr jl_datatype = jl_uint64_type
-
-template julia_type(T: typedesc[uint]): ptr jl_datatype =
-  when sizeof(T) == sizeof(uint64):
-    julia_type(uint64)
-  elif sizeof(T) == sizeof(uint32):
-    julia_type(uint32)
-  else:
-    {.error: "Unsupported sizeof(uint)".}
-
-template julia_type(T: typedesc[bool]): ptr jl_datatype = jl_bool_type
-template julia_type(T: typedesc[char]): ptr jl_datatype = jl_char_type
-template julia_type(T: typedesc[float32]): ptr jl_datatype = jl_float32_type
-template julia_type(T: typedesc[float64]): ptr jl_datatype = jl_float64_type
 
 proc julia_apply_array_type*[T: SomeNumber|bool|char](dim: int): ptr jl_value =
   let jl_type = cast[ptr jl_value](julia_type(T))
