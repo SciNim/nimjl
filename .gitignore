@@ -1,13 +1,16 @@
 .vscode
 bin/
+
 testfull
-memleaktest
 indexingtests
-legacy
+iteratorstests
+memleaktest
+arraymancertensortests
 
 testresults/
 nimcache/
 
+legacy/
 install/
 third_party/
 

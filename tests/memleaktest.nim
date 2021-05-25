@@ -5,8 +5,11 @@ import std/osproc
 import std/times
 import std/os
 
-import testfull
 import nimjl
+
+import ./testfull
+import ./iteratorstests
+import ./arraymancertensortests
 
 ## Mem Leak Tests
 proc memLeakTest*(maxDuration: Duration) =
