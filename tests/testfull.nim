@@ -153,15 +153,26 @@ proc arrayMutateMeBaby() =
   check data == @[0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0]
   check data == orig.map(x => x*10)
 
+proc arrayAsType() =
+  var
+    refdata: seq[int64] = @[0'i64, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    data: seq[float64] = @[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+    xArray = jlArrayFromBuffer[float64](data)
+
+  check xArray.asType(int64) == refdata.toJlArray()
+
 proc runArrayArgsTest*() =
   suite "Array":
     teardown: jlGcCollect()
 
-    test "external_module : squareMeBaby[Array]":
+    test "squareMeBaby[Array]":
       arraySquareMeBaby()
 
-    test "external_module : mutateMeByTen[Array]":
+    test "mutateMeByTen[Array]":
       arrayMutateMeBaby()
+
+    test "asType":
+      arrayAsType()
 
 proc runExternalsTest*() =
   suite "external module":

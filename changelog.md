@@ -1,5 +1,10 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.5.2 - 2021_05_25
+===========================
+* Split tests into multiple files
+* Add fill, asType proc for arrays
+
 Release v0.5.1 - 2021_05_21
 ===========================
 * Added some operators

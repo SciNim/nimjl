@@ -88,13 +88,13 @@ proc runTensorArgsTest*() =
   suite "Tensor":
     teardown: jlGcCollect()
 
-    test "external_module : squareMeBaby[Tensor]":
+    test "squareMeBaby[Tensor]":
       tensorSquareMeBaby()
 
-    test "external_module : mutateMeByTen[Tensor]":
+    test "mutateMeByTen[Tensor]":
       tensorMutateMeBaby()
 
-    test "external_module : rot180[Tensor]":
+    test "rot180[Tensor]":
       tensorBuiltinRot180()
 
 when isMainModule:
@@ -103,5 +103,3 @@ when isMainModule:
   runExternalsTest()
   runTensorArgsTest()
   Julia.exit()
-
-

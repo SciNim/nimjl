@@ -41,12 +41,12 @@ Mostly quality-of-life improvements, especially when handling arrays.
 * Improve Julia Arrays interop. from Nim.
   * Create Array API with most common proc
     * Implement Matrix calc. operators : `*`, `+`, `-`, `/`, "Dotted operator" ``*.``, ``+.``, ``-.``, ``/.``
-    * Implement ``asType`` function mapped ``Base.reinterpret`` (ref. https://docs.julialang.org/en/v1/base/arrays/#Base.reinterpret) and ``reshape`` with ``Base.reshape``
+    * Supports complex Arrays
 
   * map / apply / reduce /fold
   * Iterators
 
-  * GPU Support ?
+  * GPU Support (or is CUDA.jl enough ?)
 
 ### Backlog
 
@@ -61,13 +61,16 @@ Mostly quality-of-life improvements, especially when handling arrays.
 ## Limitations
 
 * Julia Init / Exit can only be called **once in the lifetime of your program**
-* Value conversion Nim ==> Julia are done **by copy** **except for Arrays** type that use a pre-allocated buffer.
+* Value conversion Nim ==> Julia are done **by copy**. 
+  * Arrays are an exception to this rule and can be created from buffer / are accessible using a buffer.
 * Value conversion Julia => Nim s always done **by copy**
   * When using Arrays you can access the buffer as ``ptr UncheckedArray`` of the Julia Arrays with ``rawData()``. 
-  * Using ``to(seq[T])`` or ``to(Tensor[T])`` perform a ``copyMem`` of ``jlArray.rawData()`` in your seq/Tensor 
+  * Using ``to(seq[T])`` or ``to(Tensor[T])`` perform a ``copyMem`` of ``jlArray.rawData()`` in your seq/Tensor
 
 * Julia allocated arrays only goes up to 3 dimensions (but Arrays can be allocated in Nim)
-* Only supports Linux for now
+
+* Linux / WSL supports only 
+  * I still accept PR aiming at improving Windows supports
 
 # Examples
 

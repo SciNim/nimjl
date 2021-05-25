@@ -78,6 +78,9 @@ converter nimValueToJlValue*[T](x: JlArray[T]): JlValue =
 converter nimValueToJlValue(x: JlSym): JlValue =
   result = cast[JlValue](x)
 
+converter nimValueToJlValue(x: JlDataType): JlValue =
+  result = cast[JlValue](x)
+
 converter nimValueToJlValue(x: JlFunc): JlValue  =
   result = cast[JlValue](x)
 
