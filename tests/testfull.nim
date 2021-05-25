@@ -416,7 +416,6 @@ proc runExternalsTest*() =
       callDummyFunc()
 
 proc runTests*() =
-  jlVmInit()
   # run Externals include module so ran it first and only once
   runExternalsTest()
   runSimpleTests()
@@ -426,42 +425,14 @@ proc runTests*() =
   runTensorArgsTest()
   runIteratorsTest()
   runIndexingTest()
-  jlVmExit(0)
+
+when defined(checkMemLeak):
+  import memleaktest
 
 when isMainModule:
+  Julia.init()
   runTests()
-
-## Mem Leak Tests
-import os
-import times
-import std/monotimes
-proc runMemLeakTest*(maxDuration: Duration) =
-  # Hello Julia
-  jlVmInit()
-
-  # run Externals include module so ran it first and only once
-  runExternalsTest()
-
-  let begin = getMonoTime()
-  var elapsed = initDuration(seconds = 0'i64, nanoseconds = 0'i64)
-  let deltaTest = initDuration(seconds = 1)
-  var maxDuration = maxDuration + 4*deltaTest
-
-  while elapsed <= maxDuration:
-    elapsed = getMonoTime() - begin
-    runTupleTest()
-    sleep(deltaTest.inMilliseconds().int)
-    run1DArrayTest()
-    sleep(deltaTest.inMilliseconds().int)
-    runArrayArgsTest()
-    sleep(deltaTest.inMilliseconds().int)
-    runTensorArgsTest()
-    sleep(deltaTest.inMilliseconds().int)
-    runIteratorsTest()
-    sleep(deltaTest.inMilliseconds().int)
-
-  # Bye bye Julia
-  jlVmExit(0)
-  echo GC_getStatistics()
-  sleep(deltaTest.inMilliseconds().int)
+  when defined(checkMemLeak):
+    runMemLeakTest()
+  Julia.exit()
 

@@ -1,7 +1,7 @@
 .vscode
 bin/
 testfull
-testleak
+memleaktest
 indexingtests
 legacy
 

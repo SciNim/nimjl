@@ -123,10 +123,16 @@ proc reshape*[T](x: JlArray[T], dims: openarray[int]) : JlArray[T] =
 proc reverse*[T](x: JlArray[T]) : JlArray[T] =
   result = jlCall("reverse", x).toJlArray(T)
 
+proc fill*[T](x: T, dims: varargs[int]) : JlArray[T] =
+  if dims.len > 0:
+    result = jlCall("fill", x, dims).toJlArray(T)
+  else:
+    result = jlCall("fill", x).toJlArray(T)
+
 # TODO map typedesc to Julia type
-# proc asType*[T](x: JlArray[T], U: typedesc) : JlArray[U] =
-#   result = jlCall("reinterpret", U, x)
-#
+proc asType*[T](x: JlArray[T], U: typedesc) : JlArray[U] =
+  result = jlCall("reinterpret", U, x)
+
 proc swapMemoryOrder*[T](x: JlArray[T]) : JlArray[T] =
   let revshape = reverse(size(x))
   var invdim : seq[int]
