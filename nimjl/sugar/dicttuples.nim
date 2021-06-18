@@ -1,6 +1,7 @@
 import ../cores
 import ../types
 import ../functions
+import ../glucose
 
 import std/tables
 import std/strutils
@@ -52,7 +53,7 @@ proc nimToUnnamedJlTuple(v: tuple): JlValue =
   var tupStr = $v
   result = jlEval(tupStr)
 
-proc nimToNamedJlTuple(v: tuple|object): JlValue =
+proc nimToNamedJlTuple(v: tuple): JlValue =
   result = jlEval("NamedTuple()")
   for name, field in v.fieldPairs:
     result = jlCall(JlBase, "setindex", result, toJlVal(field), jlSym(name))
@@ -70,9 +71,6 @@ proc nimToJlTuple*(v: tuple): JlValue =
     nimToNamedJlTuple(v)
   else:
     nimToUnnamedJlTuple(v)
-
-proc nimToJlTuple*(v: object): JlValue =
-  nimToNamedJlTuple(v)
 
 proc nimTableToJlDict*[U, V: string|SomeNumber](tab: Table[U, V]): JlValue =
   result = jlEval("Dict()")

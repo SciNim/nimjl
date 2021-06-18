@@ -19,17 +19,17 @@ proc tuplesTest() =
     check res.B == 2
     check res.C == 3
 
-  type TT = object
-    a: int
-    b: Option[float]
-    c: float
-    d: Option[string]
-    e: Option[bool]
-
-  block:
-    var tt: TT = TT(a: 123, b: some(-11.11e-3), c: 67.32147, d: some("azerty"), e: none(bool))
-    var ret = Julia.tupleTest(tt).to(bool)
-    check ret
+  # type TT = object
+  #   a: int
+  #   b: Option[float]
+  #   c: float
+  #   d: Option[string]
+  #   e: Option[bool]
+  #
+  # block:
+  #   var tt: TT = TT(a: 123, b: some(-11.11e-3), c: 67.32147, d: some("azerty"), e: none(bool))
+  #   var ret = Julia.tupleTest(tt).to(bool)
+  #   check ret
 
 proc stringModTest() =
   var inputStr = "This is a nice string, isn't it ?"
@@ -82,9 +82,9 @@ proc dictToTableTest() =
     check res[key1] == val2
     check res[key2] == val1
 
-proc nestedObjectsTest() =
+proc nestedTuplesTest() =
   type
-    A = object
+    A = tuple
       dict : Table[string, float32]
       dat: seq[int]
 
@@ -93,14 +93,14 @@ proc nestedObjectsTest() =
       y: int
       z: int
 
-    O = object
+    O = tuple
       a: A
       b: B
 
   var o : O
-  o.a = A(dict: {"A": 1.0.float32,"B": 2.0.float32}.toTable, dat: toSeq(1..10))
+  o.a = (dict: {"A": 1.0.float32,"B": 2.0.float32}.toTable, dat: toSeq(1..10))
   o.b = (x: 36, y: 48, z: 60)
-  var res = Julia.nestedObjects(o)
+  var res = Julia.nestedTuples(o)
   check res.to(bool)
 
 proc runConversionsTest*() =
@@ -119,8 +119,8 @@ proc runConversionsTest*() =
     test "invertDict":
       dictToTableTest()
 
-    test "nestedObjectsTuples":
-      nestedObjectsTest()
+    test "nestedTuples":
+      nestedTuplesTest()
 
 when isMainModule:
   import ./testfull
