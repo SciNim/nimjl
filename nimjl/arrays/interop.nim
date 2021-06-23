@@ -97,10 +97,10 @@ proc toJlArray*[T: seq|array](oa: openarray[T]): auto =
     inc(i)
 
 # Utility
-proc firstindex*[T](val: JlArray[T], dim: int) : int =
+proc firstindex*[T](val: JlArray[T], dim: int): int =
   jlCall("firstindex", val, dim).to(int)
 
-proc lastindex*[T](val: JlArray[T], dim: int) : int =
+proc lastindex*[T](val: JlArray[T], dim: int): int =
   jlCall("lastindex", val, dim).to(int)
 
 proc iterate*[T](val: JlArray[T]): JlValue =
@@ -111,32 +111,32 @@ proc iterate*[T](val: JlArray[T]): JlValue =
 proc iterate*[T](val: JlArray[T], state: JlValue): JlValue =
   result = jlCall("iterate", val, state)
 
-proc transpose*[T](x: JlArray[T]) : JlArray[T] =
+proc transpose*[T](x: JlArray[T]): JlArray[T] =
   result = jlCall("transpose", x).toJlArray(T)
 
-proc reshape*[T](x: JlArray[T], dims: JlArray[int]) : JlArray[T] =
+proc reshape*[T](x: JlArray[T], dims: JlArray[int]): JlArray[T] =
   result = jlCall("reshape", x, dims).toJlArray(T)
 
-proc reshape*[T](x: JlArray[T], dims: openarray[int]) : JlArray[T] =
+proc reshape*[T](x: JlArray[T], dims: openarray[int]): JlArray[T] =
   result = jlCall("reshape", x, dims).toJlArray(T)
 
-proc reverse*[T](x: JlArray[T]) : JlArray[T] =
+proc reverse*[T](x: JlArray[T]): JlArray[T] =
   result = jlCall("reverse", x).toJlArray(T)
 
-proc fill*[T](x: T, dims: varargs[int]) : JlArray[T] =
+proc fill*[T](x: T, dims: varargs[int]): JlArray[T] =
   if dims.len > 0:
     result = jlCall("fill", x, dims).toJlArray(T)
   else:
     result = jlCall("fill", x).toJlArray(T)
 
 # TODO map typedesc to Julia type
-proc asType*[T](x: JlArray[T], U: typedesc) : JlArray[U] =
+proc asType*[T](x: JlArray[T], U: typedesc): JlArray[U] =
   let tmp = newSeq[U](1).toJlArray()
   result = jlCall("convert", jltypeof(tmp), x).toJlArray(U)
 
-proc swapMemoryOrder*[T](x: JlArray[T]) : JlArray[T] =
+proc swapMemoryOrder*[T](x: JlArray[T]): JlArray[T] =
   let revshape = reverse(size(x))
-  var invdim : seq[int]
+  var invdim: seq[int]
   for i in countdown(ndims(x), 1):
     invdim.add i
   let tmp = reshape(x, revshape)

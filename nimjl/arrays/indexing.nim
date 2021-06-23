@@ -24,7 +24,7 @@ proc makerange[T](x: JlArray[T], start, stop: int): JlValue =
 
 # This comes from arraymancer
 # |2 syntax is parsed but not used for now
-macro desugar*[T](x: JlArray[T], args: untyped): void =
+macro desugar[T](x: JlArray[T], args: untyped): void =
   ## Transform all syntactic sugar in arguments to integer or slices
 
   # echo "\n------------------\nOriginal tree"

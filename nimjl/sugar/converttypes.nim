@@ -81,10 +81,10 @@ converter nimValueToJlValue(x: JlSym): JlValue =
 converter nimValueToJlValue(x: JlDataType): JlValue =
   result = cast[JlValue](x)
 
-converter nimValueToJlValue(x: JlFunc): JlValue  =
+converter nimValueToJlValue(x: JlFunc): JlValue =
   result = cast[JlValue](x)
 
-converter nimValueToJlValue(x: JlModule): JlValue  =
+converter nimValueToJlValue(x: JlModule): JlValue =
   result = cast[JlValue](x)
 
 proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue =
@@ -93,7 +93,7 @@ proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue =
 proc nimValueToJlValue(val: string): JlValue =
   result = jlvalue_from_string(val)
 
-proc nimValueToJlValue(x: JlValue): JlValue  =
+proc nimValueToJlValue(x: JlValue): JlValue =
   result = x
 
 # Complex stuff
@@ -104,17 +104,17 @@ proc nimValueToJlValue(x: object): JlValue
 proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue
 proc nimValueToJlValue[T](x: Option[T]): JlValue
 
-proc nimValueToJlValue[T](x: openarray[T]): JlValue  =
+proc nimValueToJlValue[T](x: openarray[T]): JlValue =
   result = nimValueToJlValue(
     jlArrayFromBuffer(x)
   )
 
-proc nimValueToJlValue[I, T](x: array[I, T]): JlValue  =
+proc nimValueToJlValue[I, T](x: array[I, T]): JlValue =
   result = nimValueToJlValue(
     jlArrayFromBuffer(x)
   )
 
-proc nimValueToJlValue[T](x: Tensor[T]): JlValue  =
+proc nimValueToJlValue[T](x: Tensor[T]): JlValue =
   ## Convert a Tensor to JlValue
   result = nimValueToJlValue(
     jlArrayFromBuffer(x)
@@ -153,20 +153,20 @@ proc toNimVal(x: JlValue, t: var tuple) =
 proc toNimVal[U, V](x: JlValue, tab: var Table[U, V]) =
   jlDictToNim[U, V](x, tab)
 
-proc nimValueToJlValue[T](x: Option[T]): JlValue  =
+proc nimValueToJlValue[T](x: Option[T]): JlValue =
   if isSome(x):
     result = toJlVal(get(x))
   else:
     result = JlNothing
 
-proc nimValueToJlValue(x: tuple): JlValue  =
+proc nimValueToJlValue(x: tuple): JlValue =
   result = nimToJlTuple(x)
 
 # Treat Nim object as Julia tuple
-proc nimValueToJlValue(x: object): JlValue  =
+proc nimValueToJlValue(x: object): JlValue =
   result = nimToJlTuple(x)
 
-proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue  =
+proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue =
   result = nimTableToJlDict(x)
 
 {.pop.}

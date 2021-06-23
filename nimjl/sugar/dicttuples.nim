@@ -1,7 +1,6 @@
 import ../cores
 import ../types
 import ../functions
-import ../glucose
 
 import std/tables
 import std/strutils
@@ -58,7 +57,7 @@ proc nimToNamedJlTuple(v: tuple): JlValue =
   for name, field in v.fieldPairs:
     result = jlCall(JlBase, "setindex", result, toJlVal(field), jlSym(name))
 
-proc isNamedTuple(v: tuple) : bool =
+proc isNamedTuple(v: tuple): bool =
   var i = 0
   for name, field in v.fieldPairs:
     if name != &"Field{i}":
