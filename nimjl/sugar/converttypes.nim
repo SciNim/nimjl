@@ -100,7 +100,7 @@ proc nimValueToJlValue(x: JlValue): JlValue =
 # Treat Nim object as Julia tuple
 # Forward declaration for cyclic import
 proc nimValueToJlValue(x: tuple): JlValue
-proc nimValueToJlValue(x: object): JlValue
+# proc nimValueToJlValue(x: object): JlValue
 proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue
 proc nimValueToJlValue[T](x: Option[T]): JlValue
 
@@ -163,8 +163,8 @@ proc nimValueToJlValue(x: tuple): JlValue =
   result = nimToJlTuple(x)
 
 # Treat Nim object as Julia tuple
-proc nimValueToJlValue(x: object): JlValue =
-  result = nimToJlTuple(x)
+# proc nimValueToJlValue(x: object): JlValue =
+#   result = nimToJlTuple(x)
 
 proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue =
   result = nimTableToJlDict(x)
