@@ -8,7 +8,7 @@ license       = "MIT"
 
 # Dependencies
 requires "nim >= 1.2.0"
-requires "arraymancer"
+requires "arraymancer >= 0.6.3"
 
 # TODO finish auto installation of Julia
 task installjulia, "Install Julia":

@@ -1,27 +1,25 @@
-import nimjl/arrays
+import ./nimjl/arrays
 export arrays
 
-import nimjl/cores
+import ./nimjl/cores
 export cores
 
-import nimjl/types
+import ./nimjl/types
 export types
 
-import nimjl/gc
+import ./nimjl/gc
 export gc
 
-import nimjl/functions
+import ./nimjl/functions
 export functions
 
-import nimjl/glucose
+import ./nimjl/glucose
 export glucose
 
-import nimjl/sugar/converttypes
+import ./nimjl/sugar/converttypes
 export converttypes
 
-import nimjl/sugar/valindexing
-export valindexing
+import ./nimjl/config
 
-import nimjl/config
 static:
   debugEcho "Nimjl> Using Julia install: ", JuliaPath

@@ -47,8 +47,13 @@ proc jlArrayFromBuffer*[T](data: openArray[T]): JlArray[T] =
 
 proc jlArrayFromBuffer*[T](data: Tensor[T]): JlArray[T] =
   ## Create an Array from existing buffer
-  let uncheckedDataPtr = data.unsafe_raw_offset().distinctBase()
-  result = jlArrayFromBuffer(uncheckedDataPtr, data.shape.toSeq)
+  if not data.is_F_contiguous:
+    var data = data.asContiguous(colMajor, true)
+    let uncheckedDataPtr = data.toUnsafeView()
+    result = jlArrayFromBuffer(uncheckedDataPtr, data.shape.toSeq)
+  else:
+    let uncheckedDataPtr = data.toUnsafeView()
+    result = jlArrayFromBuffer(uncheckedDataPtr, data.shape.toSeq)
 
 # Julia allocated array
 proc allocJlArray*[T](dims: openArray[int]): JlArray[T] =
