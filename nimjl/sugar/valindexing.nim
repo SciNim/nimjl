@@ -304,7 +304,7 @@ macro desugar(x: JlValue, args: untyped): void =
 macro op_square_bracket*(x: JlValue, args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
-    JlMain.getindex(`x`, `new_args`)
+    getindex(`x`, `new_args`)
 
 template `[]`*(x: JlValue, args: varargs[untyped]): untyped =
   op_square_bracket(x, args)

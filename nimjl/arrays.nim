@@ -5,7 +5,6 @@ import ./functions
 
 import arraymancer
 
-import std/typetraits
 import std/sequtils
 
 proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =

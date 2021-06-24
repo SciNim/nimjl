@@ -2,6 +2,7 @@ import ../private/jlcores
 import ../cores
 import ../types
 import ../arrays
+
 import ./box
 
 import std/json
@@ -11,40 +12,26 @@ import arraymancer
 
 {.push inline.}
 
-  # Nim -> Julia
-# Avoid going throung template toJlVal pointer version when dealing with Julia known type
-# Is converter the right choice here ?
-converter nimValueToJlValue*[T](x: JlArray[T]): JlValue =
-  result = cast[JlValue](x)
+# Is converter appropriate ?
+converter nimValueToJlValue*[T](x: JlArray[T]): JlValue = cast[JlValue](x)
+converter nimValueToJlValue*(x: JlSym): JlValue = cast[JlValue](x)
+converter nimValueToJlValue*(x: JlDataType): JlValue = cast[JlValue](x)
+converter nimValueToJlValue*(x: JlFunc): JlValue = cast[JlValue](x)
+converter nimValueToJlValue*(x: JlModule): JlValue = cast[JlValue](x)
+proc nimValueToJlValue(x: JlValue): JlValue = x
 
-converter nimValueToJlValue(x: JlSym): JlValue =
-  result = cast[JlValue](x)
-
-converter nimValueToJlValue(x: JlDataType): JlValue =
-  result = cast[JlValue](x)
-
-converter nimValueToJlValue(x: JlFunc): JlValue =
-  result = cast[JlValue](x)
-
-converter nimValueToJlValue(x: JlModule): JlValue =
-  result = cast[JlValue](x)
-
+# Real conversions
 proc nimValueToJlValue*[T: SomeNumber|bool|pointer](val: T): JlValue =
   result = jlBox(val)
 
 proc nimValueToJlValue(val: string): JlValue =
   result = jlvalue_from_string(val)
 
-proc nimValueToJlValue(x: JlValue): JlValue =
-  result = x
-
 # Forward declaration for cyclic import
 proc nimValueToJlValue(x: tuple): JlValue
+proc nimValueToJlValue(x: object): JlValue
 proc nimValueToJlValue[U, V](x: Table[U, V]): JlValue
 proc nimValueToJlValue[T](x: Option[T]): JlValue
-
-# TODO object as struct
-# proc nimValueToJlValue(x: object): JlValue
 
 proc nimValueToJlValue[T](x: openarray[T]): JlValue =
   result = nimValueToJlValue(
@@ -76,6 +63,11 @@ proc toJlValue*[T](x: T): JlValue =
 
 # Recursive import strategy
 import ./dict_tuples
+import ./obj_structs
+
+proc nimValueToJlValue(x: object): JlValue =
+  nimToJlVal(x)
+
 proc nimValueToJlValue[T](x: Option[T]): JlValue =
   if isSome(x):
     result = toJlVal(get(x))

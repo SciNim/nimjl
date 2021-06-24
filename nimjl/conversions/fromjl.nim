@@ -21,6 +21,7 @@ proc toNimVal(x: JlValue, res: var string) =
 # Julia Tuple / Dict can't really be mapped to Nim's type so returning JsonNode is easier.
 # It introduces a "distinction" between to[T] -> T and to[T] -> JsonNode as return types
 # Forward declare for cyclic import
+proc toNimVal(x: JlValue, t: var object)
 proc toNimVal(x: JlValue, t: var tuple)
 proc toNimVal[U, V](x: JlValue, tab: var Table[U, V])
 
@@ -76,7 +77,6 @@ proc to*[U](x: JlArray[U], T: typedesc): T =
   else:
     toNimVal(x, result)
 
-
 proc to*(x: JlValue, T: typedesc): T =
   ## Copy a JlValue into a Nim type
   when T is void:
@@ -86,6 +86,10 @@ proc to*(x: JlValue, T: typedesc): T =
 
 # Recursive import strategy
 import ./dict_tuples
+import ./obj_structs
+
+proc toNimVal(x: JlValue, t: var object) =
+  jlStructToNim(x, t)
 
 proc toNimVal(x: JlValue, t: var tuple) =
   jlTupleToNim(x, t)

@@ -19,17 +19,22 @@ proc tuplesTest() =
     check res.B == 2
     check res.C == 3
 
-  # type TT = object
-  #   a: int
-  #   b: Option[float]
-  #   c: float
-  #   d: Option[string]
-  #   e: Option[bool]
+proc objectTest() =
+  type MyStruct = object
+    a: int
+    b: Option[float]
+    c: float
+    d: Option[string]
+    e: Option[bool]
   #
-  # block:
-  #   var tt: TT = TT(a: 123, b: some(-11.11e-3), c: 67.32147, d: some("azerty"), e: none(bool))
-  #   var ret = Julia.tupleTest(tt).to(bool)
-  #   check ret
+  block:
+    var tt = MyStruct(a: 123, b: some(-11.11e-3), c: 67.32147, d: some("azerty"), e: none(bool))
+    var jltt = tt.toJlVal()
+    echo jltypeof(jltt)
+    echo jltt
+    # Julia.println(tt)
+    var ret = Julia.objectTest(tt).to(bool)
+    check ret
 
 proc stringModTest() =
   var inputStr = "This is a nice string, isn't it ?"
@@ -104,11 +109,14 @@ proc nestedTuplesTest() =
   check res.to(bool)
 
 proc runConversionsTest*() =
-  suite "Converions":
+  suite "Conversions":
     teardown: jlGcCollect()
 
     test "Tuples":
       tuplesTest()
+
+    test "Objects":
+      objectTest()
 
     test "String":
       stringModTest()

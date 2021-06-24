@@ -72,8 +72,37 @@ module custom_module
       end
     end
     return false
-
   end
+
+  mutable struct MyStruct
+    a::Int
+    b::Float64
+    c::Float64
+    d::String
+    e::Nothing
+    MyStruct() = new()
+  end
+
+  function objectTest(tt::MyStruct)
+    ## test tuple args with specific values
+    if tt.a != 123
+      return false
+    end
+    if tt.b - (-11.11e-3) > 1e-12
+      return false
+    end
+    if tt.c - 67.32147 > 1e-12
+      return false
+    end
+    if tt.d != "azerty"
+      return false
+    end
+    if tt.e != nothing
+      return false
+    end
+    return true
+  end
+
 
   export dummy
   export tupleTest
@@ -84,4 +113,7 @@ module custom_module
   export squareMeBaby
   export mutateMeByTen!
   export nestedTuples
+
+  export MyStruct
+  export objectTest
 end
