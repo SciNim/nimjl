@@ -7,19 +7,19 @@ import std/strformat
 proc JlColon(): JlValue =
   JlMain.Colon()
 
-proc makerange(x: JlValue, start, stop: int, step : int) : JlValue =
-  let makerangestr = (&"{start}:{step}:{stop}")
+proc makerange(x: JlValue, start, stop: int, step: int): JlValue =
+  let makerangestr = fmt"{start}:{step}:{stop}"
   # echo ">> ", makerangestr
   jlEval(makerangestr)
 
-proc makerange(x: JlValue, start, stop: int) : JlValue =
-  let makerangestr = (&"{start}:{stop}")
+proc makerange(x: JlValue, start, stop: int): JlValue =
+  let makerangestr = fmt"{start}:{stop}"
   # echo ">> ", makerangestr
   jlEval(makerangestr)
 
 # This comes from arraymancer
 # |2 syntax is parsed but not used for now
-macro desugar*(x: JlValue, args: untyped): void =
+macro desugar(x: JlValue, args: untyped): void =
   ## Transform all syntactic sugar in arguments to integer or slices
 
   # echo "\n------------------\nOriginal tree"
@@ -127,7 +127,7 @@ macro desugar*(x: JlValue, args: untyped): void =
       let step = nnk[2][2]
       r.add(
         quote do:
-          makerange(`x`, firstindex(`x`), lastindex(`x`), `step`)
+        makerange(`x`, firstindex(`x`), lastindex(`x`), `step`)
       )
 
     elif nnk0_inf_dotdot_all and nnk1_joker and nnk20_bar_all:
@@ -141,19 +141,19 @@ macro desugar*(x: JlValue, args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-            makerange(`x`, firstindex(`x`), `stop`, `step`)
+          makerange(`x`, firstindex(`x`), `stop`, `step`)
         )
       elif nnk0_inf_dotdot_inf:
         let step = nnk[2][2]
         r.add(
           quote do:
-            makerange(`x`, firstindex(`x`), `stop`-1, `step`)
+          makerange(`x`, firstindex(`x`), `stop`-1, `step`)
         )
       elif nnk0_inf_dotdot_alt:
         let step = nnk[2][2]
         r.add(
           quote do:
-            makerange(`x`, firstindex(`x`), lastindex(`x`)-`stop`+1, `step`)
+          makerange(`x`, firstindex(`x`), lastindex(`x`)-`stop`+1, `step`)
         )
     elif nnk0_inf_dotdot_all and nnk1_joker:
       ## Identical as above but force step as 1
@@ -166,19 +166,19 @@ macro desugar*(x: JlValue, args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-            makerange(`x`, firstindex(`x`), `stop`, `step`)
+          makerange(`x`, firstindex(`x`), `stop`, `step`)
         )
       elif nnk0_inf_dotdot_inf:
         let step = nnk[2][2]
         r.add(
           quote do:
-            makerange(`x`, firstindex(`x`), `stop`-1, `step`)
+          makerange(`x`, firstindex(`x`), `stop`-1, `step`)
         )
       elif nnk0_inf_dotdot_alt:
         let step = nnk[2][2]
         r.add(
           quote do:
-            makerange(`x`, firstindex(`x`), lastindex(`x`)-`stop`+1, `step`)
+          makerange(`x`, firstindex(`x`), lastindex(`x`)-`stop`+1, `step`)
         )
 
     elif nnk0_inf_dotdot and nnk2_joker:
@@ -188,7 +188,7 @@ macro desugar*(x: JlValue, args: untyped): void =
       let step = 1
       r.add(
         quote do:
-          makerange(`x`, `start`, lastindex(`x`), `step`)
+        makerange(`x`, `start`, lastindex(`x`), `step`)
       )
 
     # TODO Re-check this
@@ -200,7 +200,7 @@ macro desugar*(x: JlValue, args: untyped): void =
       let step = nnk[2][2]
       r.add(
         quote do:
-          makerange(`x`, `start`, lastindex(`x`), `step`)
+        makerange(`x`, `start`, lastindex(`x`), `step`)
       )
     elif nnk0_inf_dotdot and nnk20_bar_min and nnk21_joker:
       ## Raise error on [5.._|-1, 3]
@@ -216,7 +216,7 @@ macro desugar*(x: JlValue, args: untyped): void =
 
       r.add(
         quote do:
-          makerange(`x`, `start`, `stop`, `step`)
+        makerange(`x`, `start`, `stop`, `step`)
       )
 
     elif nnk0_inf_dotdot_all and nnk10_hat:
@@ -231,7 +231,7 @@ macro desugar*(x: JlValue, args: untyped): void =
       let step = -1 # Should be < 0
       r.add(
         quote do:
-          makerange(`x`, lastindex(`x`)-`start`+1, `stop`, `step`)
+        makerange(`x`, lastindex(`x`)-`start`+1, `stop`, `step`)
       )
 
     # TODO Finish this
@@ -245,19 +245,19 @@ macro desugar*(x: JlValue, args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-            makerange(`x`, `start`, `stop`, `step`)
+          makerange(`x`, `start`, `stop`, `step`)
         )
       elif nnk0_inf_dotdot_inf:
         let step = nnk[2][2]
         r.add(
           quote do:
-            makerange(`x`, `start`, `stop`-1, `step`)
+          makerange(`x`, `start`, `stop`-1, `step`)
         )
       elif nnk0_inf_dotdot_alt:
         let step = nnk[2][2]
         r.add(
           quote do:
-            makerange(`x`, `start`, lastindex(`x`)-`stop`+1, `step`)
+          makerange(`x`, `start`, lastindex(`x`)-`stop`+1, `step`)
         )
 
     elif nnk0_inf_dotdot_all:
@@ -270,17 +270,17 @@ macro desugar*(x: JlValue, args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-            makerange(`x`, `start`, `stop`)
+          makerange(`x`, `start`, `stop`)
         )
       elif nnk0_inf_dotdot_inf:
         r.add(
           quote do:
-            makerange(`x`, `start`, `stop`-1)
+          makerange(`x`, `start`, `stop`-1)
         )
       elif nnk0_inf_dotdot_alt:
         r.add(
           quote do:
-            makerange(`x`, `start`, lastindex(`x`)-`stop`+1)
+          makerange(`x`, `start`, lastindex(`x`)-`stop`+1)
         )
 
     elif nnk0_pre_hat:
@@ -289,7 +289,7 @@ macro desugar*(x: JlValue, args: untyped): void =
       let stop = nnk[1]
       r.add(
         quote do:
-          lastindex(`x`) - `stop` + 1
+        lastindex(`x`) - `stop` + 1
       )
 
     else:
@@ -304,7 +304,7 @@ macro desugar*(x: JlValue, args: untyped): void =
 macro op_square_bracket*(x: JlValue, args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
-    JlMain.getindex(`x`, `new_args`)
+    getindex(`x`, `new_args`)
 
-template `[]`*(x: JlValue, args: varargs[untyped]) : untyped =
+template `[]`*(x: JlValue, args: varargs[untyped]): untyped =
   op_square_bracket(x, args)

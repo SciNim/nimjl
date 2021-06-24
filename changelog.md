@@ -1,5 +1,10 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.5.3 - 2021_06_24
+===========================
+* Improve file layout
+* Added object <=> struct conversions
+
 Release v0.5.2 - 2021_05_25
 ===========================
 * Split tests into multiple files
@@ -26,7 +31,7 @@ Release v0.4.5 - 2021_04_02
 
 Release v0.4.4 - 2021_03_25
 ===========================
-* Add support for Option 
+* Add support for Option
 * Fix boxing bool and voidpointer types
 * Improve test coverage
 * Add examples to ci
@@ -46,7 +51,7 @@ Release v0.4.1 - 2021_03_10
 * Add seq support when converting types
 * Add Tensor support when converting types
 * Improved dispatch using generic proc instead of ``when T is ...``
-* Format code using nimpretty 
+* Format code using nimpretty
 * Add changelog
 * Improve readme
 * Improve examples

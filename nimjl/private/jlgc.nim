@@ -4,8 +4,8 @@ import ../config
 ## Must be inline
 type
   JlGcCollection* {.pure, size: sizeof(cint), importc: "jl_gc_collection_t", header: JuliaHeader.} = enum
-    jlGcAuto = 0 # JL_GC_AUTO
-    jlGcFull = 1 # JL_GC_FULL
+    jlGcAuto = 0        # JL_GC_AUTO
+    jlGcFull = 1        # JL_GC_FULL
     jlGcIncremental = 2 # JL_GC_INCREMENTAL
 
 {.push dynlib: JuliaLibName, header: JuliaHeader.}

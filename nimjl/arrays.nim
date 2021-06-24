@@ -5,7 +5,6 @@ import ./functions
 
 import arraymancer
 
-import std/typetraits
 import std/sequtils
 
 proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =
@@ -46,8 +45,11 @@ proc jlArrayFromBuffer*[T](data: openArray[T]): JlArray[T] =
   result = jlArrayFromBuffer(uncheckedDataPtr, [data.len()])
 
 proc jlArrayFromBuffer*[T](data: Tensor[T]): JlArray[T] =
+  if not data.is_contiguous:
+    raise newException(ValueError, "Error using non-contiguous Tensor as buffer")
+
   ## Create an Array from existing buffer
-  let uncheckedDataPtr = data.unsafe_raw_offset().distinctBase()
+  let uncheckedDataPtr = data.toUnsafeView()
   result = jlArrayFromBuffer(uncheckedDataPtr, data.shape.toSeq)
 
 # Julia allocated array

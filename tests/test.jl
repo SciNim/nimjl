@@ -63,7 +63,7 @@ module custom_module
     return (A=1, B=2, C=3,)
   end
 
-  function nestedObjects(o)
+  function nestedTuples(o)
     if (o.a.dict["A"] == 1.0 && o.a.dict["B"] == 2.0)
       if(o.a.dat == collect(1:1:10))
         if o.b.x == 36 && o.b.y == 48 && o.b.z == 60
@@ -72,8 +72,37 @@ module custom_module
       end
     end
     return false
-
   end
+
+  mutable struct MyStruct
+    a::Int
+    b::Float64
+    c::Float64
+    d::String
+    e::Array{Int}
+    MyStruct() = new()
+  end
+
+  function objectTest(tt::MyStruct)
+    ## test tuple args with specific values
+    if tt.a != 123
+      return false
+    end
+    if tt.b - (-11.11e-3) > 1e-12
+      return false
+    end
+    if tt.c - 67.32147 > 1e-12
+      return false
+    end
+    if tt.d != "azerty"
+      return false
+    end
+    if tt.e != [111, 2, 3, 4, 5, 6]
+      return false
+    end
+    return true
+  end
+
 
   export dummy
   export tupleTest
@@ -83,5 +112,8 @@ module custom_module
   export makeMyTuple
   export squareMeBaby
   export mutateMeByTen!
-  export nestedObjects
+  export nestedTuples
+
+  export MyStruct
+  export objectTest
 end

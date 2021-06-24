@@ -13,7 +13,10 @@ const JuliaLibPath* = JuliaPath / "lib"
 const JuliaDepPath* = JuliaPath / "lib" / "julia"
 
 const JlVersionCmd = JuliaPath / "bin" / "julia" & " -E VERSION"
-const JuliaVersion = gorge(JlVersionCmd).split("\"")[1].split(".")
+const (cmdOutput, exitCode) = gorgeEx(JlVersionCmd)
+const JuliaVersion = cmdOutput.split("\"")[1].split(".")
+static: doAssert(exitCode == 0, "Julia executable could not be found")
+
   # For release : result has the form ["v", "1.6.0", ""] -> splitting [1] yiels ["1", "6, "0"]
   # For dev: result has the form ["v", "1.7.0-DEV", "667"] -> splitting [1] yiels ["1", "7, "0-DEV", "667"]
 const JuliaMajorVersion* = JuliaVersion[0].parseInt
@@ -32,9 +35,9 @@ const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
 {.passL: "-Wl,-rpath," & JuliaDepPath.}
 {.passL: "-ljulia".}
 
-# Workaround for Julia 1.6.0 and 1.6.1
+# Workaround for Julia 1.6.0
 # See https://github.com/JuliaLang/julia/issues/40524
-when (JuliaMajorVersion, JuliaMinorVersion) == (1, 6) and (JuliaPatchVersion == 0 or JuliaPatchVersion == 1):
-  const internalJuliaLibName* = JuliaDepPath / libPrefix & "Julia-internal" & libSuffix
+when (JuliaMajorVersion, JuliaMinorVersion) == (1, 6):
+  const internalJuliaLibName* = JuliaDepPath / libPrefix & "julia-internal" & libSuffix
   {.passL: "-ljulia-internal".}
 

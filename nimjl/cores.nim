@@ -25,7 +25,7 @@ proc jlSym*(symname: string): JlSym =
   result = jl_symbol(symname.cstring)
 
 proc jlExceptionHandler*() =
-  let excpt : JlValue = jl_exception_occurred()
+  let excpt: JlValue = jl_exception_occurred()
   if not isNil(excpt):
     let msg = $(jl_exception_message())
     raise newException(JlError, msg)
@@ -66,4 +66,4 @@ proc jlGetModule*(modname: string): JlModule =
   result = cast[JlModule](tmp)
 
 # JlNothing is handy to have
-template JlNothing*() : JlValue = jlEval("nothing")
+template JlNothing*(): JlValue = jlEval("nothing")

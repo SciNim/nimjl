@@ -44,15 +44,14 @@ Mostly quality-of-life improvements, especially when handling arrays.
     * Supports complex Arrays
 
   * map / apply / reduce /fold
-  * Iterators
 
-  * GPU Support (or is CUDA.jl enough ?)
+  * Map mutable struct to Nim object
 
 ### Backlog
 
 * Add support for Enum types
 
-* Map mutable struct to Nim object
+* GPU Support (or is CUDA.jl enough ?)
 
 * Support Julia chaining syntax
 
