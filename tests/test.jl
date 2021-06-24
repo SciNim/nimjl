@@ -79,7 +79,7 @@ module custom_module
     b::Float64
     c::Float64
     d::String
-    e::Nothing
+    e::Array{Int}
     MyStruct() = new()
   end
 
@@ -97,7 +97,7 @@ module custom_module
     if tt.d != "azerty"
       return false
     end
-    if tt.e != nothing
+    if tt.e != [111, 2, 3, 4, 5, 6]
       return false
     end
     return true

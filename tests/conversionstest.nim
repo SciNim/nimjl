@@ -25,15 +25,14 @@ proc objectTest() =
     b: Option[float]
     c: float
     d: Option[string]
-    e: Option[bool]
-  #
+    e: seq[int]
+
   block:
-    var tt = MyStruct(a: 123, b: some(-11.11e-3), c: 67.32147, d: some("azerty"), e: none(bool))
+    var tt = MyStruct(a: 123, b: some(-11.11e-3), c: 67.32147, d: some("azerty"), e: @[1, 2, 3, 4, 5, 6])
     var jltt = tt.toJlVal()
-    echo jltypeof(jltt)
-    echo jltt
-    # Julia.println(tt)
-    var ret = Julia.objectTest(tt).to(bool)
+    tt.e[0] = 111
+    check $(jltypeof(jltt)) == "MyStruct"
+    var ret = Julia.objectTest(jltt).to(bool)
     check ret
 
 proc stringModTest() =
