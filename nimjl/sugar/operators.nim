@@ -2,8 +2,7 @@
 # It contains most syntactic sugar to ease using Julia inside Nim
 import ../types
 import ../functions
-
-import ./converttypes
+import ../conversions
 import ../glucose
 
 # typeof is taken by Nim already

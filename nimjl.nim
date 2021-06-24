@@ -16,8 +16,8 @@ export functions
 import ./nimjl/glucose
 export glucose
 
-import ./nimjl/sugar/converttypes
-export converttypes
+import ./nimjl/conversions
+export conversions
 
 import ./nimjl/config
 

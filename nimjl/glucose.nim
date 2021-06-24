@@ -3,8 +3,8 @@
 import ./types
 import ./cores
 import ./functions
+import ./conversions
 
-import ./sugar/converttypes
 import ./private/jlcores
 
 type Julia* = object
@@ -58,7 +58,7 @@ iterator enumerate*(val: JlValue): (int, JlValue) =
     it = iterate(val, it.getindex(2))
     inc(i)
 
-import sugar/operators
+import ./sugar/operators
 export operators
 
 import ./sugar/valindexing
