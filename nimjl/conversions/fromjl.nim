@@ -92,4 +92,3 @@ proc toNimVal(x: JlValue, t: var tuple) =
 
 proc toNimVal[U, V](x: JlValue, tab: var Table[U, V]) =
   jlDictToNim[U, V](x, tab)
-
