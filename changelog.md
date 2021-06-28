@@ -1,5 +1,12 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.5.4 - 2021_XX_XX
+===========================
+* Added field access syntax with `.` and moved call syntax to `.()`
+* lent for `[]`
+* Fix issues on object <=> struct vonersions (notably with Option[T])
+* Added common / useful procs directly accessible
+
 Release v0.5.3 - 2021_06_24
 ===========================
 * Improve file layout
