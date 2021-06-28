@@ -27,7 +27,6 @@ template `.`*(jl: type Julia, funcname: untyped, args: varargs[JlValue, toJlVal]
 template `.`*(jlmod: JlModule, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
   jlCall(jlmod, astToStr(funcname), args)
 
-
 #####################################################
 # Interop and utility
 #####################################################
@@ -62,6 +61,11 @@ proc lastindex*(val: JlValue): int =
 template getindex*(val: JlValue, idx: varargs[untyped]): JlValue =
   jlCall("getindex", val, idx)
 
+template getproperty*(val: JlValue, propertyname: untyped): JlValue =
+  jlCall("getproperty", val, jlSym(astToStr(propertyname)))
+
+template `.`*(jlval: JlValue, propertyname: untyped): untyped =
+  getproperty(jlval, propertyname)
 
 # Re-export
 import ./sugar/iterators
@@ -72,4 +76,3 @@ export operators
 
 import ./sugar/valindexing
 export valindexing
-
