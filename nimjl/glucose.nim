@@ -19,15 +19,6 @@ proc exit*(jl: type Julia, exitcode: int = 0) =
 # TODO generate a proc ``modname`` that returns module
 
 #####################################################
-# Syntactic sugar
-#####################################################
-template `.`*(jl: type Julia, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
-  jlCall(astToStr(funcname), args)
-
-template `.`*(jlmod: JlModule, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
-  jlCall(jlmod, astToStr(funcname), args)
-
-#####################################################
 # Interop and utility
 #####################################################
 proc `$`*(val: JlValue): string =
@@ -64,8 +55,29 @@ template getindex*(val: JlValue, idx: varargs[untyped]): JlValue =
 template getproperty*(val: JlValue, propertyname: untyped): JlValue =
   jlCall("getproperty", val, jlSym(astToStr(propertyname)))
 
-template `.`*(jlval: JlValue, propertyname: untyped): untyped =
+template setindex*(val: JlValue, newval: untyped, idx: varargs[untyped]) =
+  discard jlCall("setindex!", val, newval, idx)
+
+template setproperty*(val: JlValue, propertyname: untyped, newval: untyped) =
+  discard jlCall("setproperty!", val, jlSym(astToStr(propertyname)), newval)
+
+#####################################################
+# Syntactic sugar
+#####################################################
+template `.()`*(jl: type Julia, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
+  jlCall(astToStr(funcname), args)
+
+template `.()`*(jlmod: JlModule, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
+  jlCall(jlmod, astToStr(funcname), args)
+
+template `.()`*(jlval: JlValue, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
+  jlCall(astToStr(funcname), jlval, args)
+
+template `.`*(jlval: JlValue, propertyname: untyped): JlValue =
   getproperty(jlval, propertyname)
+
+template `.=`*(jlval: var JlValue, fieldname: untyped, newval: untyped) =
+  setproperty(jlval, fieldname, newval)
 
 # Re-export
 import ./sugar/iterators

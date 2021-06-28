@@ -308,3 +308,14 @@ macro op_square_bracket*(x: JlValue, args: varargs[untyped]): untyped =
 
 template `[]`*(x: JlValue, args: varargs[untyped]): untyped =
   op_square_bracket(x, args)
+
+template `[]`*(x: var JlValue, args: varargs[untyped]): var JlValue =
+  op_square_bracket(x, args)
+
+macro op_square_bracket_assign*[T](x: JlValue, args: varargs[untyped], val: T) =
+  let new_args = getAST(desugar(x, args))
+  quote do:
+    discard jlCall("setindex!", `x`, `val`, `new_args`)
+
+template `[]=`*[T](x: JlValue, args: varargs[untyped], val: T) =
+  op_square_bracket_assign(x, args, val)
