@@ -317,10 +317,10 @@ macro op_square_bracket_view*[T](x: var JlArray[T], args: varargs[untyped]): unt
   result = quote do:
     jlCall("view", `x`, `new_args`)
 
-template `[]`*[T](x: JlArray[T], args: varargs[untyped]): JlArray[T] =
+template `[]`*[T](x: JlArray[T], args: varargs[untyped]): lent JlArray[T] =
   op_square_bracket_slice(x, args).toJlArray(typedesc[T])
 
-template `[]`*[T](x: var JlArray[T], args: varargs[untyped]): JlArray[T] =
+template `[]`*[T](x: var JlArray[T], args: varargs[untyped]): var JlArray[T] =
   op_square_bracket_view(x, args).toJlArray(typedesc[T])
 
 macro op_square_bracket_assign*[T](x: JlArray[T], args: varargs[untyped], val: T) =
@@ -330,4 +330,3 @@ macro op_square_bracket_assign*[T](x: JlArray[T], args: varargs[untyped], val: T
 
 template `[]=`*[T](x: JlArray[T], args: varargs[untyped], val: T) =
   op_square_bracket_assign(x, args, val)
-

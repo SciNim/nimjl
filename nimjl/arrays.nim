@@ -33,6 +33,9 @@ proc shape*[T](x: JlArray[T]): seq[int] =
   for i in 0..<x.ndims():
     result.add x.dim(i)
 
+proc eltype*[T](x: JlArray[T]): JlDataType =
+  jl_array_eltype(x)
+
 # Buffer with dims
 proc jlArrayFromBuffer*[T](data: ptr UncheckedArray[T], dims: openArray[int]): JlArray[T] =
   ## Create an Array from existing buffer
@@ -67,4 +70,3 @@ export interop
 
 import ./arrays/indexing
 export indexing
-
