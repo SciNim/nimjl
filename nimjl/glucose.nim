@@ -64,6 +64,15 @@ template setproperty*(val: JlValue, propertyname: untyped, newval: untyped) =
 #####################################################
 # Syntactic sugar
 #####################################################
+import std/macros
+
+macro unpackVarargs_first(callee, arg_first: untyped; arg_second: untyped, args: varargs[untyped]):untyped =
+  result = newCall(callee)
+  result.add arg_first
+  result.add arg_second
+  for a in args:
+    result.add a
+
 template `.()`*(jl: type Julia, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
   jlCall(astToStr(funcname), args)
 
@@ -71,7 +80,7 @@ template `.()`*(jlmod: JlModule, funcname: untyped, args: varargs[JlValue, toJlV
   jlCall(jlmod, astToStr(funcname), args)
 
 template `.()`*(jlval: JlValue, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
-  jlCall(astToStr(funcname), jlval, args)
+  unpackVarargs_first(jlCall, astToStr(funcname), jlval, args)
 
 template `.`*(jlval: JlValue, propertyname: untyped): JlValue =
   getproperty(jlval, propertyname)

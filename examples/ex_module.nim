@@ -20,4 +20,17 @@ echo nimres
 doAssert myTup.nimTupKey1+1 == nimres.nimTupKey1
 doAssert myTup.nimTupKey2+1 == nimres.nimTupKey2
 
+var foo = Julia.makeFoo()
+# You can access fields with dot syntax
+echo foo.x
+echo foo.y
+echo foo.z
+
+# You can modify objects
+foo.x = 2
+foo.y = 3.14
+foo.z = "General Kenobi !"
+
+echo foo
+
 Julia.exit() # Exit Julia VM. This can be done only once in the lifetime of your program.

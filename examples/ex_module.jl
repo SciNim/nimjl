@@ -10,6 +10,18 @@ module nimjlExample
     return result
   end
 
+  mutable struct Foo
+    x::Int
+    y::Float64
+    z::String
+  end
+
+  function makeFoo()
+    return Foo(1, -1.0, "Hello there")
+  end
+
   export customFunction
+  export Foo
+  export makeFoo
 
 end
