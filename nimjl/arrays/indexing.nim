@@ -308,15 +308,14 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
 
 macro op_square_bracket_slice*[T](x: JlArray[T], args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
-  echo new_args.treerepr
   result = quote do:
     jlCall("getindex", `x`, `new_args`)
 
 macro op_square_bracket_view*[T](x: var JlArray[T], args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
-  echo new_args.treerepr
   result = quote do:
-    jlCall("view", `x`, `new_args`)
+    # TODO investigate how to use getindex function
+    jlCall("getindex", `x`, `new_args`)
 
 template `[]`*[T](x: JlArray[T], args: varargs[untyped]): JlArray[T] =
   op_square_bracket_slice(x, args).toJlArray(typedesc[T])
