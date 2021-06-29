@@ -112,6 +112,32 @@ proc var_index2darray() =
     check locarray[1..<8, 1] == [1, 2, 3, 4, 5, 6, 7].toJlArray()
     check locarray[1..^4, 1] == [1, 2, 3, 4, 5, 6, 7, 8, 9].toJlArray()
 
+proc assign_index1darray() =
+  var refarray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  var locarray = jlArrayFromBuffer(refarray)
+
+  test "1DArray":
+    locarray[1] = 12
+    check refarray[0] == 12
+    # locarray[2.._|+2] = 36
+    check refarray == @[12, 36, 3, 36, 5, 36, 6, 36, 8, 36, 10, 36, 12]
+
+# proc var_index2darray() =
+#   var locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
+#
+#   test "2DArray":
+#     check locarray[^2, 1] == fill(11)
+#     check locarray[_, 1] == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
+#     check locarray[2, 1] == fill(2)
+#     check locarray[_.._, 1] == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
+#     check locarray[2.._, 1] == [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
+#     check locarray[_.._|+2, 1] == [1, 3, 5, 7, 9, 11].toJlArray()
+#     check locarray[1..9|+2, 1] == [1, 3, 5, 7, 9].toJlArray()
+#     check locarray[1..<9|+2, 1] == [1, 3, 5, 7].toJlArray()
+#     check locarray[1..^2|+2, 1] == [1, 3, 5, 7, 9, 11].toJlArray()
+#     check locarray[1..6, 1] == [1, 2, 3, 4, 5, 6].toJlArray()
+#     check locarray[1..<8, 1] == [1, 2, 3, 4, 5, 6, 7].toJlArray()
+#     check locarray[1..^4, 1] == [1, 2, 3, 4, 5, 6, 7, 8, 9].toJlArray()
 
 proc runIndexingTest*() =
   suite "Immutable Indexing":
@@ -123,6 +149,9 @@ proc runIndexingTest*() =
     var_indextuple()
     var_index1darray()
     var_index2darray()
+
+  suite "Assign Indexing":
+    assign_index1darray()
 
 when isMainModule:
   import ./testfull

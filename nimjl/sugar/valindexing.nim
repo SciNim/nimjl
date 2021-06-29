@@ -301,21 +301,36 @@ macro desugar(x: JlValue, args: untyped): void =
   # echo r.astGenRepr
   return r
 
-macro op_square_bracket(x: JlValue, args: varargs[untyped]): untyped =
+macro op_square_bracket*(x: JlValue, args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
     getindex(`x`, `new_args`)
 
-template `[]`*(x: JlValue, args: varargs[untyped]): untyped =
+template `[]`*(x: JlValue, args: varargs[untyped]): lent JlValue =
   op_square_bracket(x, args)
 
 template `[]`*(x: var JlValue, args: varargs[untyped]): var JlValue =
   op_square_bracket(x, args)
 
-macro op_square_bracket_assign[T](x: JlValue, args: varargs[untyped], val: T) =
-  let new_args = getAST(desugar(x, args))
-  quote do:
-    discard jlCall("setindex!", `x`, `val`, `new_args`)
+macro unpackVarargs_firstsecond*(callee, funcname: untyped, arg_first: untyped, arg_second: untyped, args: varargs[untyped]) : untyped =
+  result = newCall(callee)
+  result.add arg_first
+  result.add arg_second
+  for a in args:
+    result.add a
 
-template `[]=`*[T](x: JlValue, args: varargs[untyped], val: T) =
-  op_square_bracket_assign(x, args, val)
+macro op_square_bracket_assign*(x: JlValue, val:untyped, args: varargs[untyped]) =
+  let new_args = getAST(desugar(x, args))
+  # quote do:
+  #   discard jlCall("setindex!", `x`, `val`, `new_args`)
+  quote do:
+    unpackVarargs_firstlast(
+      jlCall,
+      astToStr("setindex!"),
+      `x`,
+      `val`,
+      `new_args`
+    )
+
+template `[]=`*(x: var JlValue, args: varargs[untyped], val: untyped) =
+  op_square_bracket_assign(x, val, args)
