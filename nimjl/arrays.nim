@@ -36,6 +36,9 @@ proc shape*[T](x: JlArray[T]): seq[int] =
 proc eltype*[T](x: JlArray[T]): JlDataType =
   jl_array_eltype(x)
 
+proc eltype*(x: JlValue): JlDataType =
+  jl_array_eltype(cast[ptr jl_array](x))
+
 # Buffer with dims
 proc jlArrayFromBuffer*[T](data: ptr UncheckedArray[T], dims: openArray[int]): JlArray[T] =
   ## Create an Array from existing buffer
