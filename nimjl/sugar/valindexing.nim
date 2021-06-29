@@ -301,7 +301,7 @@ macro desugar(x: JlValue, args: untyped): void =
   # echo r.astGenRepr
   return r
 
-macro op_square_bracket*(x: JlValue, args: varargs[untyped]): untyped =
+macro op_square_bracket(x: JlValue, args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
     getindex(`x`, `new_args`)
@@ -312,7 +312,7 @@ template `[]`*(x: JlValue, args: varargs[untyped]): untyped =
 template `[]`*(x: var JlValue, args: varargs[untyped]): var JlValue =
   op_square_bracket(x, args)
 
-macro op_square_bracket_assign*[T](x: JlValue, args: varargs[untyped], val: T) =
+macro op_square_bracket_assign[T](x: JlValue, args: varargs[untyped], val: T) =
   let new_args = getAST(desugar(x, args))
   quote do:
     discard jlCall("setindex!", `x`, `val`, `new_args`)
