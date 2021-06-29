@@ -3,9 +3,8 @@ import ./private/jlcores
 import ./private/jlarrays
 import ./functions
 
-import arraymancer
-
 import std/sequtils
+import arraymancer
 
 proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =
   result = cast[ptr jl_array](x)
@@ -51,7 +50,7 @@ proc jlArrayFromBuffer*[T](data: openArray[T]): JlArray[T] =
   result = jlArrayFromBuffer(uncheckedDataPtr, [data.len()])
 
 proc jlArrayFromBuffer*[T](data: Tensor[T]): JlArray[T] =
-  if not data.is_contiguous:
+  if not is_contiguous(data):
     raise newException(ValueError, "Error using non-contiguous Tensor as buffer")
 
   ## Create an Array from existing buffer

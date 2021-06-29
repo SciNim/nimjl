@@ -345,5 +345,5 @@ macro op_square_bracket_assign*[T](x: JlArray[T], val: T, args: varargs[untyped]
   #     `new_args`
   #   )
 
-template `[]=`*[T](x: var JlArray[T], args: varargs[untyped], val: T) =
+template `[]=`*[T](x: JlArray[T], args: varargs[untyped], val: T) =
   op_square_bracket_assign(x, val, args)

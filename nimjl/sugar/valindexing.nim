@@ -333,5 +333,5 @@ macro op_square_bracket_assign*(x: JlValue, val:untyped, args: varargs[untyped])
   #     `new_args`
   #   )
 
-template `[]=`*(x: var JlValue, args: varargs[untyped], val: untyped) =
+template `[]=`*(x: JlValue, args: varargs[untyped], val: untyped) =
   op_square_bracket_assign(x, val, args)
