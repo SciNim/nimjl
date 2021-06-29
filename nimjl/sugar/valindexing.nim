@@ -306,11 +306,11 @@ macro op_square_bracket*(x: JlValue, args: varargs[untyped]): untyped =
   result = quote do:
     getindex(`x`, `new_args`)
 
-template `[]`*(x: JlValue, args: varargs[untyped]): lent JlValue =
+template `[]`*(x: JlValue, args: varargs[untyped]): JlValue =
   op_square_bracket(x, args)
 
-template `[]`*(x: var JlValue, args: varargs[untyped]): var JlValue =
-  op_square_bracket(x, args)
+# template `[]`*(x: var JlValue, args: varargs[untyped]): JlValue =
+#   op_square_bracket(x, args)
 
 macro unpackVarargs_firstsecond*(callee, funcname: untyped, arg_first: untyped, arg_second: untyped, args: varargs[untyped]) : untyped =
   result = newCall(callee)
@@ -321,16 +321,17 @@ macro unpackVarargs_firstsecond*(callee, funcname: untyped, arg_first: untyped, 
 
 macro op_square_bracket_assign*(x: JlValue, val:untyped, args: varargs[untyped]) =
   let new_args = getAST(desugar(x, args))
-  # quote do:
-  #   discard jlCall("setindex!", `x`, `val`, `new_args`)
   quote do:
-    unpackVarargs_firstlast(
-      jlCall,
-      astToStr("setindex!"),
-      `x`,
-      `val`,
-      `new_args`
-    )
+    discard jlCall("setindex!", `x`, `val`, `new_args`)
+
+  # quote do:
+  #   unpackVarargs_firstlast(
+  #     jlCall,
+  #     astToStr("setindex!"),
+  #     `x`,
+  #     `val`,
+  #     `new_args`
+  #   )
 
 template `[]=`*(x: var JlValue, args: varargs[untyped], val: untyped) =
   op_square_bracket_assign(x, val, args)

@@ -307,7 +307,7 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
   # echo r.astGenRepr
   return r
 
-macro op_square_bracket_slice[T](x: JlArray[T], args: varargs[untyped]): untyped =
+macro op_square_bracket_slice*[T](x: JlArray[T], args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
     jlCall("getindex", `x`, `new_args`)
@@ -317,10 +317,10 @@ macro op_square_bracket_view*[T](x: var JlArray[T], args: varargs[untyped]): unt
   result = quote do:
     jlCall("view", `x`, `new_args`)
 
-template `[]`*[T](x: JlArray[T], args: varargs[untyped]): lent JlArray[T] =
+template `[]`*[T](x: JlArray[T], args: varargs[untyped]): JlArray[T] =
   op_square_bracket_slice(x, args).toJlArray(typedesc[T])
 
-template `[]`*[T](x: var JlArray[T], args: varargs[untyped]): var JlArray[T] =
+template `[]`*[T](x: var JlArray[T], args: varargs[untyped]): JlArray[T] =
   op_square_bracket_view(x, args).toJlArray(typedesc[T])
 
 macro unpackVarargs_firstlast*(callee, funcname: string, arg_first: untyped, args: varargs[untyped], arg_last: untyped) : untyped =
@@ -333,16 +333,17 @@ macro unpackVarargs_firstlast*(callee, funcname: string, arg_first: untyped, arg
 
 macro op_square_bracket_assign*[T](x: JlArray[T], val: T, args: varargs[untyped]) =
   let new_args = getAST(desugar(x, args))
-  # quote do:
-  #   discard jlCall("setindex!", `x`, `val`, `new_args`)
   quote do:
-    unpackVarargs_firstlast(
-      jlCall,
-      astToStr("setindex!"),
-      `x`,
-      `val`,
-      `new_args`
-    )
+    discard jlCall("setindex!", `x`, `val`, `new_args`)
+
+  # quote do:
+  #   unpackVarargs_firstlast(
+  #     jlCall,
+  #     astToStr("setindex!"),
+  #     `x`,
+  #     `val`,
+  #     `new_args`
+  #   )
 
 template `[]=`*[T](x: var JlArray[T], args: varargs[untyped], val: T) =
   op_square_bracket_assign(x, val, args)
