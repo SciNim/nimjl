@@ -84,8 +84,8 @@ template `.()`*(jlmod: JlModule, funcname: untyped, args: varargs[JlValue, toJlV
 template `.()`*(jlval: JlValue, funcname: untyped, args: varargs[JlValue, toJlVal]): JlValue =
   unpackVarargs_first(jlCall, astToStr(funcname), jlval, args)
 
-# template `.`*(jlval: JlValue, propertyname: untyped): JlValue =
-#   getproperty(jlval, astToStr(propertyname))
+template `.`*(jlval: JlValue, propertyname: untyped): JlValue =
+  getproperty(jlval, astToStr(propertyname))
 
 template `.=`*(jlval: var JlValue, fieldname: untyped, newval: untyped) =
   setproperty(jlval, astToStr(fieldname), newval)
