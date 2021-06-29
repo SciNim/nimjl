@@ -21,16 +21,22 @@ proc main() =
     # Julia Arrays starts at 1 even from Nim
     # Automatic conversions creates a copy of Tensor
     var res = Julia.permutedims(tensor, [2, 1]).toJlArray(float)
-    # Check dimensions have changed
-    echo typeof(res) # From Nim : JlArray[float64]
-    echo jltypeof(res) # From Julia: Matrix{Float64}
+    jlGcRoot(res):
+      # Check dimensions have changed
+      echo typeof(res) # From Nim : JlArray[float64]
+      echo jltypeof(res) # From Julia: Matrix{Float64}
 
-    echo res.shape()
-
-    # You can index Julia Arrays from Nim
-    res[1, 1] = 120.0
-    echo res
-    echo tensor
+      var tmp = res[1, 1]
+      echo ">< ", tmp
+      echo ">< ", jltypeof(tmp)
+      echo ">< ", tmp.length()
+      echo ">< ", getindex(tmp, 1, 1)
+      echo "----------------------"
+      # You can index Julia Arrays from Nim
+      res[1, 1] = 120.0
+      echo res
+      echo tensor
+      echo res.shape()
 
 
 

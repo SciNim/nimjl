@@ -30,4 +30,12 @@ block:
   doAssert not myJlTab.to(Table[int64, float64]).contains(key) # Value was removed from myJlTab
   doAssert poppedValue == mytab[key]
 
+block:
+  # You can use [] on Julia dict as well
+  var jldict = toJlVal({"alpha": 1.1, "beta": 2.2}.toTable)
+  doAssert jldict["alpha"].to(float) == 1.1
+  doAssert jldict["beta"].to(float) == 2.2
+  jldict["alpha"] = 3.3
+  doAssert jldict["alpha"].to(float) == 3.3
+
 jlVmExit() # Exit Julia VM. This can be done only once in the lifetime of your program.

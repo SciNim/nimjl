@@ -1,11 +1,11 @@
 import ../types
 import ../cores
-import ../glucose
+import ../functions
 import std/macros
 import std/strformat
 
 proc JlColon(): JlValue =
-  JlMain.Colon()
+  jlCall(JlBase, "Colon")
 
 proc makerange(x: JlValue, start, stop: int, step: int): JlValue =
   let makerangestr = fmt"{start}:{step}:{stop}"
@@ -301,37 +301,25 @@ macro desugar(x: JlValue, args: untyped): void =
   # echo r.astGenRepr
   return r
 
-macro op_square_bracket*(x: JlValue, args: varargs[untyped]): untyped =
+macro op_square_bracket_index*(x: JlValue, args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
-    getindex(`x`, `new_args`)
+    jlCall("getindex", `x`, `new_args`)
 
 template `[]`*(x: JlValue, args: varargs[untyped]): JlValue =
-  op_square_bracket(x, args)
+  op_square_bracket_index(x, args)
 
-# template `[]`*(x: var JlValue, args: varargs[untyped]): JlValue =
-#   op_square_bracket(x, args)
+macro `[]=`*(x: var JlValue, args: varargs[untyped]) =
+  var tmp = args
+  # See for why val has to be in varargs
+  # https://github.com/nim-lang/Nim/issues/5855
+  let val = tmp[tmp.len - 1]
+  tmp.del(tmp.len-1)
+  let new_args = getAST(desugar(x, tmp))
 
-macro unpackVarargs_firstsecond*(callee, funcname: untyped, arg_first: untyped, arg_second: untyped, args: varargs[untyped]) : untyped =
-  result = newCall(callee)
-  result.add arg_first
-  result.add arg_second
-  for a in args:
-    result.add a
-
-macro op_square_bracket_assign*(x: JlValue, val:untyped, args: varargs[untyped]) =
-  let new_args = getAST(desugar(x, args))
-  quote do:
-    discard jlCall("setindex!", `x`, `val`, `new_args`)
-
-  # quote do:
-  #   unpackVarargs_firstlast(
-  #     jlCall,
-  #     astToStr("setindex!"),
-  #     `x`,
-  #     `val`,
-  #     `new_args`
-  #   )
-
-template `[]=`*(x: JlValue, args: varargs[untyped], val: untyped) =
-  op_square_bracket_assign(x, val, args)
+  if new_args.len > 1:
+    result = quote do:
+      discard jlCall("setindex!", `x`, `val`, [`new_args`])
+  else:
+    result = quote do:
+      discard jlCall("setindex!", `x`, `val`, `new_args`)

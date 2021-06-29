@@ -119,7 +119,7 @@ proc assign_index1darray() =
   test "1DArray":
     locarray[1] = 12
     check refarray[0] == 12
-    # locarray[2.._|+2] = 36
+    locarray[2.._|+2] = 36
     check refarray == @[12, 36, 3, 36, 5, 36, 6, 36, 8, 36, 10, 36, 12]
 
 # proc var_index2darray() =

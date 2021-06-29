@@ -1,7 +1,6 @@
 import ../types
 import ../cores
 import ../functions
-import ../glucose
 import ./interop
 
 import std/macros
@@ -309,11 +308,13 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
 
 macro op_square_bracket_slice*[T](x: JlArray[T], args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
+  echo new_args.treerepr
   result = quote do:
     jlCall("getindex", `x`, `new_args`)
 
 macro op_square_bracket_view*[T](x: var JlArray[T], args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
+  echo new_args.treerepr
   result = quote do:
     jlCall("view", `x`, `new_args`)
 
@@ -323,27 +324,17 @@ template `[]`*[T](x: JlArray[T], args: varargs[untyped]): JlArray[T] =
 template `[]`*[T](x: var JlArray[T], args: varargs[untyped]): JlArray[T] =
   op_square_bracket_view(x, args).toJlArray(typedesc[T])
 
-macro unpackVarargs_firstlast*(callee, funcname: string, arg_first: untyped, args: varargs[untyped], arg_last: untyped) : untyped =
-  result = newCall(callee)
-  result.add funcname
-  result.add arg_first
-  for a in args:
-    result.add a
-  result.add arg_last
+macro `[]=`*[T](x: var JlArray[T], args: varargs[untyped]) =
+  var tmp = args
+  # See for why val has to be in varargs
+  # https://github.com/nim-lang/Nim/issues/5855
+  let val = tmp[tmp.len - 1]
+  tmp.del(tmp.len-1)
+  let new_args = getAST(desugar(x, tmp))
 
-macro op_square_bracket_assign*[T](x: JlArray[T], val: T, args: varargs[untyped]) =
-  let new_args = getAST(desugar(x, args))
-  quote do:
-    discard jlCall("setindex!", `x`, `val`, `new_args`)
-
-  # quote do:
-  #   unpackVarargs_firstlast(
-  #     jlCall,
-  #     astToStr("setindex!"),
-  #     `x`,
-  #     `val`,
-  #     `new_args`
-  #   )
-
-template `[]=`*[T](x: JlArray[T], args: varargs[untyped], val: T) =
-  op_square_bracket_assign(x, val, args)
+  if new_args.len > 1:
+    result = quote do:
+      discard jlCall("setindex!", `x`, `val`, [`new_args`])
+  else:
+    result = quote do:
+      discard jlCall("setindex!", `x`, `val`, `new_args`)
