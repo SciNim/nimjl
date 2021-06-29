@@ -1,3 +1,4 @@
+# This a dummy Julia module for demonstration purpose
 module nimjlExample
   function customFunction(a::NamedTuple)
     println("From Julia -> args = ", a)
@@ -14,14 +15,24 @@ module nimjlExample
     x::Int
     y::Float64
     z::String
+    # Nim initialize the Julia variable with empty constructor by default
+    Foo() = new()
+    Foo(x, y, z) = new(x, y, z)
   end
 
   function makeFoo()
     return Foo(1, -1.0, "Hello there")
   end
 
+  function applyToFoo(foo::Foo)
+    foo.x += 1
+    foo.y *= 2/3
+    foo.z *= " -> AppendMeBaby"
+  end
+
   export customFunction
   export Foo
   export makeFoo
+  export applyToFoo
 
 end

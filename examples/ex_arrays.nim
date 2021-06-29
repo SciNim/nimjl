@@ -4,6 +4,7 @@ import random
 import nimjl
 
 randomize()
+
 proc main() =
   Julia.init() # Initialize Julia VM. This should be done once in the lifetime of your program.
   block sort:
