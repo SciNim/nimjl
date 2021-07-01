@@ -30,7 +30,6 @@ proc main() =
       echo ">< ", tmp
       echo ">< ", jltypeof(tmp)
       echo ">< ", tmp.length()
-      echo ">< ", getindex(tmp, 1, 1)
       echo "----------------------"
       # You can index Julia Arrays from Nim
       res[1, 1] = 120.0

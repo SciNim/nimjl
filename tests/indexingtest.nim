@@ -121,26 +121,23 @@ proc assign_index1darray() =
     locarray[1] = 12
     check refarray[0] == 12
     # echo locarray[2.._|+2]
-    # locarray[2.._|+2] = toJlArray([36, 36, 36, 36, 36, 36])
-    # check refarray == @[12, 36, 3, 36, 5, 36, 6, 36, 8, 36, 10, 36, 12]
+    locarray[2.._|+2] = repeat(36, 6)
+    check refarray == @[12, 36, 3, 36, 5, 36, 7, 36, 9, 36, 11, 36]
 
-# proc var_index2darray() =
-#   var locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
-#
-#   test "2DArray":
-#     check locarray[^2, 1] == fill(11)
-#     check locarray[_, 1] == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
-#     check locarray[2, 1] == fill(2)
-#     check locarray[_.._, 1] == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
-#     check locarray[2.._, 1] == [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
-#     check locarray[_.._|+2, 1] == [1, 3, 5, 7, 9, 11].toJlArray()
-#     check locarray[1..9|+2, 1] == [1, 3, 5, 7, 9].toJlArray()
-#     check locarray[1..<9|+2, 1] == [1, 3, 5, 7].toJlArray()
-#     check locarray[1..^2|+2, 1] == [1, 3, 5, 7, 9, 11].toJlArray()
-#     check locarray[1..6, 1] == [1, 2, 3, 4, 5, 6].toJlArray()
-#     check locarray[1..<8, 1] == [1, 2, 3, 4, 5, 6, 7].toJlArray()
-#     check locarray[1..^4, 1] == [1, 2, 3, 4, 5, 6, 7, 8, 9].toJlArray()
-#
+proc assign_index2darray() =
+  var locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
+
+  test "2DArray":
+    locarray[3, 2] = 1500
+    check locarray[3, 2] == toJlValue(1500)
+
+    locarray[^2, 1] = 36
+    check locarray[^2, 1] == toJlValue(36)
+
+    locarray[_, 1] = repeat(-1, 12)
+    # The transformation look super weird like this because of the row major vs col major
+    check locarray == toJlArray([[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], [110, 120, 1500, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
+
 proc runIndexingTest*() =
   suite "Immutable Indexing":
     let_indextuple()
@@ -154,6 +151,7 @@ proc runIndexingTest*() =
 
   suite "Assign Indexing":
     assign_index1darray()
+    assign_index2darray()
 
 when isMainModule:
   import ./testfull

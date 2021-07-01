@@ -316,9 +316,5 @@ macro `[]=`*(x: var JlValue, args: varargs[untyped]) =
   let val = tmp[tmp.len - 1]
   tmp.del(tmp.len-1)
   let new_args = getAST(desugar(x, tmp))
-  let new_args_len = new_args.len
   result = quote do:
-    if `new_args_len` > `x`.ndims:
-      discard jlCall("setindex!", `x`, `val`, [`new_args`])
-    else:
-      discard jlCall("setindex!", `x`, `val`, `new_args`)
+    discard jlCall("setindex!", `x`, `val`, `new_args`)
