@@ -311,17 +311,18 @@ macro op_square_bracket_slice*[T](x: JlArray[T], args: varargs[untyped]): untype
   result = quote do:
     jlCall("getindex", `x`, `new_args`)
 
-macro op_square_bracket_view*[T](x: var JlArray[T], args: varargs[untyped]): untyped =
-  let new_args = getAST(desugar(x, args))
-  result = quote do:
-    # TODO investigate how to use getindex function
-    jlCall("getindex", `x`, `new_args`)
-
 template `[]`*[T](x: JlArray[T], args: varargs[untyped]): JlArray[T] =
   op_square_bracket_slice(x, args).toJlArray(typedesc[T])
 
+macro op_square_bracket_view*[T](x: var JlArray[T], args: varargs[untyped]): untyped =
+  let new_args = getAST(desugar(x, args))
+  result = quote do:
+    # Using view is bugger and not clear at all.
+    # Drop it for now
+    jlCall("view", `x`, `new_args`)
+
 template `[]`*[T](x: var JlArray[T], args: varargs[untyped]): JlArray[T] =
-  op_square_bracket_view(x, args).toJlArray(typedesc[T])
+  op_square_bracket_slice(x, args).toJlArray(typedesc[T])
 
 macro `[]=`*[T](x: var JlArray[T], args: varargs[untyped]) =
   var tmp = args
@@ -330,10 +331,9 @@ macro `[]=`*[T](x: var JlArray[T], args: varargs[untyped]) =
   let val = tmp[tmp.len - 1]
   tmp.del(tmp.len-1)
   let new_args = getAST(desugar(x, tmp))
-
-  if new_args.len > 1:
-    result = quote do:
+  let new_args_len = new_args.len
+  result = quote do:
+    if `new_args_len` > `x`.ndims:
       discard jlCall("setindex!", `x`, `val`, [`new_args`])
-  else:
-    result = quote do:
+    else:
       discard jlCall("setindex!", `x`, `val`, `new_args`)

@@ -75,6 +75,7 @@ proc var_indextuple() =
 
 proc var_index1darray() =
   var locarray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
+
   test "1DArray":
     check $locarray == "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
     let reflocarray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
@@ -82,8 +83,8 @@ proc var_index1darray() =
     check locarray[_] == reflocarray
 
     # No idea why this produce a fill result
-    check locarray[^2] == fill(11)
-    check locarray[2] == fill(2)
+    check locarray[^2] == toJlValue(11)
+    check locarray[2] == toJlValue(2)
 
     check locarray[_.._] == locarray
     check locarray[2.._] == [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
@@ -99,9 +100,9 @@ proc var_index2darray() =
   var locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
 
   test "2DArray":
-    check locarray[^2, 1] == fill(11)
+    check locarray[^2, 1] == toJlValue(11)
     check locarray[_, 1] == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
-    check locarray[2, 1] == fill(2)
+    check locarray[2, 1] == toJlValue(2)
     check locarray[_.._, 1] == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
     check locarray[2.._, 1] == [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].toJlArray()
     check locarray[_.._|+2, 1] == [1, 3, 5, 7, 9, 11].toJlArray()
@@ -119,8 +120,8 @@ proc assign_index1darray() =
   test "1DArray":
     locarray[1] = 12
     check refarray[0] == 12
-    locarray[2.._|+2] = 36
-    check refarray == @[12, 36, 3, 36, 5, 36, 6, 36, 8, 36, 10, 36, 12]
+    # locarray[2.._|+2] = repeat(36, 6).toJlArray()
+    # check refarray == @[12, 36, 3, 36, 5, 36, 6, 36, 8, 36, 10, 36, 12]
 
 # proc var_index2darray() =
 #   var locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
