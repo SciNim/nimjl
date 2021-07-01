@@ -4,8 +4,17 @@ import ./conversions/unbox
 import ./private/jlcores
 import ./private/jlarrays
 
-import std/sequtils
 import arraymancer
+
+proc tensor_shape[T](x: Tensor[T]): seq[int] =
+  # toSeq was causing issue for some reason and I don't want to import some of Arraymancer Metadata here
+  var curShape = -1
+  var idx = 0
+  curShape = x.shape[idx]
+  while curShape != 0:
+    result.add curShape
+    inc(idx)
+    curShape = x.shape[idx]
 
 proc toJlArray*[T](x: JlValue): JlArray[T] {.inline.} =
   result = cast[ptr jl_array](x)
@@ -53,7 +62,7 @@ proc jlArrayFromBuffer*[T](data: Tensor[T]): JlArray[T] =
 
   ## Create an Array from existing buffer
   let uncheckedDataPtr = data.toUnsafeView()
-  result = jlArrayFromBuffer(uncheckedDataPtr, data.shape.toSeq)
+  result = jlArrayFromBuffer(uncheckedDataPtr, data.tensor_shape)
 
 # Julia allocated array
 proc allocJlArray*[T](dims: openArray[int]): JlArray[T] =
@@ -66,8 +75,8 @@ proc allocJlArray*(dims: openArray[int], T: typedesc): JlValue =
   result = cast[JlValue](julia_alloc_array(dims, T))
 
 proc toJlArray*[T](x: Tensor[T]): JlArray[T] =
+  let shape = x.tensor_shape
   ## Perform a Julia-allocated copy
-  let shape = x.shape.toSeq
   let nbytes = x.size*(sizeof(T) div sizeof(byte))
   result = allocJlArray[T](shape)
   copyMem(unsafeAddr(result.getRawData()[0]), unsafeAddr(toUnsafeView(x)[0]), nbytes)

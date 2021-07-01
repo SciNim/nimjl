@@ -333,6 +333,7 @@ macro `[]=`*[T](x: var JlArray[T], args: varargs[untyped]) =
   let new_args = getAST(desugar(x, tmp))
   let new_args_len = new_args.len
   result = quote do:
+    # TODO FIX THIS
     if `new_args_len` > `x`.ndims:
       discard jlCall("setindex!", `x`, `val`, [`new_args`])
     else:

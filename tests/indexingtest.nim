@@ -120,7 +120,8 @@ proc assign_index1darray() =
   test "1DArray":
     locarray[1] = 12
     check refarray[0] == 12
-    # locarray[2.._|+2] = repeat(36, 6).toJlArray()
+    # echo locarray[2.._|+2]
+    # locarray[2.._|+2] = toJlArray([36, 36, 36, 36, 36, 36])
     # check refarray == @[12, 36, 3, 36, 5, 36, 6, 36, 8, 36, 10, 36, 12]
 
 # proc var_index2darray() =
@@ -139,7 +140,7 @@ proc assign_index1darray() =
 #     check locarray[1..6, 1] == [1, 2, 3, 4, 5, 6].toJlArray()
 #     check locarray[1..<8, 1] == [1, 2, 3, 4, 5, 6, 7].toJlArray()
 #     check locarray[1..^4, 1] == [1, 2, 3, 4, 5, 6, 7, 8, 9].toJlArray()
-
+#
 proc runIndexingTest*() =
   suite "Immutable Indexing":
     let_indextuple()
