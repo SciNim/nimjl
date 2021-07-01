@@ -1,6 +1,5 @@
 import ../private/jlcores
 import ../types
-import ../arrays
 
 import ./unbox
 
@@ -67,6 +66,15 @@ proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
 proc toNimVal[I, T](x: JlValue, locarr: var array[I, T]) =
   let x = toJlArray[T](x)
   toNimVal(x, locarr)
+
+proc toNimVal(x: JlValue, jltype: var JlDataType) =
+  jltype = cast[JlDataType](x)
+
+proc toNimVal(x: JlValue, jlmod: var JlModule) =
+  jlmod = cast[JlModule](x)
+
+proc toNimVal(x: JlValue, jlfunc: var JlFunc) =
+  jlfunc = cast[JlFunc](x)
 
 {.pop.}
 

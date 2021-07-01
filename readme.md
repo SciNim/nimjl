@@ -70,6 +70,7 @@ Mostly quality-of-life improvements, especially when handling arrays.
 
 * Linux / WSL supports only 
   * I still accept PR aiming at improving Windows supports
+  * To be more precise, I develop and tests with Linux and don't run tests with Windows - but most of it should work.
 
 # Examples
 

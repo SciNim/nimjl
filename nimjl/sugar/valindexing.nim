@@ -1,11 +1,11 @@
 import ../types
 import ../cores
-import ../glucose
+import ../functions
 import std/macros
 import std/strformat
 
 proc JlColon(): JlValue =
-  JlMain.Colon()
+  jlCall(JlBase, "Colon")
 
 proc makerange(x: JlValue, start, stop: int, step: int): JlValue =
   let makerangestr = fmt"{start}:{step}:{stop}"
@@ -301,10 +301,20 @@ macro desugar(x: JlValue, args: untyped): void =
   # echo r.astGenRepr
   return r
 
-macro op_square_bracket*(x: JlValue, args: varargs[untyped]): untyped =
+macro op_square_bracket_index*(x: JlValue, args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
-    getindex(`x`, `new_args`)
+    jlCall("getindex", `x`, `new_args`)
 
-template `[]`*(x: JlValue, args: varargs[untyped]): untyped =
-  op_square_bracket(x, args)
+template `[]`*(x: JlValue, args: varargs[untyped]): JlValue =
+  op_square_bracket_index(x, args)
+
+macro `[]=`*(x: var JlValue, args: varargs[untyped]) =
+  var tmp = args
+  # See for why val has to be in varargs
+  # https://github.com/nim-lang/Nim/issues/5855
+  let val = tmp[tmp.len - 1]
+  tmp.del(tmp.len-1)
+  let new_args = getAST(desugar(x, tmp))
+  result = quote do:
+    discard jlCall("setindex!", `x`, `val`, `new_args`)

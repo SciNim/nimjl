@@ -23,6 +23,9 @@ proc jl_alloc_array_3d*(atype: ptr jl_value, nr: csize_t, nc: csize_t, z: csize_
 
 ## Handle apply Array type mechanics
 proc jl_apply_array_type(x: ptr jl_value, ndims: csize_t): ptr jl_value {.importc: "jl_apply_array_type".}
+
+proc jl_array_eltype*(x: ptr jl_array): ptr jl_datatype {.importc: "jl_array_eltype".}
+
 {.pop.}
 
 proc julia_apply_array_type*[T: SomeNumber|bool|char](dim: int): ptr jl_value =
@@ -51,4 +54,3 @@ proc julia_alloc_array*(dims: openArray[int], T: typedesc): ptr jl_array =
     result = jl_alloc_array_3d(array_type, dims[0].csize_t, dims[1].csize_t, dims[2].csize_t)
   else:
     raise newException(JlError, &"Julia alloc array only supports Array for rank 1, 2, 3 not {dims.len}")
-

@@ -20,6 +20,7 @@ proc tuplesTest() =
     check res.C == 3
 
 proc objectTest() =
+
   type MyStruct = object
     a: int
     b: Option[float]
@@ -34,6 +35,8 @@ proc objectTest() =
     check $(jltypeof(jltt)) == "MyStruct"
     var ret = Julia.objectTest(jltt).to(bool)
     check ret
+    var tt2 = jltt.to(MyStruct)
+    check tt2 == tt
 
 proc stringModTest() =
   var inputStr = "This is a nice string, isn't it ?"

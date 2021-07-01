@@ -1,7 +1,6 @@
 import ../types
 import ../cores
 import ../functions
-import ../glucose
 import ./interop
 
 import std/macros
@@ -312,22 +311,25 @@ macro op_square_bracket_slice*[T](x: JlArray[T], args: varargs[untyped]): untype
   result = quote do:
     jlCall("getindex", `x`, `new_args`)
 
-macro op_square_bracket_view*[T](x: var JlArray[T], args: varargs[untyped]): untyped =
-  let new_args = getAST(desugar(x, args))
-  result = quote do:
-    jlCall("view", `x`, `new_args`)
-
 template `[]`*[T](x: JlArray[T], args: varargs[untyped]): JlArray[T] =
   op_square_bracket_slice(x, args).toJlArray(typedesc[T])
 
-template `[]`*[T](x: var JlArray[T], args: varargs[untyped]): JlArray[T] =
-  op_square_bracket_view(x, args).toJlArray(typedesc[T])
-
-macro op_square_bracket_assign*[T](x: JlArray[T], args: varargs[untyped], val: T) =
+macro op_square_bracket_view*[T](x: var JlArray[T], args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
-  quote do:
+  result = quote do:
+    # Using view is bugger and not clear at all.
+    # Drop it for now
+    jlCall("view", `x`, `new_args`)
+
+template `[]`*[T](x: var JlArray[T], args: varargs[untyped]): JlArray[T] =
+  op_square_bracket_slice(x, args).toJlArray(typedesc[T])
+
+macro `[]=`*[T](x: var JlArray[T], args: varargs[untyped]) =
+  var tmp = args
+  # See for why val has to be in varargs
+  # https://github.com/nim-lang/Nim/issues/5855
+  let val = tmp[tmp.len - 1]
+  tmp.del(tmp.len-1)
+  let new_args = getAST(desugar(x, tmp))
+  result = quote do:
     discard jlCall("setindex!", `x`, `val`, `new_args`)
-
-template `[]=`*[T](x: JlArray[T], args: varargs[untyped], val: T) =
-  op_square_bracket_assign(x, args, val)
-

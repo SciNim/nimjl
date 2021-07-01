@@ -19,16 +19,6 @@ proc exit*(jl: type Julia, exitcode: int = 0) =
 # TODO generate a proc ``modname`` that returns module
 
 #####################################################
-# Syntactic sugar
-#####################################################
-template `.`*(jl: type Julia, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
-  jlCall(astToStr(funcname), args)
-
-template `.`*(jlmod: JlModule, funcname: untyped, args: varargs[JlValue, toJlVal]): untyped =
-  jlCall(jlmod, astToStr(funcname), args)
-
-
-#####################################################
 # Interop and utility
 #####################################################
 proc `$`*(val: JlValue): string =
@@ -59,9 +49,40 @@ proc firstindex*(val: JlValue): int =
 proc lastindex*(val: JlValue): int =
   jlCall("lastindex", val).to(int)
 
-template getindex*(val: JlValue, idx: varargs[untyped]): JlValue =
-  jlCall("getindex", val, idx)
+template getproperty*(val: JlValue, propertyname: string): JlValue =
+  jlCall("getproperty", val, jlSym(propertyname))
 
+template setproperty*(val: JlValue, propertyname: string, newval: untyped) =
+  discard jlCall("setproperty!", val, jlSym(propertyname), newval)
+
+#####################################################
+# Syntactic sugar
+#####################################################
+import std/macros
+
+{.experimental: "dotOperators".}
+
+macro unpackVarargs_first(callee, arg_first: untyped; arg_second: untyped, args: varargs[untyped]):untyped =
+  result = newCall(callee)
+  result.add arg_first
+  result.add arg_second
+  for a in args:
+    result.add a
+
+template `.()`*(jl: type Julia, funcname: untyped, args: varargs[JlValue, toJlVal]): JlValue =
+  jlCall(astToStr(funcname), args)
+
+template `.()`*(jlmod: JlModule, funcname: untyped, args: varargs[JlValue, toJlVal]): JlValue =
+  jlCall(jlmod, astToStr(funcname), args)
+
+template `.()`*(jlval: JlValue, funcname: untyped, args: varargs[JlValue, toJlVal]): JlValue =
+  unpackVarargs_first(jlCall, astToStr(funcname), jlval, args)
+
+template `.`*(jlval: JlValue, propertyname: untyped): JlValue =
+  getproperty(jlval, astToStr(propertyname))
+
+template `.=`*(jlval: var JlValue, fieldname: untyped, newval: untyped) =
+  setproperty(jlval, astToStr(fieldname), newval)
 
 # Re-export
 import ./sugar/iterators
@@ -72,4 +93,3 @@ export operators
 
 import ./sugar/valindexing
 export valindexing
-

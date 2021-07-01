@@ -7,6 +7,7 @@ import ./unbox
 import ./dict_tuples
 
 import std/strformat
+import std/options
 
 proc isdefined*(typename: string): bool =
   let cmdStr = &"@isdefined({typename})"
@@ -37,11 +38,13 @@ proc nimToJlVal*[T: object](obj: T) : JlValue =
     # Return a named tuple if an equivalent type do not exsits
     result = nimToNamedJlTuple(obj)
 
-proc assignproperty[T](val: JlValue, fieldvalue: var T) =
+proc assignproperty[T](fieldvalue: var T, val: JlValue) =
   fieldvalue = val.to(T)
+
+proc assignproperty[T](fieldvalue: var Option[T], val: JlValue) =
+  fieldvalue = some(val.to(T))
 
 proc jlStructToNim*(val: JlValue, obj: var object) =
   for name, field in obj.fieldPairs:
     let newval = jlCall("getproperty", val, jlSym(name))
     assignproperty(field, newval)
-
