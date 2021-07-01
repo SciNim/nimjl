@@ -49,14 +49,8 @@ proc firstindex*(val: JlValue): int =
 proc lastindex*(val: JlValue): int =
   jlCall("lastindex", val).to(int)
 
-template getindex*(val: JlValue, idx: varargs[int]): JlValue =
-  jlCall("getindex", val, idx)
-
 template getproperty*(val: JlValue, propertyname: string): JlValue =
   jlCall("getproperty", val, jlSym(propertyname))
-
-template setindex*(val: JlValue, newval: untyped, idx: varargs[int]) =
-  discard jlCall("setindex!", val, newval, idx)
 
 template setproperty*(val: JlValue, propertyname: string, newval: untyped) =
   discard jlCall("setproperty!", val, jlSym(propertyname), newval)

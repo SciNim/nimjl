@@ -1,6 +1,5 @@
 import ./types
 import ./functions
-import ./cores
 import ./conversions/unbox
 import ./private/jlcores
 import ./private/jlarrays
@@ -65,6 +64,14 @@ proc allocJlArray*[T](dims: openArray[int]): JlArray[T] =
 proc allocJlArray*(dims: openArray[int], T: typedesc): JlValue =
   ## Create a Julia Array managed by Julia GC
   result = cast[JlValue](julia_alloc_array(dims, T))
+
+proc toJlArray*[T](x: Tensor[T]): JlArray[T] =
+  ## Perform a Julia-allocated copy
+  let shape = x.shape.toSeq
+  let nbytes = x.size*(sizeof(T) div sizeof(byte))
+  result = allocJlArray[T](shape)
+  copyMem(unsafeAddr(result.getRawData()[0]), unsafeAddr(toUnsafeView(x)[0]), nbytes)
+
 
 import ./arrays/interop
 export interop

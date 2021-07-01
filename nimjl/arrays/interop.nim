@@ -1,6 +1,5 @@
 import ../arrays
 import ../types
-import ../cores
 import ../functions
 import ../glucose
 
@@ -103,14 +102,6 @@ proc firstindex*[T](val: JlArray[T], dim: int): int =
 proc lastindex*[T](val: JlArray[T], dim: int): int =
   jlCall("lastindex", val, dim).to(int)
 
-proc iterate*[T](val: JlArray[T]): JlValue =
-  result = jlCall("iterate", val)
-  if result == JlNothing or len(result) != 2:
-    raise newException(JlError, "Non-iterable Array. This shouldn't be possible, but reality and life are often strange.")
-
-proc iterate*[T](val: JlArray[T], state: JlValue): JlValue =
-  result = jlCall("iterate", val, state)
-
 proc transpose*[T](x: JlArray[T]): JlArray[T] =
   result = jlCall("transpose", x).toJlArray(T)
 
@@ -142,16 +133,3 @@ proc swapMemoryOrder*[T](x: JlArray[T]): JlArray[T] =
   let tmp = reshape(x, revshape)
   result = jlCall("permutedims", tmp, invdim).toJlArray(T).transpose()
 
-iterator items*[T](val: JlArray[T]): T =
-  var it = iterate(val)
-  while it != JlNothing:
-    yield it.getindex(1).to(T)
-    it = iterate(val, it.getindex(2))
-
-iterator enumerate*[T](val: JlArray[T]): (int, T) =
-  var it = iterate(val)
-  var i = 0
-  while it != JlNothing:
-    yield (i, it.getindex(1).to(T))
-    it = iterate(val, it.getindex(2))
-    inc(i)
