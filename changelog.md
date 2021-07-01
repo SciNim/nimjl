@@ -1,6 +1,6 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
-Release v0.5.4 - 2021_XX_XX
+Release v0.5.4 - 2021_07_01
 ===========================
 * Added field access syntax with `.` and moved call syntax to `.()`
 * lent for `[]`
