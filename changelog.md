@@ -1,5 +1,10 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.5.5 - 2021_07_15
+===========================
+* Updated nimble file for Nim >= 1.4.0 (pre-1.4.0 will not work)
+* Updated CI to add MacOs in test Matrix; Next is adding windows but I need to link for Windows
+
 Release v0.5.4 - 2021_07_01
 ===========================
 * Added field access syntax with `.` and moved call syntax to `.()`
