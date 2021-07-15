@@ -32,17 +32,19 @@ proc tensorSquareMeBaby() =
     check @[d0, d1, d2] == orig.shape.toSeq
 
   var
-    ret = toJlArray[float64](jlCall("squareMeBaby", xTensor))
+    ret = toJlArray[float64](Julia.squareMeBaby(xTensor))
     len_ret = len(ret)
     rank_ret = ndims(ret)
+
   check len_ret == orig.size
   check rank_ret == 3
 
-  var tensorData: Tensor[float64] = ret.to(Tensor[float])
+  var tensorData = ret.to(Tensor[float])
   check tensorData == square(orig)
 
 proc tensorMutateMeBaby() =
   let dims = [14, 12, 10]
+
   var
     orig: Tensor[float64] = ones[float64](dims)
     index = 0
@@ -50,22 +52,27 @@ proc tensorMutateMeBaby() =
     inc(index)
     i = index.float64 / 3.0
 
-  # Create an immutable tensor for comparaison with original
-  let tensorcmp = orig.clone()
+  # Create a deepcopy immutable with the expected result
+  let tensorcmp = orig.map(x => x*10)
+
   var
-    ret = toJlArray[float64](jlCall("mutateMeByTen!", orig))
+    # ! is a special character in Nim but not in Julia so backticks are necessary
+    ret = toJlArray[float](Julia.`mutateMeByTen!`(orig))
     len_ret = len(ret)
     rank_ret = ndims(ret)
+
   check not isNil(ret)
   check len_ret == orig.size
   check rank_ret == 3
+
   # Check result is correct
-  check orig == tensorcmp.map(x => x*10)
+  check orig == tensorcmp
 
 proc tensorBuiltinRot180() =
   var
     orig_tensor = newTensor[float64](4, 3)
     index = 0
+
   for i in orig_tensor.mitems:
     i = index.float64
     inc(index)
@@ -78,11 +85,12 @@ proc tensorBuiltinRot180() =
   check d0 == orig_tensor.shape[0]
   check d1 == orig_tensor.shape[1]
 
-  var ret = toJlArray[float64](jlCall("rot180", xArray))
+  var ret = toJlArray[float64](Julia.rot180(xArray))
   check not isNil(ret)
 
   var tensorResData = ret.to(Tensor[float64])
-  check tensorResData == (11.0 -. orig_tensor)
+  orig_tensor.apply_inline: 11.0 - x
+  check tensorResData == orig_tensor
 
 proc runTensorArgsTest*() =
   suite "Tensor":
