@@ -7,7 +7,6 @@ proc do1darray() =
     var s = @[1, 2, 3, 4, 5, 6, 7, 8, 9]
     var s1 = jlArrayFromBuffer[int](s)
 
-    s[0] = 120
     s1[1] = 122
     s1[3, 5, 8] = [123, 124, 125]
 
@@ -17,8 +16,8 @@ proc do1darray() =
   block:
     var s = @[1, 2, 3, 4, 5, 6, 7, 8, 9]
     var s1 = toJlArray[int](s)
+
     jlGcRoot(s1):
-      s[0] = 120
       s1[1] = 122
       s1[3, 5, 8] = [123, 124, 125]
 
