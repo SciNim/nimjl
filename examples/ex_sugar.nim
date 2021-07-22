@@ -1,5 +1,5 @@
 import nimjl
-import sequtils
+import std/sequtils
 
 Julia.init()
 # Use Module handle

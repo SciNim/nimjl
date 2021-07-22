@@ -1,5 +1,5 @@
 import nimjl
-import math
+import std/math
 
 jlVmInit() # Initialize Julia VM. This should be done once in the lifetime of your program.
 

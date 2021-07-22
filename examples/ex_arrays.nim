@@ -1,6 +1,6 @@
-import sequtils
-import sugar
-import random
+import std/sequtils
+import std/sugar
+import std/random
 import nimjl
 
 randomize()

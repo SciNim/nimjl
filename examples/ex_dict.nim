@@ -1,4 +1,4 @@
-import tables
+import std/tables
 import nimjl
 
 proc popMe[U, V](tab: Table[U, V], key: U): V =

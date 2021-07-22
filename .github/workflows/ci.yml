@@ -30,9 +30,9 @@ jobs:
       - run: nimble install -y
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
-      - run: testament r tests/testfull.nim
+      - run: nimble test
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
-      - run: testament c examples
+      - run: nimble runexamples
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..

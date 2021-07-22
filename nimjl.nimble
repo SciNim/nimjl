@@ -14,3 +14,10 @@ requires "arraymancer >= 0.6.3"
 task installjulia, "Install Julia":
   selfExec("r install/juliainstall.nim")
 
+task runexamples, "Run all examples":
+  withDir "examples":
+    for fstr in listFiles("."):
+      echo fstr
+      if fstr.endsWith(".nim"):
+        echo "running ", fstr
+        selfExec("cpp -r -d:release " & fstr)
