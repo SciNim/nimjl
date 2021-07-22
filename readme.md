@@ -59,7 +59,6 @@ Mostly quality-of-life improvements, especially when handling arrays.
 
 ## Limitations
 
-* Julia Init / Exit can only be called **once in the lifetime of your program**
 * Value conversion Nim ==> Julia are done **by copy**.
   * Arrays are an exception to this rule and can be created from buffer / are accessible using a buffer.
 * Value conversion Julia => Nim s always done **by copy**
@@ -79,14 +78,13 @@ Here is the basic API usage :
 ```nim
 import nimjl
 
-Julia.init() # Initialize Julia VM. This should be done once in the lifetime of your program.
+Julia.init() # Initialize Julia VM. Subsequent call will be ignored
 
 var myval = 4.0'f64
 # Call Julia function "sqrt" and convert the result to a float
 var res = Julia.sqrt(myval).to(float64)
 echo res # 2.0
 
-Julia.exit() # Exit Julia VM. This can be done only once in the lifetime of your program.
 ```
 
 Take a look at the ``examples/`` folder for  more examples.
