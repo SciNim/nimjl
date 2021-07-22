@@ -15,5 +15,3 @@ echo arr
 echo arr.stride(1)
 echo arr.strides()
 
-Julia.exit()
-

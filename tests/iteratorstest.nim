@@ -50,4 +50,3 @@ when isMainModule:
   Julia.init()
   runExternalsTest()
   runIteratorsTest()
-  Julia.exit()

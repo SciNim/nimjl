@@ -137,4 +137,3 @@ when isMainModule:
   Julia.init()
   runExternalsTest()
   runConversionsTest()
-  Julia.exit()

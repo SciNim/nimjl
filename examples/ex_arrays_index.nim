@@ -55,6 +55,5 @@ proc main() =
   Julia.init()
   do1darray()
   do2darray()
-  Julia.exit()
 
 main()

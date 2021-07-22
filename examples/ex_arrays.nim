@@ -42,7 +42,6 @@ proc main() =
     # Notice how arrays are passed by buffer and thus this has modified the original seq
     echo "Sorted seqRand=", seqRand
 
-  Julia.exit() # Exit Julia VM. This can be done only once in the lifetime of your program.
 
 when isMainModule:
   main()

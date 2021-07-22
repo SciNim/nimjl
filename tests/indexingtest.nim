@@ -156,4 +156,3 @@ when isMainModule:
   Julia.init()
   runExternalsTest()
   runIndexingTest()
-  Julia.exit()

@@ -110,4 +110,3 @@ when isMainModule:
   Julia.init()
   runExternalsTest()
   runTensorArgsTest()
-  Julia.exit()

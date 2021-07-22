@@ -38,8 +38,5 @@ proc main() =
       echo res.shape()
 
 
-
-  Julia.exit() # Exit Julia VM. This can be done only once in the lifetime of your program.
-
 when isMainModule:
   main()
