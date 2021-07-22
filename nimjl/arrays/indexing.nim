@@ -2,14 +2,14 @@ import ../types
 import ../functions
 import ./interop
 
-import std/macros
-
 import ../sugar/macro_index_utils
 
-# TODO make Nim views and Julia views correspond
+import std/macros
+
+# TODO understand View in Julia and see waht can be done with it (fill(3) for scalar is a problem)
 {.experimental: "views".}
 
-
+# This comes from arraymancer
 # You may be wondering why desugar Array is almost a duplicate as a desugar Value.
 # Devil's is in the details and there are small, but key, difference between the two.
 # Desugar for Array iterate over dimensions, while indexing for value do not (can't have multi-dimensionnal value indexed AFAIK)
@@ -288,7 +288,6 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
 
     else:
       r.add(nnk)
-
   # echo "\nAfter modif"
   # echo r.treerepr
   # echo r.repr
@@ -296,7 +295,6 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
   # echo r.astGenRepr
   return r
 
-# [] Index at 1
 macro op_square_bracket_slice*[T](x: JlArray[T], args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
@@ -322,5 +320,23 @@ macro `[]=`*[T](x: var JlArray[T], args: varargs[untyped]) =
   let val = tmp[tmp.len - 1]
   tmp.del(tmp.len-1)
   let new_args = getAST(desugar(x, tmp))
-  result = quote do:
-    discard jlCall("setindex!", `x`, `val`, `new_args`)
+
+  var new_args_len = 0
+  var all_int_lit = true
+
+  for n in new_args:
+    inc(new_args_len)
+    if n.kind != nnkIntLit:
+      all_int_lit = false
+      break
+
+  if all_int_lit:
+    result = quote do:
+      if `new_args_len` == ndims(`x`):
+        discard jlCall("setindex!", `x`, `val`, `new_args`)
+      else:
+        discard jlCall("setindex!", `x`, `val`, [`new_args`])
+  else:
+    result = quote do:
+      discard jlCall("setindex!", `x`, `val`, `new_args`)
+  # echo result.repr
