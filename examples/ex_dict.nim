@@ -1,4 +1,4 @@
-import tables
+import std/tables
 import nimjl
 
 proc popMe[U, V](tab: Table[U, V], key: U): V =
@@ -38,4 +38,3 @@ block:
   jldict["alpha"] = 3.3
   doAssert jldict["alpha"].to(float) == 3.3
 
-jlVmExit() # Exit Julia VM. This can be done only once in the lifetime of your program.

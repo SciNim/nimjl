@@ -1,28 +1,19 @@
 import ../types
-import ../cores
 import ../functions
 import ./interop
 
-import std/macros
-import std/[strformat]
+import ../sugar/macro_index_utils
 
+import std/macros
+
+# TODO understand View in Julia and see waht can be done with it (fill(3) for scalar is a problem)
 {.experimental: "views".}
 
-proc JlColon(): JlValue =
-  jlCall(JlBase, "Colon")
-
-proc makerange[T](x: JlArray[T], start, stop: int, step: int): JlValue =
-  let makerangestr = (&"{start}:{step}:{stop}")
-  # echo ">> ", makerangestr
-  jlEval(makerangestr)
-
-proc makerange[T](x: JlArray[T], start, stop: int): JlValue =
-  let makerangestr = (&"{start}:{stop}")
-  # echo ">> ", makerangestr
-  jlEval(makerangestr)
-
 # This comes from arraymancer
-# |2 syntax is parsed but not used for now
+# You may be wondering why desugar Array is almost a duplicate as a desugar Value.
+# Devil's is in the details and there are small, but key, difference between the two.
+# Desugar for Array iterate over dimensions, while indexing for value do not (can't have multi-dimensionnal value indexed AFAIK)
+# This changes lastindex syntax and desugar and make factorizing not really worth it
 macro desugar[T](x: JlArray[T], args: untyped): void =
   ## Transform all syntactic sugar in arguments to integer or slices
 
@@ -132,7 +123,7 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
       let step = nnk[2][2]
       r.add(
         quote do:
-        makerange(`x`, firstindex(`x`, `ndim`), lastindex(`x`, `ndim`), `step`)
+        makerange(firstindex(`x`, `ndim`), lastindex(`x`, `ndim`), `step`)
       )
 
     elif nnk0_inf_dotdot_all and nnk1_joker and nnk20_bar_all:
@@ -146,19 +137,19 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`, `ndim`), `stop`, `step`)
+          makerange(firstindex(`x`, `ndim`), `stop`, `step`)
         )
       elif nnk0_inf_dotdot_inf:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`, `ndim`), `stop`-1, `step`)
+          makerange(firstindex(`x`, `ndim`), `stop`-1, `step`)
         )
       elif nnk0_inf_dotdot_alt:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`, `ndim`), lastindex(`x`, `ndim`)-`stop`+1, `step`)
+          makerange(firstindex(`x`, `ndim`), lastindex(`x`, `ndim`)-`stop`+1, `step`)
         )
     elif nnk0_inf_dotdot_all and nnk1_joker:
       ## Identical as above but force step as 1
@@ -171,19 +162,19 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`, `ndim`), `stop`, `step`)
+          makerange(firstindex(`x`, `ndim`), `stop`, `step`)
         )
       elif nnk0_inf_dotdot_inf:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`, `ndim`), `stop`-1, `step`)
+          makerange(firstindex(`x`, `ndim`), `stop`-1, `step`)
         )
       elif nnk0_inf_dotdot_alt:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`, `ndim`), lastindex(`x`, `ndim`)-`stop`+1, `step`)
+          makerange(firstindex(`x`, `ndim`), lastindex(`x`, `ndim`)-`stop`+1, `step`)
         )
 
     elif nnk0_inf_dotdot and nnk2_joker:
@@ -193,10 +184,9 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
       let step = 1
       r.add(
         quote do:
-        makerange(`x`, `start`, lastindex(`x`, `ndim`), `step`)
+        makerange(`start`, lastindex(`x`, `ndim`), `step`)
       )
 
-    # TODO Re-check this
     elif nnk0_inf_dotdot and nnk20_bar_pos and nnk21_joker:
       ## [1.._|1, 3] into [1..^1|1, 3]
       ## [1.._|+1, 3] into [1..^1|1, 3]
@@ -205,7 +195,7 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
       let step = nnk[2][2]
       r.add(
         quote do:
-        makerange(`x`, `start`, lastindex(`x`, `ndim`), `step`)
+        makerange(`start`, lastindex(`x`, `ndim`), `step`)
       )
     elif nnk0_inf_dotdot and nnk20_bar_min and nnk21_joker:
       ## Raise error on [5.._|-1, 3]
@@ -221,7 +211,7 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
 
       r.add(
         quote do:
-        makerange(`x`, `start`, `stop`, `step`)
+        makerange(`start`, `stop`, `step`)
       )
 
     elif nnk0_inf_dotdot_all and nnk10_hat:
@@ -236,10 +226,9 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
       let step = -1 # Should be < 0
       r.add(
         quote do:
-        makerange(`x`, lastindex(`x`, `ndim`)-`start`+1, `stop`, `step`)
+        makerange(lastindex(`x`, `ndim`)-`start`+1, `stop`, `step`)
       )
 
-    # TODO Finish this
     elif nnk0_inf_dotdot_all and nnk20_bar_all:
       ## [1..10|1] as is
       ## [1..^10|1] as is
@@ -250,19 +239,19 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-          makerange(`x`, `start`, `stop`, `step`)
+          makerange(`start`, `stop`, `step`)
         )
       elif nnk0_inf_dotdot_inf:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, `start`, `stop`-1, `step`)
+          makerange(`start`, `stop`-1, `step`)
         )
       elif nnk0_inf_dotdot_alt:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, `start`, lastindex(`x`, `ndim`)-`stop`+1, `step`)
+          makerange(`start`, lastindex(`x`, `ndim`)-`stop`+1, `step`)
         )
 
     elif nnk0_inf_dotdot_all:
@@ -275,17 +264,17 @@ macro desugar[T](x: JlArray[T], args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-          makerange(`x`, `start`, `stop`)
+          makerange(`start`, `stop`)
         )
       elif nnk0_inf_dotdot_inf:
         r.add(
           quote do:
-          makerange(`x`, `start`, `stop`-1)
+          makerange(`start`, `stop`-1)
         )
       elif nnk0_inf_dotdot_alt:
         r.add(
           quote do:
-          makerange(`x`, `start`, lastindex(`x`, `ndim`)-`stop`+1)
+          makerange(`start`, lastindex(`x`, `ndim`)-`stop`+1)
         )
 
     elif nnk0_pre_hat:
@@ -331,5 +320,23 @@ macro `[]=`*[T](x: var JlArray[T], args: varargs[untyped]) =
   let val = tmp[tmp.len - 1]
   tmp.del(tmp.len-1)
   let new_args = getAST(desugar(x, tmp))
-  result = quote do:
-    discard jlCall("setindex!", `x`, `val`, `new_args`)
+
+  var new_args_len = 0
+  var all_int_lit = true
+
+  for n in new_args:
+    inc(new_args_len)
+    if n.kind != nnkIntLit:
+      all_int_lit = false
+      break
+
+  if all_int_lit:
+    result = quote do:
+      if `new_args_len` == ndims(`x`):
+        discard jlCall("setindex!", `x`, `val`, `new_args`)
+      else:
+        discard jlCall("setindex!", `x`, `val`, [`new_args`])
+  else:
+    result = quote do:
+      discard jlCall("setindex!", `x`, `val`, `new_args`)
+  # echo result.repr

@@ -68,5 +68,4 @@ when isMainModule:
   # Hello Julia
   Julia.init()
   runMemLeakTest(srcName)
-  Julia.exit()
 

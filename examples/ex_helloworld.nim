@@ -13,4 +13,3 @@ if res == JlNothing:
 
 discard Julia.println("This also works")
 
-Julia.exit() # Exit Julia VM. This can be done only once in the lifetime of your program.

@@ -1,16 +1,31 @@
 import ./types
 import ./private/jlcores
+import ./config
+import std/[strformat, os]
 
-import std/strformat
+proc jlVmIsInit*() : bool =
+  bool(jl_is_initialized())
 
 # Init & Exit function
 proc jlVmInit*() =
   ## jlVmInit should only be called once per process
   ## Subsequent calls after the first one will be ignored
-  once:
+  if not jlVmIsInit():
     jl_init()
     return
-  raise newException(JlError, "jl_init() must be called once per process")
+  # raise newException(JlError, "jl_init() must be called once per process")
+
+# Not exported for now because I don't know how it works
+proc jlVmInit(pathToImage: string) {.used.} =
+  ## Same as jlVmInit but with a pre-compiler image
+  if not jlVmIsInit():
+    let jlBinDir = JuliaPath / "bin"
+    jl_init_with_image(jlBinDir, pathToImage.cstring)
+    return
+  # raise newException(JlError, "jl_init_with_image(...) must be called once per process")
+
+proc jlVmSaveImage*(fname: string) =
+  jl_save_system_image(fname.cstring)
 
 proc jlVmExit*(exit_code: cint = 0.cint) =
   ## jlVmExit should only be called once per process
@@ -18,7 +33,8 @@ proc jlVmExit*(exit_code: cint = 0.cint) =
   once:
     jl_atexit_hook(exit_code)
     return
-  raise newException(JlError, "jl_atexit_hook() must be called once per process")
+  # Do nothing -> atexit_hook must be called once
+  # raise newException(JlError, "jl_atexit_hook() must be called once per process")
 
 # Convert a string to Julia Symbol
 proc jlSym*(symname: string): JlSym =

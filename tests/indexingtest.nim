@@ -130,10 +130,8 @@ proc assign_index2darray() =
   test "2DArray":
     locarray[3, 2] = 1500
     check locarray[3, 2] == toJlValue(1500)
-
     locarray[^2, 1] = 36
     check locarray[^2, 1] == toJlValue(36)
-
     locarray[_, 1] = repeat(-1, 12)
     # The transformation look super weird like this because of the row major vs col major
     check locarray == toJlArray([[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], [110, 120, 1500, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
@@ -158,4 +156,3 @@ when isMainModule:
   Julia.init()
   runExternalsTest()
   runIndexingTest()
-  Julia.exit()

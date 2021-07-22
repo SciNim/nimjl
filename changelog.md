@@ -1,5 +1,10 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.5.6 - 2021_07_XX
+===========================
+* Julia.Exit() now made optinnal
+* Fixed indexing bugs. Factorized some code.
+
 Release v0.5.5 - 2021_07_15
 ===========================
 * Updated nimble file for Nim >= 1.4.0 (pre-1.4.0 will not work)

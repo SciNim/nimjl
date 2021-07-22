@@ -208,4 +208,3 @@ when isMainModule:
     runMemLeakTest(srcName)
   else:
     runTests()
-  Julia.exit()

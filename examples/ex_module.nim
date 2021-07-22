@@ -63,4 +63,3 @@ block:
   echo jlfoo
   echo foo
 
-Julia.exit() # Exit Julia VM. This can be done only once in the lifetime of your program.

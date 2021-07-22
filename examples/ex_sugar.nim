@@ -1,5 +1,5 @@
 import nimjl
-import sequtils
+import std/sequtils
 
 Julia.init()
 # Use Module handle
@@ -14,6 +14,4 @@ echo arr
 # You can also call proc from the value directly
 echo arr.stride(1)
 echo arr.strides()
-
-Julia.exit()
 

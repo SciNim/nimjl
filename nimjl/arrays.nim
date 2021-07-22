@@ -30,7 +30,10 @@ proc len*[T](x: JlArray[T]): int =
 
 # Rank func takes value for some reason
 proc ndims*[T](x: JlArray[T]): int =
-  result = jl_array_rank(cast[JlValue](x))
+  # This version was buggt w/ indexing macro
+  # Don't know why, but it's more coherent as well that ndims calls Julia.ndims so there's no downside and less bugs
+  # result = jl_array_rank(cast[JlValue](x))
+  result = jlUnbox[int](jlCall("ndims", x))
 
 proc dim*[T](x: JlArray[T], dim: int): int =
   result = jl_array_dim(x, dim.cint)

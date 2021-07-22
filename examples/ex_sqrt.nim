@@ -1,5 +1,5 @@
 import nimjl
-import math
+import std/math
 
 jlVmInit() # Initialize Julia VM. This should be done once in the lifetime of your program.
 
@@ -11,4 +11,3 @@ var res = JlBase.sqrt(myval).to(float64)
 echo res # 2.0
 doAssert res == sqrt(myval)
 
-jlVmExit() # Exit Julia VM. This can be done only once in the lifetime of your program.

@@ -1,24 +1,10 @@
 import ../types
-import ../cores
 import ../functions
 import std/macros
-import std/strformat
 
-proc JlColon(): JlValue =
-  jlCall(JlBase, "Colon")
-
-proc makerange(x: JlValue, start, stop: int, step: int): JlValue =
-  let makerangestr = fmt"{start}:{step}:{stop}"
-  # echo ">> ", makerangestr
-  jlEval(makerangestr)
-
-proc makerange(x: JlValue, start, stop: int): JlValue =
-  let makerangestr = fmt"{start}:{stop}"
-  # echo ">> ", makerangestr
-  jlEval(makerangestr)
+import ./macro_index_utils
 
 # This comes from arraymancer
-# |2 syntax is parsed but not used for now
 macro desugar(x: JlValue, args: untyped): void =
   ## Transform all syntactic sugar in arguments to integer or slices
 
@@ -127,7 +113,7 @@ macro desugar(x: JlValue, args: untyped): void =
       let step = nnk[2][2]
       r.add(
         quote do:
-        makerange(`x`, firstindex(`x`), lastindex(`x`), `step`)
+        makerange(firstindex(`x`), lastindex(`x`), `step`)
       )
 
     elif nnk0_inf_dotdot_all and nnk1_joker and nnk20_bar_all:
@@ -141,19 +127,19 @@ macro desugar(x: JlValue, args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`), `stop`, `step`)
+          makerange(firstindex(`x`), `stop`, `step`)
         )
       elif nnk0_inf_dotdot_inf:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`), `stop`-1, `step`)
+          makerange(firstindex(`x`), `stop`-1, `step`)
         )
       elif nnk0_inf_dotdot_alt:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`), lastindex(`x`)-`stop`+1, `step`)
+          makerange(firstindex(`x`), lastindex(`x`)-`stop`+1, `step`)
         )
     elif nnk0_inf_dotdot_all and nnk1_joker:
       ## Identical as above but force step as 1
@@ -166,19 +152,19 @@ macro desugar(x: JlValue, args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`), `stop`, `step`)
+          makerange(firstindex(`x`), `stop`, `step`)
         )
       elif nnk0_inf_dotdot_inf:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`), `stop`-1, `step`)
+          makerange(firstindex(`x`), `stop`-1, `step`)
         )
       elif nnk0_inf_dotdot_alt:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, firstindex(`x`), lastindex(`x`)-`stop`+1, `step`)
+          makerange(firstindex(`x`), lastindex(`x`)-`stop`+1, `step`)
         )
 
     elif nnk0_inf_dotdot and nnk2_joker:
@@ -188,10 +174,9 @@ macro desugar(x: JlValue, args: untyped): void =
       let step = 1
       r.add(
         quote do:
-        makerange(`x`, `start`, lastindex(`x`), `step`)
+        makerange(`start`, lastindex(`x`), `step`)
       )
 
-    # TODO Re-check this
     elif nnk0_inf_dotdot and nnk20_bar_pos and nnk21_joker:
       ## [1.._|1, 3] into [1..^1|1, 3]
       ## [1.._|+1, 3] into [1..^1|1, 3]
@@ -200,7 +185,7 @@ macro desugar(x: JlValue, args: untyped): void =
       let step = nnk[2][2]
       r.add(
         quote do:
-        makerange(`x`, `start`, lastindex(`x`), `step`)
+        makerange(`start`, lastindex(`x`), `step`)
       )
     elif nnk0_inf_dotdot and nnk20_bar_min and nnk21_joker:
       ## Raise error on [5.._|-1, 3]
@@ -216,7 +201,7 @@ macro desugar(x: JlValue, args: untyped): void =
 
       r.add(
         quote do:
-        makerange(`x`, `start`, `stop`, `step`)
+        makerange(`start`, `stop`, `step`)
       )
 
     elif nnk0_inf_dotdot_all and nnk10_hat:
@@ -231,10 +216,9 @@ macro desugar(x: JlValue, args: untyped): void =
       let step = -1 # Should be < 0
       r.add(
         quote do:
-        makerange(`x`, lastindex(`x`)-`start`+1, `stop`, `step`)
+        makerange(lastindex(`x`)-`start`+1, `stop`, `step`)
       )
 
-    # TODO Finish this
     elif nnk0_inf_dotdot_all and nnk20_bar_all:
       ## [1..10|1] as is
       ## [1..^10|1] as is
@@ -245,19 +229,19 @@ macro desugar(x: JlValue, args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-          makerange(`x`, `start`, `stop`, `step`)
+          makerange(`start`, `stop`, `step`)
         )
       elif nnk0_inf_dotdot_inf:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, `start`, `stop`-1, `step`)
+          makerange(`start`, `stop`-1, `step`)
         )
       elif nnk0_inf_dotdot_alt:
         let step = nnk[2][2]
         r.add(
           quote do:
-          makerange(`x`, `start`, lastindex(`x`)-`stop`+1, `step`)
+          makerange(`start`, lastindex(`x`)-`stop`+1, `step`)
         )
 
     elif nnk0_inf_dotdot_all:
@@ -270,17 +254,17 @@ macro desugar(x: JlValue, args: untyped): void =
       if nnk0_inf_dotdot:
         r.add(
           quote do:
-          makerange(`x`, `start`, `stop`)
+          makerange(`start`, `stop`)
         )
       elif nnk0_inf_dotdot_inf:
         r.add(
           quote do:
-          makerange(`x`, `start`, `stop`-1)
+          makerange(`start`, `stop`-1)
         )
       elif nnk0_inf_dotdot_alt:
         r.add(
           quote do:
-          makerange(`x`, `start`, lastindex(`x`)-`stop`+1)
+          makerange(`start`, lastindex(`x`)-`stop`+1)
         )
 
     elif nnk0_pre_hat:
@@ -294,6 +278,7 @@ macro desugar(x: JlValue, args: untyped): void =
 
     else:
       r.add(nnk)
+
   # echo "\nAfter modif"
   # echo r.treerepr
   # echo r.repr
@@ -301,6 +286,7 @@ macro desugar(x: JlValue, args: untyped): void =
   # echo r.astGenRepr
   return r
 
+# [] is starts at 1
 macro op_square_bracket_index*(x: JlValue, args: varargs[untyped]): untyped =
   let new_args = getAST(desugar(x, args))
   result = quote do:
