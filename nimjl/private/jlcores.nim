@@ -30,6 +30,19 @@ else:
   proc jl_string_ptr*(v: ptr jl_value): cstring {.importc: "jl_string_ptr".}
 
 proc jl_init*() {.importc: "jl_init".}
+
+proc jl_init_with_image*(julia_bindir: cstring, image_relative_path: cstring) {.importc: "jl_init_with_image".}
+
+proc jl_is_initialized*() : cint {.importc: "jl_is_initialized".}
+
+proc jl_get_default_sysimg_path*() : cstring {.importc: "jl_get_default_sysimg_path".}
+
+proc jl_preload_sysimg_so*(fname: cstring) {.importc: "jl_preload_sysimg_so".}
+
+proc jl_get_libdir*() : cstring {.importc: "jl_get_libdir".}
+
+proc jl_save_system_image*(fname: cstring) {.importc: "jl_save_system_image".}
+
 proc jl_atexit_hook*(exit_code: cint) {.importc: "jl_atexit_hook".}
 {.pop.}
 

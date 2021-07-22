@@ -23,3 +23,9 @@ import ./nimjl/config
 
 static:
   debugEcho "Nimjl> Using Julia install: ", JuliaPath
+
+import std/exitprocs
+proc jlVmProcessExit() =
+  jlVmExit(0.cint)
+
+addExitProc jlVmProcessExit
