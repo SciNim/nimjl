@@ -13,7 +13,7 @@ proc jlVmInit*() =
   if not jlVmIsInit():
     jl_init()
     return
-  raise newException(JlError, "jl_init() must be called once per process")
+  # raise newException(JlError, "jl_init() must be called once per process")
 
 # Not exported for now because I don't know how it works
 proc jlVmInit(pathToImage: string) {.used.} =
@@ -22,7 +22,7 @@ proc jlVmInit(pathToImage: string) {.used.} =
     let jlBinDir = JuliaPath / "bin"
     jl_init_with_image(jlBinDir, pathToImage.cstring)
     return
-  raise newException(JlError, "jl_init_with_image(...) must be called once per process")
+  # raise newException(JlError, "jl_init_with_image(...) must be called once per process")
 
 proc jlVmSaveImage*(fname: string) =
   jl_save_system_image(fname.cstring)
