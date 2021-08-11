@@ -84,7 +84,6 @@ proc toJlArray*[T](x: Tensor[T]): JlArray[T] =
   result = allocJlArray[T](shape)
   copyMem(unsafeAddr(result.getRawData()[0]), unsafeAddr(toUnsafeView(x)[0]), nbytes)
 
-
 import ./arrays/interop
 export interop
 
