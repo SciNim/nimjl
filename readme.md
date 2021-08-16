@@ -38,7 +38,6 @@ Mostly quality-of-life improvements, especially when handling arrays.
 
 * Improve Julia Arrays interop. from Nim.
   * Array constructor API with most common proc
-  * Implement Array operators : `*`, `+`, `-`, `/`, dotted operator ``*.``, ``+.``, ``-.``, ``/.``
   * Supports complex Arrays
   * map / apply / reduce /fold
 
