@@ -48,14 +48,6 @@ proc equal*(val1, val2: JlValue): bool =
 template `==`*(val1, val2: JlValue): bool =
   val1.equal(val2)
 
-proc equal*[T](val1, val2: JlArray[T]): bool =
-  jlCall("==", val1, val2).to(bool)
-
-# # Comparaison
-template `==`*[T](val1, val2: JlArray[T]): bool =
-  val1.equal(val2)
-
-
 proc `!=`*(val1, val2: JlValue): bool =
   Julia.`!=`(val1, val2).to(bool)
 
@@ -63,9 +55,15 @@ proc `!==`*(val1, val2: JlValue): bool =
   Julia.`!==`(val1, val2).to(bool)
 
 # Assignment
-# TODO
-# +=, -=, /=, *=
-#
-# Dot operators
-# TODO
-# ., .*, ./, .+, .- etc..
+proc `+=`*(val1: var JlValue, val2: JlValue) =
+  discard Julia.`+=`(val1, val2)
+
+proc `-=`*(val1: var JlValue, val2: JlValue) =
+  discard Julia.`-=`(val1, val2)
+
+proc `*=`*(val1: var JlValue, val2: JlValue) =
+  discard Julia.`*=`(val1, val2)
+
+proc `/=`*(val1: var JlValue, val2: JlValue) =
+  discard Julia.`/=`(val1, val2)
+

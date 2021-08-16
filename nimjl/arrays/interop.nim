@@ -120,7 +120,13 @@ proc fill*[T](x: T, dims: varargs[int]): JlArray[T] =
   else:
     result = jlCall("fill", x).toJlArray(T)
 
-# TODO map typedesc to Julia type
+proc rand*[T](dims: openArray[int]) : JlArray[T] =
+  let
+    tmp : T
+    tmp2 = tmp.toJlValue()
+
+  jlCall("rand", jltypeof(tmp2), dims)
+
 proc asType*[T](x: JlArray[T], U: typedesc): JlArray[U] =
   let tmp = newSeq[U](1).toJlArray()
   result = jlCall("convert", jltypeof(tmp), x).toJlArray(U)

@@ -1,6 +1,13 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
-Release v0.5.6 - 2021_07_XX
+Release v0.5.7 - 2021_08_16
+===========================
+* Added dot operators and broadcast mechanism.
+* Added JlDataType conversions to typedesc
+* Added ``rand`` proc to initialize Julia Array
+* Updated tests
+
+Release v0.5.6 - 2021_07_23
 ===========================
 * Julia.Exit() now made optinnal
 * Fixed indexing bugs. Factorized some code.

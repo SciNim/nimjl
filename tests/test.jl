@@ -26,6 +26,9 @@ module custom_module
     return dict
   end
 
+  function addValue(val1, val2)
+    return val1 + val2
+  end
 
   function squareMeBaby(A)
     ## Square array and return the result
@@ -103,7 +106,6 @@ module custom_module
     return true
   end
 
-
   export dummy
   export tupleTest
   export modString
@@ -113,6 +115,7 @@ module custom_module
   export squareMeBaby
   export mutateMeByTen!
   export nestedTuples
+  export addValue
 
   export MyStruct
   export objectTest

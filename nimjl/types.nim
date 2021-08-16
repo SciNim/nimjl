@@ -67,3 +67,4 @@ template jlType*(T: typedesc[bool]): JlDataType = JlBool
 template jlType*(T: typedesc[char]): JlDataType = JlChar
 template jlType*(T: typedesc[float32]): JlDataType = JlFloat32
 template jlType*(T: typedesc[float64]): JlDataType = JlFloat64
+

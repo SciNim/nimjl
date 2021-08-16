@@ -46,7 +46,7 @@ proc shape*[T](x: JlArray[T]): seq[int] =
     result.add x.dim(i)
 
 proc eltype*[T](x: JlArray[T]): JlDataType =
-  jl_array_eltype(x)
+  jl_array_eltype(cast[JlValue](x))
 
 # Buffer with dims
 proc jlArrayFromBuffer*[T](data: ptr UncheckedArray[T], dims: openArray[int]): JlArray[T] =
@@ -84,9 +84,11 @@ proc toJlArray*[T](x: Tensor[T]): JlArray[T] =
   result = allocJlArray[T](shape)
   copyMem(unsafeAddr(result.getRawData()[0]), unsafeAddr(toUnsafeView(x)[0]), nbytes)
 
-
 import ./arrays/interop
 export interop
 
 import ./arrays/indexing
 export indexing
+
+import ./arrays/dotoperators
+export dotoperators
