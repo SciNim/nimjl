@@ -92,6 +92,56 @@ proc tensorBuiltinRot180() =
   orig_tensor.apply_inline: 11.0 - x
   check tensorResData == orig_tensor
 
+
+proc tensorDotOperator() =
+  block:
+    var
+      origTensor = [[1, 2, 3], [4, 5, 6], [7, 8, 9]].toTensor
+      origJlArray = toJlArray(origTensor)
+      res = origJlArray .+ 3
+    origTensor.apply_inline: x+3
+    check eltype(res) == jlType(int)
+    check res == toJlArray(origTensor)
+
+  block:
+    var
+      origTensor = [[1, 2, 3], [4, 5, 6], [7, 8, 9]].toTensor
+      origJlArray = toJlArray(origTensor)
+      res = origJlArray .+ 3.0
+    var t2 = origTensor.asType(float)
+    t2.apply_inline: x+3.0
+    check eltype(res) == jlType(float)
+    check res == toJlArray(t2)
+
+  block:
+    var
+      origTensor = toTensor([[1.0'f64, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+      origJlArray = toJlArray(origTensor)
+      res = origJlArray .+ 3
+    origTensor.apply_inline: x+3.0
+    check eltype(res) == jlType(float)
+    check res == toJlArray(origTensor)
+
+  block:
+    var
+      origTensor = toTensor([[2.0'f64, 2.0, 2.0], [4.0, 4.0, 4.0], [8.0, 8.0, 8.0]])
+      origJlArray = toJlArray(origTensor)
+      res = origJlArray ./ 2
+    origTensor.apply_inline: x/2.0
+    check eltype(res) == jlType(float)
+    check res == toJlArray(origTensor)
+
+  block:
+    var
+      origTensor = toTensor([[1.0'f64, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
+      origJlArray = toJlArray(origTensor)
+      res = jlBroadcast("addValue", origJlArray, 6).toJlArray(float)
+    origTensor.apply_inline: x+6.0
+    check eltype(res) == jlType(float)
+    check res == toJlArray(origTensor)
+
+
+
 proc runTensorArgsTest*() =
   suite "Tensor":
     teardown: jlGcCollect()
@@ -104,6 +154,10 @@ proc runTensorArgsTest*() =
 
     test "rot180[Tensor]":
       tensorBuiltinRot180()
+
+    test "Dot Operators":
+      tensorDotOperator()
+
 
 when isMainModule:
   import ./testfull

@@ -7,6 +7,8 @@ import conversions/box
 import conversions/dict_tuples
 import conversions/obj_structs
 
+import conversions/jldatatype
+
 export fromjl
 export unbox
 
@@ -16,3 +18,4 @@ export box
 export dict_tuples
 export obj_structs
 
+export jldatatype

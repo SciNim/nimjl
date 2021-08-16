@@ -24,7 +24,7 @@ proc jl_alloc_array_3d*(atype: ptr jl_value, nr: csize_t, nc: csize_t, z: csize_
 ## Handle apply Array type mechanics
 proc jl_apply_array_type(x: ptr jl_value, ndims: csize_t): ptr jl_value {.importc: "jl_apply_array_type".}
 
-proc jl_array_eltype*(x: ptr jl_array): ptr jl_datatype {.importc: "jl_array_eltype".}
+proc jl_array_eltype*(x: ptr jl_value): ptr jl_datatype {.importc: "jl_array_eltype".}
 
 {.pop.}
 

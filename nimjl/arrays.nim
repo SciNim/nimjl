@@ -46,7 +46,7 @@ proc shape*[T](x: JlArray[T]): seq[int] =
     result.add x.dim(i)
 
 proc eltype*[T](x: JlArray[T]): JlDataType =
-  jl_array_eltype(x)
+  jl_array_eltype(cast[JlValue](x))
 
 # Buffer with dims
 proc jlArrayFromBuffer*[T](data: ptr UncheckedArray[T], dims: openArray[int]): JlArray[T] =
@@ -89,3 +89,6 @@ export interop
 
 import ./arrays/indexing
 export indexing
+
+import ./arrays/dotoperators
+export dotoperators

@@ -37,4 +37,3 @@ proc julia_box(x: pointer): JlValue = jl_box_voidpointer(x)
 proc jlBox*[T](val: T): JlValue =
   julia_box(val)
 
-
