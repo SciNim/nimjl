@@ -29,3 +29,12 @@ proc jlVmProcessExit() =
   jlVmExit(0.cint)
 
 addExitProc jlVmProcessExit
+
+runnableExamples:
+  import nimjl
+
+  Julia.init() # Initialize Julia VM. Subsequent call to init will be ignored
+  var myval = 4.0'f64
+  discard Julia.println("Hello world") # No need for \n with Julia println function
+  var res = Julia.sqrt(myval).to(float64) # Call Julia function "sqrt" and convert the result to a float
+  echo res # sqrt(4.0) == 2.0
