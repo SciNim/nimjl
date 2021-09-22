@@ -63,3 +63,8 @@ block:
   echo jlfoo
   echo foo
 
+block:
+  let res = Julia.returnDoubleValue()
+  echo res.myint
+  echo res.mystr
+
