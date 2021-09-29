@@ -1,5 +1,10 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.5.8 - 2021_09_29
+===========================
+* Renamed examples so it's easier to read in order
+
+
 Release v0.5.7 - 2021_08_16
 ===========================
 * Added dot operators and broadcast mechanism.
@@ -71,7 +76,6 @@ Release v0.4.2 - 2021_03_18
 
 Release v0.4.1 - 2021_03_10
 ===========================
-
 * Add seq support when converting types
 * Add Tensor support when converting types
 * Improved dispatch using generic proc instead of ``when T is ...``
@@ -82,7 +86,6 @@ Release v0.4.1 - 2021_03_10
 
 Release v0.4.0 - 2021_03_08
 ===========================
-
 * First official release
 * Support Arrays / Tuple / Dict of POD
 * Supports Julia Arrays from Buffer.

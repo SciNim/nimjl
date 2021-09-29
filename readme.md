@@ -77,7 +77,7 @@ echo res # 2.0
 
 ```
 
-Take a look at the ``examples/`` folder for  more examples. There's also the ``tests/`` folder with more application.
+Take a look at ``tests/`` or ``examples/`` folder for typical examples.
 
 
 # License

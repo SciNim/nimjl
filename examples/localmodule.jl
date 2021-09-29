@@ -30,6 +30,11 @@ module nimjlExample
     foo.z *= " -> AppendMeBaby"
   end
 
+  function returnDoubleValue()
+    return (myint=36, mystr="Hello, world")
+  end
+
+  export returnDoubleValue
   export customFunction
   export Foo
   export makeFoo

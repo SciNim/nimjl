@@ -12,6 +12,8 @@ proc do1darray() =
 
     echo s1
     echo s
+    # s1 was created using s buffer therefore assigning s1 modify s
+    doAssert s == @[122, 2, 123, 4, 124, 6, 7, 125, 9]
 
   block:
     var s = @[1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -23,6 +25,8 @@ proc do1darray() =
 
       echo s1
       echo s
+      # s1 was created by copy therefore assigning s1 does not modify s
+      doAssert s == @[1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 proc do2darray() =
   block:
