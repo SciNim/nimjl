@@ -1,6 +1,6 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
-Release v0.5.8 - 2021_09_XX
+Release v0.5.8 - 2021_09_29
 ===========================
 * Renamed examples so it's easier to read in order
 
