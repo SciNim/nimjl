@@ -21,3 +21,4 @@ task runexamples, "Run all examples":
       if fstr.endsWith(".nim"):
         echo "running ", fstr
         selfExec("cpp -r -d:release " & fstr)
+        selfExec("cpp -r --gc:orc -d:release " & fstr)

@@ -1,4 +1,7 @@
-legacy/* linguist-vendored
+legacy/cexamples/* linguist-vendored
+legacy/cfunccall/* linguist-vendored
+legacy/cfunccall/bin/* linguist-vendored
+legacy/cfunccall/src/* linguist-vendored
+legacy/cfunccall/src/csrc* linguist-vendored
 install/* linguist-vendored
 third_party/* linguist-vendored
-
