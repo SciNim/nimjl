@@ -1,9 +1,21 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+
+Release v0.6.0 - 2021_10_14
+===========================
+* pairs iterators for named Tuple
+
+Release v0.6.0 - 2021_10_08
+===========================
+* Add --gc:orc to CI 
+
+Release v0.5.9 - 2021_10_05
+===========================
+* CI fix
+
 Release v0.5.8 - 2021_09_29
 ===========================
 * Renamed examples so it's easier to read in order
-
 
 Release v0.5.7 - 2021_08_16
 ===========================
