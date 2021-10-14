@@ -1,7 +1,7 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
 
-Release v0.6.0 - 2021_10_14
+Release v0.6.1 - 2021_10_14
 ===========================
 * pairs iterators for named Tuple
 
