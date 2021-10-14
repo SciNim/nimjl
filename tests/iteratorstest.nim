@@ -19,6 +19,30 @@ proc arrayIterator() =
       check x == refxx[i]
       inc(refi)
 
+proc namedTupleIterator() =
+  var xx = (a: 1, b: 3, c: 5, d: 7, e: 9, f: 11,).toJlValue()
+  echo jltypeof(xx)
+  echo xx
+
+  block:
+    var refx = 1
+    for x in xx:
+      check x.to(int) == refx
+      inc(refx)
+      inc(refx)
+
+  let keyList = @["a", "b", "c", "d", "e", "f"]
+
+  block:
+    var refx = 1
+    var idx = 0
+    for key, val in xx.pairs():
+      check val.to(int) == refx
+      check key == keyList[idx]
+      inc(idx)
+      inc(refx)
+      inc(refx)
+
 proc tupleIterator() =
   var xx = (1, 3, 5, 7, 9, 11,).toJlValue()
   block:
@@ -44,6 +68,8 @@ proc runIteratorsTest*() =
       arrayIterator()
     test "Tuple Iterators":
       tupleIterator()
+    test "Named Tuple Iterators":
+      namedTupleIterator()
 
 when isMainModule:
   import ./testfull
