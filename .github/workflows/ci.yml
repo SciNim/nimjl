@@ -33,9 +33,6 @@ jobs:
       - run: nimble test
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
-      - run: nimble test --gc:orc
-        env:
-          JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
 
       - run: nimble runexamples
         env:
