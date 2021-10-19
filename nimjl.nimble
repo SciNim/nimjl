@@ -30,7 +30,6 @@ task test, "Run tests":
     for fstr in listFiles("tests"):
       if fstr.endsWith(".nim") and fstr.startsWith("tests" / "t"):
         echo "running ", fstr
-        selfExec("cpp -r -d:release " & fstr)
-        selfExec("cpp -r --gc:orc -d:release " & fstr)
-        selfExec("cpp -r --gc:arc -d:release " & fstr)
+        selfExec("cpp -r -d:danger " & fstr)
+        selfExec("cpp -r --gc:arc -d:danger " & fstr)
 
