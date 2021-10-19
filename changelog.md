@@ -1,6 +1,10 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
 
+Release v0.6.2 - 2021_10_19
+===========================
+* Invert dot-like operators .+ -> +. to avoid dot-like operator
+
 Release v0.6.1 - 2021_10_14
 ===========================
 * pairs iterators for named Tuple

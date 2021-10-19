@@ -29,37 +29,37 @@ macro jlBroadcast*(f: untyped, args: varargs[untyped]): untyped =
     let f = getJlFunc(`expr`)
     jlCall("broadcast", f, `args`)
 
-proc `.+`*[T: SomeInteger, U: SomeInteger](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
+proc `+.`*[T: SomeInteger, U: SomeInteger](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
   jlBroadcast(`+`, val, factor).toJlArray(T)
 
-proc `.+`*[T: SomeInteger, U: SomeFloat](val: JlArray[T], factor: U|JlArray[U]): JlArray[U] =
+proc `+.`*[T: SomeInteger, U: SomeFloat](val: JlArray[T], factor: U|JlArray[U]): JlArray[U] =
   jlBroadcast(`+`, val, factor).toJlArray(U)
 
-proc `.+`*[T: SomeFloat, U: SomeNumber](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
+proc `+.`*[T: SomeFloat, U: SomeNumber](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
   jlBroadcast(`+`, val, factor).toJlArray(T)
 
-proc `.-`*[T: SomeInteger, U: SomeInteger](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
+proc `-.`*[T: SomeInteger, U: SomeInteger](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
   jlBroadcast(`-`, val, factor).toJlArray(T)
 
-proc `.-`*[T: SomeInteger, U: SomeFloat](val: JlArray[T], factor: U|JlArray[U]): JlArray[U] =
+proc `-.`*[T: SomeInteger, U: SomeFloat](val: JlArray[T], factor: U|JlArray[U]): JlArray[U] =
   jlBroadcast(`-`, val, factor).toJlArray(U)
 
-proc `.-`*[T: SomeFloat, U: SomeNumber](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
+proc `-.`*[T: SomeFloat, U: SomeNumber](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
   jlBroadcast(`-`, val, factor).toJlArray(T)
 
-proc `.*`*[T: SomeInteger, U: SomeInteger](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
+proc `*.`*[T: SomeInteger, U: SomeInteger](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
   jlBroadcast(`*`, val, factor).toJlArray(T)
 
-proc `.*`*[T: SomeInteger, U: SomeFloat](val: JlArray[T], factor: U|JlArray[U]): JlArray[U] =
+proc `*.`*[T: SomeInteger, U: SomeFloat](val: JlArray[T], factor: U|JlArray[U]): JlArray[U] =
   jlBroadcast(`*`, val, factor).toJlArray(U)
 
-proc `.*`*[T: SomeFloat, U: SomeNumber](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
+proc `*.`*[T: SomeFloat, U: SomeNumber](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
   jlBroadcast(`*`, val, factor).toJlArray(T)
 
 # ./ division is a special case
-proc `./`*[T: SomeInteger, U: SomeNumber](val: JlArray[T], factor: U|JlArray[U]): JlArray[float] =
+proc `/.`*[T: SomeInteger, U: SomeNumber](val: JlArray[T], factor: U|JlArray[U]): JlArray[float] =
   jlBroadcast(`/`, val, factor).toJlArray(float)
 
-proc `./`*[T: SomeFloat, U: SomeNumber](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
+proc `/.`*[T: SomeFloat, U: SomeNumber](val: JlArray[T], factor: U|JlArray[U]): JlArray[T] =
   jlBroadcast(`/`, val, factor).toJlArray(T)
 
