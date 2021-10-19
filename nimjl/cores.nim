@@ -19,7 +19,7 @@ proc jlVmInit*() =
 proc jlVmInit(pathToImage: string) {.used.} =
   ## Same as jlVmInit but with a pre-compiler image
   if not jlVmIsInit():
-    let jlBinDir = JuliaPath / "bin"
+    let jlBinDir = cstring(JuliaPath / "bin")
     jl_init_with_image(jlBinDir, pathToImage.cstring)
     return
   # raise newException(JlError, "jl_init_with_image(...) must be called once per process")

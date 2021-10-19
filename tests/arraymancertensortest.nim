@@ -94,11 +94,13 @@ proc tensorBuiltinRot180() =
 
 
 proc tensorDotOperator() =
+  # In Julia broadcast operator is .+
+  # In Nimjl, it is translated to +. to avoid being dot-like operator which has different rules
   block:
     var
       origTensor = [[1, 2, 3], [4, 5, 6], [7, 8, 9]].toTensor
       origJlArray = toJlArray(origTensor)
-      res = origJlArray .+ 3
+      res = origJlArray +. 3
     origTensor.apply_inline: x+3
     check eltype(res) == jlType(int)
     check res == toJlArray(origTensor)
@@ -107,7 +109,7 @@ proc tensorDotOperator() =
     var
       origTensor = [[1, 2, 3], [4, 5, 6], [7, 8, 9]].toTensor
       origJlArray = toJlArray(origTensor)
-      res = origJlArray .+ 3.0
+      res = origJlArray +. 3.0
     var t2 = origTensor.asType(float)
     t2.apply_inline: x+3.0
     check eltype(res) == jlType(float)
@@ -117,7 +119,7 @@ proc tensorDotOperator() =
     var
       origTensor = toTensor([[1.0'f64, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
       origJlArray = toJlArray(origTensor)
-      res = origJlArray .+ 3
+      res = origJlArray +. 3
     origTensor.apply_inline: x+3.0
     check eltype(res) == jlType(float)
     check res == toJlArray(origTensor)
@@ -126,7 +128,7 @@ proc tensorDotOperator() =
     var
       origTensor = toTensor([[2.0'f64, 2.0, 2.0], [4.0, 4.0, 4.0], [8.0, 8.0, 8.0]])
       origJlArray = toJlArray(origTensor)
-      res = origJlArray ./ 2
+      res = origJlArray /. 2
     origTensor.apply_inline: x/2.0
     check eltype(res) == jlType(float)
     check res == toJlArray(origTensor)
