@@ -22,6 +22,12 @@ task runexamples, "Run all examples":
       if fstr.endsWith(".nim"):
         echo "running ", fstr
         selfExec("cpp -r --gc:orc -d:release " & fstr)
+        
+  withDir "examples":
+    for fstr in listFiles("."):
+      if fstr.endsWith(".nim"):
+        echo "running ", fstr
+        selfExec("cpp -r --gc:refc -d:release " & fstr)        
 
 
 task test, "Run tests":
@@ -29,6 +35,12 @@ task test, "Run tests":
     for fstr in listFiles("tests"):
       if fstr.endsWith(".nim") and fstr.startsWith("tests" / "t"):
         echo "running ", fstr
-        selfExec("cpp -r -d:danger " & fstr)
         selfExec("cpp -r --gc:arc -d:danger " & fstr)
+        
+  withDir ".":
+    for fstr in listFiles("tests"):
+      if fstr.endsWith(".nim") and fstr.startsWith("tests" / "t"):
+        echo "running ", fstr
+        selfExec("cpp -r --gc:refc -d:danger " & fstr)
+
 
