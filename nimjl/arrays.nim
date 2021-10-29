@@ -77,7 +77,14 @@ proc allocJlArray*(dims: openArray[int], T: typedesc): JlValue =
   ## Create a Julia Array managed by Julia GC
   result = cast[JlValue](julia_alloc_array(dims, T))
 
-proc toJlArray*[T](x: Tensor[T]): JlArray[T] =
+proc toJlArray*[T](x: Tensor[T], layout: static OrderType = colMajor): JlArray[T] =
+  if not is_contiguous(x):
+    raise newException(ValueError, "Error using non-contiguous Tensor as buffer")
+
+  # if x.is_C_contiguous:
+  # elif x.is_F_contiguous:
+  ## Julia is colMajor by default
+  # let tensor = asContiguous(x, layout, true)
   let shape = x.tensor_shape
   ## Perform a Julia-allocated copy
   let nbytes = x.size*(sizeof(T) div sizeof(byte))

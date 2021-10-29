@@ -131,11 +131,18 @@ proc asType*[T](x: JlArray[T], U: typedesc): JlArray[U] =
   let tmp = newSeq[U](1).toJlArray()
   result = jlCall("convert", jltypeof(tmp), x).toJlArray(U)
 
+proc stride*[T](x: JlArray[T], axis: int) : int =
+  # Julia index starts at 1..
+  result = jlCall("stride", x, axis+1).to(int)
+
+proc strides*[T](x: JlArray[T]) : seq[int] =
+  for i in 0..<x.ndims():
+    result.add x.stride(i)
+
 proc swapMemoryOrder*[T](x: JlArray[T]): JlArray[T] =
   let revshape = reverse(size(x))
   var invdim: seq[int]
   for i in countdown(ndims(x), 1):
     invdim.add i
   let tmp = reshape(x, revshape)
-  result = jlCall("permutedims", tmp, invdim).toJlArray(T).transpose()
-
+  result = jlCall("permutedims", tmp, invdim).toJlArray(T)

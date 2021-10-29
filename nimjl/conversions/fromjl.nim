@@ -6,6 +6,8 @@ import ./unbox
 
 import std/json
 import std/tables
+import std/sequtils
+
 import arraymancer
 
 {.push inline.}
@@ -26,35 +28,44 @@ proc toNimVal(x: JlValue, t: var tuple)
 proc toNimVal[U, V](x: JlValue, tab: var Table[U, V])
 
 # Array, Seq, Tensor
-proc toNimVal[T](x: JlArray[T], tensor: var Tensor[T]) =
-  # This is possible but relies on keep Julia's memory intact
-  # I believe a copyMem is cleaner and safer
-  # tensor = fromBuffer(x, x.shape)
-  # Version that doesn't rely on keepin Jl array alive
+proc toNimVal[T](x: JlArray[T], tensor: var Tensor[T], swapLayout: static bool = true) =
   if x.ndims > 6:
     raise newException(JlError, "Tensor only support up to 6 dimensions")
+
   tensor = newTensor[T](x.shape)
   if x.len > 0:
-    # Can create a view as well
-    let tmp = fromBuffer[T](x.getRawData(), x.shape())
-    tensor = tmp.clone()
-    # let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
-    # copyMem(tensor.get_offset_ptr(), x.getRawData(), nbytes)
+    when swapLayout == true:
+      # Assume Julia Array are column major
+      let tmp = fromBuffer[T](x.getRawData(), x.shape(), colMajor)
+      # Can create a view as well
+      tensor = clone(tmp, rowMajor)
+    else:
+      # Assume Julia Array are column major
+      let tmp = fromBuffer[T](x.getRawData(), x.shape(), rowMajor)
+      # Can create a view as well
+      tensor = clone(tmp, rowMajor)
 
-proc toNimVal[T](x: JlArray[T], locseq: var seq[T]) =
-  if x.ndims > 1:
-    raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
+
+proc toNimVal[T](x: JlArray[T], locseq: var seq[T], swapLayout: static bool) =
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   locseq.setLen(x.len())
   if x.len() > 0:
-    copyMem(unsafeAddr(locseq[0]), x.getRawData(), nbytes)
+    when swapLayout == true:
+      # Assume Julia Array are column major
+      var x = swapMemoryOrder(x)
+      copyMem(unsafeAddr(locseq[0]), x.getRawData(), nbytes)
+    else:
+      copyMem(unsafeAddr(locseq[0]), x.getRawData(), nbytes)
 
-proc toNimVal[I, T](x: JlArray[T], locarr: var array[I, T]) =
-  if x.ndims > 1:
-    raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
+proc toNimVal[I, T](x: JlArray[T], locarr: var array[I, T], swapLayout: static bool) =
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   if x.len() > 0:
-    copyMem(unsafeAddr(locarr[0]), x.rawData(), nbytes)
+    when swapLayout == true:
+      # Assume Julia Array are column major
+      var x = swapMemoryOrder(x)
+      copyMem(unsafeAddr(locarr[0]), x.getRawData(), nbytes)
+    else:
+      copyMem(unsafeAddr(locarr[0]), x.getRawData(), nbytes)
 
 proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
   let x = toJlArray[T](x)
@@ -80,11 +91,11 @@ proc toNimVal(x: JlValue, jlfunc: var JlFunc) =
 {.pop.}
 
 # Public API
-proc to*[U](x: JlArray[U], T: typedesc): T =
+proc to*[U](x: JlArray[U], T: typedesc, swapLayout: static bool = true): T =
   when T is void:
     discard
   else:
-    toNimVal(x, result)
+    toNimVal(x, result, swapLayout)
 
 proc to*(x: JlValue, T: typedesc): T =
   ## Copy a JlValue into a Nim type
