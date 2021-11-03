@@ -146,3 +146,7 @@ proc swapMemoryOrder*[T](x: JlArray[T]): JlArray[T] =
     invdim.add i
   let tmp = reshape(x, revshape)
   result = jlCall("permutedims", tmp, invdim).toJlArray(T)
+
+proc unsafe_raw_offset*[T](x: JlArray[T], offset: int) : T =
+  let jlptr = JlBase.pointer(x)
+  result = jlCall("unsafe_load", jlptr, offset).to(T)

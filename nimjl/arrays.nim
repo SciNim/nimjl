@@ -77,19 +77,26 @@ proc allocJlArray*(dims: openArray[int], T: typedesc): JlValue =
   ## Create a Julia Array managed by Julia GC
   result = cast[JlValue](julia_alloc_array(dims, T))
 
-proc toJlArray*[T](x: Tensor[T], layout: static OrderType = colMajor): JlArray[T] =
+proc toJlArray*[T](x: Tensor[T]): JlArray[T] =
   if not is_contiguous(x):
     raise newException(ValueError, "Error using non-contiguous Tensor as buffer")
 
-  # if x.is_C_contiguous:
-  # elif x.is_F_contiguous:
-  ## Julia is colMajor by default
-  # let tensor = asContiguous(x, layout, true)
+  let x = asContiguous(x, colMajor, true)
   let shape = x.tensor_shape
-  ## Perform a Julia-allocated copy
-  let nbytes = x.size*(sizeof(T) div sizeof(byte))
-  result = allocJlArray[T](shape)
-  copyMem(unsafeAddr(result.getRawData()[0]), unsafeAddr(toUnsafeView(x)[0]), nbytes)
+  if x.is_C_contiguous():
+    ## Perform a Julia-allocated copy
+    let nbytes = x.size*(sizeof(T) div sizeof(byte))
+    result = allocJlArray[T](shape)
+    var tmp = fromBuffer(result.getRawData(), shape, colMajor)
+    apply2_inline(tmp, x):
+      y
+  elif x.is_F_contiguous():
+    ## Perform a Julia-allocated copy
+    let nbytes = x.size*(sizeof(T) div sizeof(byte))
+    result = allocJlArray[T](shape)
+    var tmp = fromBuffer(result.getRawData(), shape, colMajor)
+    apply2_inline(tmp, x):
+      y
 
 import ./arrays/interop
 export interop

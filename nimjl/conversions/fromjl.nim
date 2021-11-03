@@ -28,44 +28,28 @@ proc toNimVal(x: JlValue, t: var tuple)
 proc toNimVal[U, V](x: JlValue, tab: var Table[U, V])
 
 # Array, Seq, Tensor
-proc toNimVal[T](x: JlArray[T], tensor: var Tensor[T], swapLayout: static bool = true) =
+proc toNimVal[T](x: JlArray[T], tensor: var Tensor[T], layout: static OrderType) =
+  ## Convert a Julia Array to a Tensor assuming colMajor layout
   if x.ndims > 6:
     raise newException(JlError, "Tensor only support up to 6 dimensions")
 
-  tensor = newTensor[T](x.shape)
+  tensor = newTensorUninit[T](x.shape)
+  var size: int
+  initTensorMetadata(tensor, size, tensor.shape, layout)
+
   if x.len > 0:
-    when swapLayout == true:
-      # Assume Julia Array are column major
-      let tmp = fromBuffer[T](x.getRawData(), x.shape(), colMajor)
-      # Can create a view as well
-      tensor = clone(tmp, rowMajor)
-    else:
-      # Assume Julia Array are column major
-      let tmp = fromBuffer[T](x.getRawData(), x.shape(), rowMajor)
-      # Can create a view as well
-      tensor = clone(tmp, rowMajor)
+    # Assume Julia Array are column major
+    let tmp = fromBuffer[T](x.getRawData(), x.shape(), colMajor)
+    apply2_inline(tensor, tmp):
+      y
+    # tensor = clone(tmp, layout)
 
-
-proc toNimVal[T](x: JlArray[T], locseq: var seq[T], swapLayout: static bool) =
+proc toNimVal[T](x: JlArray[T], locseq: var seq[T]) =
+  ## Load the buffer into an array
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   locseq.setLen(x.len())
   if x.len() > 0:
-    when swapLayout == true:
-      # Assume Julia Array are column major
-      var x = swapMemoryOrder(x)
-      copyMem(unsafeAddr(locseq[0]), x.getRawData(), nbytes)
-    else:
-      copyMem(unsafeAddr(locseq[0]), x.getRawData(), nbytes)
-
-proc toNimVal[I, T](x: JlArray[T], locarr: var array[I, T], swapLayout: static bool) =
-  let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
-  if x.len() > 0:
-    when swapLayout == true:
-      # Assume Julia Array are column major
-      var x = swapMemoryOrder(x)
-      copyMem(unsafeAddr(locarr[0]), x.getRawData(), nbytes)
-    else:
-      copyMem(unsafeAddr(locarr[0]), x.getRawData(), nbytes)
+    copyMem(unsafeAddr(locseq[0]), x.getRawData(), nbytes)
 
 proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
   let x = toJlArray[T](x)
@@ -91,11 +75,13 @@ proc toNimVal(x: JlValue, jlfunc: var JlFunc) =
 {.pop.}
 
 # Public API
-proc to*[U](x: JlArray[U], T: typedesc, swapLayout: static bool = true): T =
+proc to*[U](x: JlArray[U], T: typedesc, layout: static OrderType= rowMajor): T =
   when T is void:
     discard
+  elif T is Tensor:
+    toNimVal(x, result, layout)
   else:
-    toNimVal(x, result, swapLayout)
+    toNimVal(x, result)
 
 proc to*(x: JlValue, T: typedesc): T =
   ## Copy a JlValue into a Nim type

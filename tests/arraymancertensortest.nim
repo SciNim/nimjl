@@ -42,7 +42,7 @@ proc tensorSquareMeBaby() =
     check len_ret == orig.size
     check rank_ret == 3
 
-    var tensorData = ret.to(Tensor[float], false)
+    var tensorData = ret.to(Tensor[float])
     check tensorData == square(orig)
 
 proc tensorMutateMeBaby() =
@@ -90,10 +90,9 @@ proc tensorBuiltinRot180() =
     check d0 == orig_tensor.shape[0]
     check d1 == orig_tensor.shape[1]
 
-    echo xArray
     var ret = toJlArray[float64](Julia.rot180(xArray))
     check not isNil(ret)
-    var tensorResData = ret.to(Tensor[float64], false)
+    var tensorResData = fromBuffer(ret.getRawData(), ret.shape(), rowMajor)
     orig_tensor.apply_inline: 11.0 - x
     check tensorResData == orig_tensor
 
@@ -149,7 +148,6 @@ proc tensorDotOperator() =
       check eltype(res) == jlType(float)
       check res == toJlArray(origTensor)
 
-
 proc tensorRowMemLayout() =
   test "RowMajor layout":
     var
@@ -158,17 +156,17 @@ proc tensorRowMemLayout() =
         [4.0, 5.0, 6.0],
         [7.0, 8.0, 9.0]
       ])
-
-      rowMajJlArray = toJlArray(rowMajTensor, rowMajor)
+      rowMajJlArray = toJlArray(rowMajTensor).swapMemoryOrder()
 
     for i in 0..<rowMajTensor.size:
-      # echo &"INDEX  rowMajTensor[{i}]: ", rowMajTensor.atContiguousIndex(i), " == rowMajJlArray[i]: ", Julia.getindex(rowMajJlArray, i+1)
       check rowMajTensor.atContiguousIndex(i) == Julia.getindex(rowMajJlArray, i+1).to(float)
-
-    for i in 0..<rowMajTensor.size:
-      # echo &"BUFFER rowMajTensor[{i}]: ", rowMajTensor.toUnsafeView()[i], " == rowMajJlArray[i]: ", rowMajJlArray.getRawData()[i]
       check rowMajTensor.toUnsafeView()[i] == rowMajJlArray.getRawData()[i]
 
+proc get2DCoord(index: int, Nx, Ny: int): array[2, int] {.inline.} =
+  var index = index
+  result[0] = index div Ny
+  index = index - result[0]*Ny
+  result[1] = index
 
 proc tensorColMemLayout() =
   test "ColMajor layout":
@@ -181,35 +179,41 @@ proc tensorColMemLayout() =
 
     var
       colMajTensor = rowMajTensor.clone(colMajor)
-      colMajJlArray = toJlArray(rowMajTensor, colMajor)
+      colMajJlArray = toJlArray(colMajTensor)
+      colTesTensor = colMajJlArray.to(Tensor[float], colMajor)
 
-    var
-      testTensor = colMajJlArray.to(Tensor[float], false)
-      rowMajJlArray = toJlArray(rowMajTensor, rowMajor)
-
-    # for i in 0..<rowMajTensor.size:
-    #   # Buffer should be identical
-    #   check rowMajTensor.toUnsafeView[i] == rowMajJlArray.getRawData()[i]
-    #   # Indexing should be identical
-    #   check rowMajTensor.atContiguousIndex(i) == Julia.getindex(rowMajJlArray, i+1).to(float)
-    #   check rowMajTensor.atContiguousIndex(i) == testTensor.atContiguousIndex(i)
-
-    # for i in 0..<colMajTensor.size:
-      # check colMajTensor.toUnsafeView[i] == colMajJlArray.getRawData()[i]
-      # check colMajTensor.atContiguousIndex(i) == Julia.getindex(colMajJlArray, i+1).to(float)
-      # check colMajTensor.atContiguousIndex(i) == colMajJlArray.getRawData()[i]
-      # echo &"INDEX  colMajTensor[{i}]: ", colMajTensor.atContiguousIndex(i), " == colMajJlArray[i]: ", Julia.getindex(colMajJlArray, i+1)
-      # echo &"INDEX    testTensor[{i}]: ", testTensor.atContiguousIndex(i), " == colMajJlArray[i]: ", Julia.getindex(colMajJlArray, i+1)
+    check colTesTensor == colMajTensor
+    check rowMajTensor == colMajTensor
 
     for i in 0..<colMajTensor.size:
-      echo &"BUFFER colMajTensor[{i}]: ", colMajTensor.toUnsafeView()[i], " == rowMajTensor[i]: ", rowMajTensor.toUnsafeView()[i]
-      # echo &"BUFFER colMajTensor[{i}]: ", colMajTensor.toUnsafeView()[i], " == colMajJlArray[i]: ", colMajJlArray.getRawData()[i]
-      # echo &"BUFFER   testTensor[{i}]: ", testTensor.toUnsafeView()[i], " == colMajJlArray[i]: ", colMajJlArray.getRawData()[i]
+      # Check buffer are identical
+      check colTesTensor.toUnsafeView()[i] == colMajJlArray.getRawData()[i]
+      check colMajTensor.toUnsafeView()[i] == colTesTensor.toUnsafeView()[i]
+      if i notin {0, 4, 8}:
+        check colTesTensor.toUnsafeView()[i] != rowMajTensor.toUnsafeView()[i]
+        check colMajTensor.toUnsafeView()[i] != rowMajTensor.toUnsafeView()[i]
+      else:
+        # Account for symetrical index i.e. index that are identical in row/col Major
+        check colTesTensor.toUnsafeView()[i] == rowMajTensor.toUnsafeView()[i]
+        check colMajTensor.toUnsafeView()[i] == rowMajTensor.toUnsafeView()[i]
+
+      # Check indexing is identical
+      check colTesTensor.atContiguousIndex(i) == rowMajTensor.atContiguousIndex(i)
+      check colMajTensor.atContiguousIndex(i) == rowMajTensor.atContiguousIndex(i)
+      check colMajTensor.atContiguousIndex(i) == colTesTensor.atContiguousIndex(i)
+
+      var
+        coord = get2DCoord(i, 3, 3)
+        nx = coord[0]
+        ny = coord[1]
+      check colTesTensor[nx, ny] == toJlValue(colMajJlArray[nx+1, ny+1]).to(float)
+      check rowMajTensor[nx, ny] == toJlValue(colMajJlArray[nx+1, ny+1]).to(float)
+      check colMajTensor[nx, ny] == toJlValue(colMajJlArray[nx+1, ny+1]).to(float)
 
 proc runTensorArgsTest*() =
   suite "Tensor":
     teardown: jlGcCollect()
-    # tensorSquareMeBaby()
+    tensorSquareMeBaby()
     tensorMutateMeBaby()
     tensorBuiltinRot180()
     tensorDotOperator()
