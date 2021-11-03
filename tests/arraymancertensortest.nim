@@ -91,7 +91,7 @@ proc tensorBuiltinRot180() =
 
     var ret = toJlArray[float64](Julia.rot180(xArray))
     check not isNil(ret)
-    var tensorResData = fromBuffer(ret.getRawData(), ret.shape(), rowMajor)
+    var tensorResData = fromBuffer(ret.getRawData(), ret.shape())
     orig_tensor.apply_inline: 11.0 - x
     check tensorResData == orig_tensor
 

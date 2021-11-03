@@ -38,10 +38,11 @@ proc toNimVal[T](x: JlArray[T], tensor: var Tensor[T], layout: static OrderType)
 
   if x.len > 0:
     # Assume Julia Array are column major
-    let tmp = fromBuffer[T](x.getRawData(), x.shape(), colMajor)
+    var tmp = fromBuffer[T](x.getRawData(), x.shape())
+    var size: int
+    initTensorMetadata(tmp, size, tensor.shape, colMajor)
     apply2_inline(tensor, tmp):
       y
-    # tensor = clone(tmp, layout)
 
 proc toNimVal[T](x: JlArray[T], locseq: var seq[T]) =
   ## Load the buffer into an array
