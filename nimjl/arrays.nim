@@ -83,7 +83,9 @@ proc toJlArray*[T](x: Tensor[T]): JlArray[T] =
 
   let shape = x.tensor_shape
   result = allocJlArray[T](shape)
-  var tmp = fromBuffer(result.getRawData(), shape, colMajor)
+  var tmp = fromBuffer(result.getRawData(), shape)
+  var size: int
+  initTensorMetadata(tmp, size, tmp.shape, colMajor)
   apply2_inline(tmp, x):
     y
 

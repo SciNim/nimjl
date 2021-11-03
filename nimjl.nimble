@@ -8,7 +8,7 @@ license       = "MIT"
 
 # Dependencies
 requires "nim >= 1.4.0"
-requires "arraymancer >= 0.6.3"
+requires "arraymancer >= 0.7.0"
 
 import os
 

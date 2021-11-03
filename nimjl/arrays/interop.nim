@@ -76,6 +76,8 @@ proc toJlArray*[T: SomeNumber](oa: openarray[T]): JlArray[T] =
   var addrInput = cast[ptr UncheckedArray[T]](unsafeAddr(oa[0]))
 
   var tmp = fromBuffer(addrInput, shape)
+  var size: int
+  initTensorMetadata(tmp, size, tmp.shape, colMajor)
   result = toJlArray(tmp)
 
 
