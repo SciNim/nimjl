@@ -81,22 +81,11 @@ proc toJlArray*[T](x: Tensor[T]): JlArray[T] =
   if not is_contiguous(x):
     raise newException(ValueError, "Error using non-contiguous Tensor as buffer")
 
-  let x = asContiguous(x, colMajor, true)
   let shape = x.tensor_shape
-  if x.is_C_contiguous():
-    ## Perform a Julia-allocated copy
-    let nbytes = x.size*(sizeof(T) div sizeof(byte))
-    result = allocJlArray[T](shape)
-    var tmp = fromBuffer(result.getRawData(), shape, colMajor)
-    apply2_inline(tmp, x):
-      y
-  elif x.is_F_contiguous():
-    ## Perform a Julia-allocated copy
-    let nbytes = x.size*(sizeof(T) div sizeof(byte))
-    result = allocJlArray[T](shape)
-    var tmp = fromBuffer(result.getRawData(), shape, colMajor)
-    apply2_inline(tmp, x):
-      y
+  result = allocJlArray[T](shape)
+  var tmp = fromBuffer(result.getRawData(), shape, colMajor)
+  apply2_inline(tmp, x):
+    y
 
 import ./arrays/interop
 export interop

@@ -1,8 +1,10 @@
 switch("path", "$projectDir/..")
+switch("gc", "arc")
+switch("define", "danger")
+
 when defined(valgrind):
   switch("stacktrace", "on")
   switch("debugger", "native")
-  switch("gc", "arc")
   switch("define", "useMalloc")
 
 when defined(msan):

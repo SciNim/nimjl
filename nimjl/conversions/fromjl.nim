@@ -6,7 +6,6 @@ import ./unbox
 
 import std/json
 import std/tables
-import std/sequtils
 
 import arraymancer
 

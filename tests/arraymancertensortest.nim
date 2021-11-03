@@ -11,7 +11,7 @@ import nimjl
 ### Tensor Args
 proc tensorSquareMeBaby() =
   test "squareMeBaby[Tensor]":
-    let dims = [18, 21, 33]
+    let dims = [8, 10, 3]
     var
       orig: Tensor[float64] = ones[float64](dims)
       index = 0
@@ -19,7 +19,7 @@ proc tensorSquareMeBaby() =
       i = index.float64 / 3.0
       inc(index)
 
-    var xTensor = jlArrayFromBuffer[float64](orig)
+    var xTensor = toJlArray[float64](orig)
 
     block:
       var
@@ -27,7 +27,6 @@ proc tensorSquareMeBaby() =
         rank_ret = ndims(xTensor)
       check len_ret == orig.size
       check rank_ret == orig.rank
-
       var
         d0 = dim(xTensor, 0)
         d1 = dim(xTensor, 1)
@@ -42,7 +41,7 @@ proc tensorSquareMeBaby() =
     check len_ret == orig.size
     check rank_ret == 3
 
-    var tensorData = ret.to(Tensor[float])
+    var tensorData = ret.to(Tensor[float], colMajor)
     check tensorData == square(orig)
 
 proc tensorMutateMeBaby() =
@@ -189,6 +188,7 @@ proc tensorColMemLayout() =
       # Check buffer are identical
       check colTesTensor.toUnsafeView()[i] == colMajJlArray.getRawData()[i]
       check colMajTensor.toUnsafeView()[i] == colTesTensor.toUnsafeView()[i]
+
       if i notin {0, 4, 8}:
         check colTesTensor.toUnsafeView()[i] != rowMajTensor.toUnsafeView()[i]
         check colMajTensor.toUnsafeView()[i] != rowMajTensor.toUnsafeView()[i]
