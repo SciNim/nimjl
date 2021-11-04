@@ -1,10 +1,12 @@
 import ./types
 import ./functions
 import ./conversions/unbox
+import ./conversions/box
 import ./private/jlcores
 import ./private/jlarrays
 
 import arraymancer
+import std/algorithm
 
 proc tensor_shape[T](x: Tensor[T]): seq[int] =
   # toSeq was causing issue for some reason and I don't want to import some of Arraymancer Metadata here
@@ -30,8 +32,9 @@ proc len*[T](x: JlArray[T]): int =
 
 # Rank func takes value for some reason
 proc ndims*[T](x: JlArray[T]): int =
-  # This version was buggt w/ indexing macro
-  # Don't know why, but it's more coherent as well that ndims calls Julia.ndims so there's no downside and less bugs
+  # This version was buggy w/ indexing macro
+  # That's because raw C function works on Base.Array but may not work on higher level Array-like type
+  # dim have the same issue
   # result = jl_array_rank(cast[JlValue](x))
   result = jlUnbox[int](jlCall("ndims", x))
 
@@ -41,9 +44,14 @@ proc dim*[T](x: JlArray[T], dim: int): int =
 proc size*[T](x: JlArray[T]): JlArray[int] =
   result = jlCall("size", cast[JlValue](x)).toJlArray(int)
 
+proc size*[T](x: JlArray[T], dim: int): int =
+  result = jlUnbox[int](
+    jlCall("size", cast[JlValue](x), jlBox(dim))
+  )
+
 proc shape*[T](x: JlArray[T]): seq[int] =
-  for i in 0..<x.ndims():
-    result.add x.dim(i)
+  for i in 1..x.ndims():
+    result.add size(x, i)
 
 proc eltype*[T](x: JlArray[T]): JlDataType =
   jl_array_eltype(cast[JlValue](x))
@@ -65,7 +73,8 @@ proc jlArrayFromBuffer*[T](data: Tensor[T]): JlArray[T] =
 
   ## Create an Array from existing buffer
   let uncheckedDataPtr = data.toUnsafeView()
-  result = jlArrayFromBuffer(uncheckedDataPtr, data.tensor_shape)
+  let shape = data.tensor_shape
+  result = jlArrayFromBuffer[T](uncheckedDataPtr, shape)
 
 # Julia allocated array
 proc allocJlArray*[T](dims: openArray[int]): JlArray[T] =

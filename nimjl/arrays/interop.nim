@@ -2,6 +2,7 @@ import ../arrays
 import ../types
 import ../functions
 import ../glucose
+import ../conversions
 
 import ../private/jlcores
 
@@ -10,6 +11,64 @@ import std/macros
 import arraymancer
 
 {.experimental: "views".}
+
+# Utility
+proc firstindex*[T](val: JlArray[T], dim: int): int =
+  jlCall("firstindex", val, dim).to(int)
+
+proc lastindex*[T](val: JlArray[T], dim: int): int =
+  jlCall("lastindex", val, dim).to(int)
+
+proc reshape*[T](x: JlArray[T], dims: JlArray[int]): JlArray[T] =
+  result = jlCall("reshape", x, dims).toJlArray(T)
+
+proc reshape*[T](x: JlArray[T], dims: openarray[int]): JlArray[T] =
+  result = jlCall("reshape", x, dims).toJlArray(T)
+
+proc reverse*[T](x: JlArray[T]): JlArray[T] =
+  result = jlCall("reverse", x).toJlArray(T)
+
+proc asType*[T](x: JlArray[T], U: typedesc): JlArray[U] =
+  let tmp = newSeq[U](1).toJlArray()
+  result = jlCall("convert", jltypeof(tmp), x).toJlArray(U)
+
+proc stride*[T](x: JlArray[T], axis: int) : int =
+  # Julia index starts at 1..
+  result = jlCall("stride", x, axis+1).to(int)
+
+proc strides*[T](x: JlArray[T]) : seq[int] =
+  for i in 0..<x.ndims():
+    result.add x.stride(i)
+
+proc permutedims*[T](x: JlArray[T], dims: varargs[int]) : JlArray[T] =
+  result = jlCall("permutedims", x, dims).toJlArray(T)
+
+proc permutedDimsArray*[T](data: JlArray[T], dims: varargs[int]) : JlArray[T] =
+  ## No copy dimension permutation
+  result = jlCall("PermutedDimsArray", data, dims).toJlArray(T)
+
+proc transpose*[T](x: JlArray[T]): JlArray[T] =
+  # if x.ndims == 2:
+  #   result = jlCall("transpose", x).toJlArray(T)
+  # else:
+  # Generalize transpose with permuteDimsArray
+  let ndims = x.ndims
+  var invdim = newSeq[int](ndims)
+  for i in 0..<ndims:
+    invdim[i] = ndims - i
+  result = permutedDimsArray(x, invdim)
+
+proc swapMemoryOrder*[T](x: JlArray[T]): JlArray[T] =
+  let revshape = reverse(size(x))
+  var invdim: seq[int]
+  for i in countdown(ndims(x), 1):
+    invdim.add i
+  let tmp = reshape(x, revshape)
+  result = permutedims(tmp, invdim)
+
+proc unsafe_raw_offset*[T](x: JlArray[T], offset: int) : T =
+  let jlptr = JlBase.pointer(x)
+  result = jlCall("unsafe_load", jlptr, offset).to(T)
 
 # # This section is copied from Arraymancer and Flambeau
 # # ---------------------------------------------------------
@@ -75,10 +134,10 @@ proc toJlArray*[T: SomeNumber](oa: openarray[T]): JlArray[T] =
   let shape = getShape(oa)
   var addrInput = cast[ptr UncheckedArray[T]](unsafeAddr(oa[0]))
 
-  var tmp = fromBuffer(addrInput, shape)
-  var size: int
-  initTensorMetadata(tmp, size, tmp.shape, colMajor)
-  result = toJlArray(tmp)
+  var tmp = jlArrayFromBuffer(addrInput, shape)
+  # var size: int
+  # initTensorMetadata(tmp, size, tmp.shape, colMajor)
+  result = swapMemoryOrder(tmp)
 
 
 proc toJlArray*[T: seq|array](oa: openarray[T]): auto =
@@ -91,35 +150,18 @@ proc toJlArray*[T: seq|array](oa: openarray[T]): auto =
   let shape = getShape(oa)
   type BaseType = getBaseType(T)
 
-  var tmp = newTensor[BaseType](shape)
-  var data = tmp.toUnsafeView()
+  # var tmp = newTensorUninit[BaseType](shape)
+  var tmp = allocJlArray[BaseType](shape)
+  var data = tmp.getRawData()
 
   var i = 0
   for val in flatIter(oa):
     data[i] = val
     inc(i)
 
-  result = toJlArray(tmp)
+  result = swapMemoryOrder(tmp)
 
-
-# Utility
-proc firstindex*[T](val: JlArray[T], dim: int): int =
-  jlCall("firstindex", val, dim).to(int)
-
-proc lastindex*[T](val: JlArray[T], dim: int): int =
-  jlCall("lastindex", val, dim).to(int)
-
-proc transpose*[T](x: JlArray[T]): JlArray[T] =
-  result = jlCall("transpose", x).toJlArray(T)
-
-proc reshape*[T](x: JlArray[T], dims: JlArray[int]): JlArray[T] =
-  result = jlCall("reshape", x, dims).toJlArray(T)
-
-proc reshape*[T](x: JlArray[T], dims: openarray[int]): JlArray[T] =
-  result = jlCall("reshape", x, dims).toJlArray(T)
-
-proc reverse*[T](x: JlArray[T]): JlArray[T] =
-  result = jlCall("reverse", x).toJlArray(T)
+# Constructor
 
 proc fill*[T](x: T, dims: varargs[int]): JlArray[T] =
   if dims.len > 0:
@@ -134,29 +176,4 @@ proc rand*[T](dims: openArray[int]) : JlArray[T] =
 
   jlCall("rand", jltypeof(tmp2), dims)
 
-proc asType*[T](x: JlArray[T], U: typedesc): JlArray[U] =
-  let tmp = newSeq[U](1).toJlArray()
-  result = jlCall("convert", jltypeof(tmp), x).toJlArray(U)
 
-proc stride*[T](x: JlArray[T], axis: int) : int =
-  # Julia index starts at 1..
-  result = jlCall("stride", x, axis+1).to(int)
-
-proc strides*[T](x: JlArray[T]) : seq[int] =
-  for i in 0..<x.ndims():
-    result.add x.stride(i)
-
-proc permutedims*[T](x: JlArray[T], dims: varargs[int]) : JlArray[T] =
-  result = jlCall("permutedims", x, dims).toJlArray(T)
-
-proc swapMemoryOrder*[T](x: JlArray[T]): JlArray[T] =
-  let revshape = reverse(size(x))
-  var invdim: seq[int]
-  for i in countdown(ndims(x), 1):
-    invdim.add i
-  let tmp = reshape(x, revshape)
-  result = permutedims(tmp, invdim)
-
-proc unsafe_raw_offset*[T](x: JlArray[T], offset: int) : T =
-  let jlptr = JlBase.pointer(x)
-  result = jlCall("unsafe_load", jlptr, offset).to(T)
