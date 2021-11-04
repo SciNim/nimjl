@@ -78,11 +78,16 @@ proc allocJlArray*(dims: openArray[int], T: typedesc): JlValue =
   result = cast[JlValue](julia_alloc_array(dims, T))
 
 proc toJlArray*[T](x: Tensor[T]): JlArray[T] =
+  if not is_contiguous(x):
+    raise newException(ValueError, "Error using non-contiguous Tensor as buffer")
+
   let shape = x.tensor_shape
-  ## Perform a Julia-allocated copy
-  let nbytes = x.size*(sizeof(T) div sizeof(byte))
   result = allocJlArray[T](shape)
-  copyMem(unsafeAddr(result.getRawData()[0]), unsafeAddr(toUnsafeView(x)[0]), nbytes)
+  var tmp = fromBuffer(result.getRawData(), shape)
+  var size: int
+  initTensorMetadata(tmp, size, tmp.shape, colMajor)
+  apply2_inline(tmp, x):
+    y
 
 import ./arrays/interop
 export interop

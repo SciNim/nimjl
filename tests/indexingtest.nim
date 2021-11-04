@@ -26,7 +26,6 @@ proc let_index1darray() =
     check locarray == reflocarray
     check locarray[_] == reflocarray
 
-    # No idea why this produce a fill result
     check locarray[^2] == toJlValue(11)
     check locarray[2] == toJlValue(2)
 
@@ -41,7 +40,7 @@ proc let_index1darray() =
     check locarray[1..^4] == [1, 2, 3, 4, 5, 6, 7, 8, 9].toJlArray()
 
 proc let_index2darray() =
-  let locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
+  let locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).permutedims(2, 1)
 
   test "2DArray":
     check locarray[^2, 1] == toJlValue(11)
@@ -97,7 +96,7 @@ proc var_index1darray() =
     check locarray[1..^4] == [1, 2, 3, 4, 5, 6, 7, 8, 9].toJlArray()
 
 proc var_index2darray() =
-  var locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
+  var locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).permutedims(2, 1)
 
   test "2DArray":
     check locarray[^2, 1] == toJlValue(11)
@@ -125,7 +124,7 @@ proc assign_index1darray() =
     check refarray == @[12, 36, 3, 36, 5, 36, 7, 36, 9, 36, 11, 36]
 
 proc assign_index2darray() =
-  var locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
+  var locarray = toJlArray([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).permutedims(2, 1)
 
   test "2DArray":
     locarray[3, 2] = 1500
@@ -133,8 +132,7 @@ proc assign_index2darray() =
     locarray[^2, 1] = 36
     check locarray[^2, 1] == toJlValue(36)
     locarray[_, 1] = repeat(-1, 12)
-    # The transformation look super weird like this because of the row major vs col major
-    check locarray == toJlArray([[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], [110, 120, 1500, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).swapMemoryOrder()
+    check locarray == toJlArray([[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], [110, 120, 1500, 140, 150, 160, 170, 180, 190, 200, 210, 220]]).permutedims(2, 1)
 
 proc runIndexingTest*() =
   suite "Immutable Indexing":

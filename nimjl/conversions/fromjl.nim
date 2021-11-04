@@ -6,6 +6,7 @@ import ./unbox
 
 import std/json
 import std/tables
+
 import arraymancer
 
 {.push inline.}
@@ -26,35 +27,29 @@ proc toNimVal(x: JlValue, t: var tuple)
 proc toNimVal[U, V](x: JlValue, tab: var Table[U, V])
 
 # Array, Seq, Tensor
-proc toNimVal[T](x: JlArray[T], tensor: var Tensor[T]) =
-  # This is possible but relies on keep Julia's memory intact
-  # I believe a copyMem is cleaner and safer
-  # tensor = fromBuffer(x, x.shape)
-  # Version that doesn't rely on keepin Jl array alive
+proc toNimVal[T](x: JlArray[T], tensor: var Tensor[T], layout: static OrderType) =
+  ## Convert a Julia Array to a Tensor assuming colMajor layout
   if x.ndims > 6:
     raise newException(JlError, "Tensor only support up to 6 dimensions")
-  tensor = newTensor[T](x.shape)
+
+  tensor = newTensorUninit[T](x.shape)
+  var size: int
+  initTensorMetadata(tensor, size, tensor.shape, layout)
+
   if x.len > 0:
-    # Can create a view as well
-    let tmp = fromBuffer[T](x.getRawData(), x.shape())
-    tensor = tmp.clone()
-    # let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
-    # copyMem(tensor.get_offset_ptr(), x.getRawData(), nbytes)
+    # Assume Julia Array are column major
+    var tmp = fromBuffer[T](x.getRawData(), x.shape())
+    var size: int
+    initTensorMetadata(tmp, size, tensor.shape, colMajor)
+    apply2_inline(tensor, tmp):
+      y
 
 proc toNimVal[T](x: JlArray[T], locseq: var seq[T]) =
-  if x.ndims > 1:
-    raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
+  ## Load the buffer into an array
   let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
   locseq.setLen(x.len())
   if x.len() > 0:
     copyMem(unsafeAddr(locseq[0]), x.getRawData(), nbytes)
-
-proc toNimVal[I, T](x: JlArray[T], locarr: var array[I, T]) =
-  if x.ndims > 1:
-    raise newException(JlError, "Can only convert 1D Julia Array to Nim seq")
-  let nbytes: int = x.len()*sizeof(T) div sizeof(byte)
-  if x.len() > 0:
-    copyMem(unsafeAddr(locarr[0]), x.rawData(), nbytes)
 
 proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
   let x = toJlArray[T](x)
@@ -80,9 +75,11 @@ proc toNimVal(x: JlValue, jlfunc: var JlFunc) =
 {.pop.}
 
 # Public API
-proc to*[U](x: JlArray[U], T: typedesc): T =
+proc to*[U](x: JlArray[U], T: typedesc, layout: static OrderType= rowMajor): T =
   when T is void:
     discard
+  elif T is Tensor:
+    toNimVal(x, result, layout)
   else:
     toNimVal(x, result)
 

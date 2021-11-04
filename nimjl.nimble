@@ -1,6 +1,6 @@
 # Nimjl
 # Licensed and distributed under MIT license (license terms in the root directory or at http://opensource.org/licenses/MIT).
-version       = "0.6.2"
+version       = "0.6.3"
 author        = "Regis Caillaud"
 description   = "Nim Julia bridge"
 license       = "MIT"
@@ -8,7 +8,7 @@ license       = "MIT"
 
 # Dependencies
 requires "nim >= 1.4.0"
-requires "arraymancer >= 0.6.3"
+requires "arraymancer >= 0.7.0"
 
 import os
 
@@ -22,25 +22,10 @@ task runexamples, "Run all examples":
       if fstr.endsWith(".nim"):
         echo "running ", fstr
         selfExec("cpp -r --gc:orc -d:release " & fstr)
-        
+
   withDir "examples":
     for fstr in listFiles("."):
       if fstr.endsWith(".nim"):
         echo "running ", fstr
-        selfExec("cpp -r --gc:refc -d:release " & fstr)        
-
-
-task test, "Run tests":
-  withDir ".":
-    for fstr in listFiles("tests"):
-      if fstr.endsWith(".nim") and fstr.startsWith("tests" / "t"):
-        echo "running ", fstr
-        selfExec("cpp -r --gc:arc -d:danger " & fstr)
-        
-  withDir ".":
-    for fstr in listFiles("tests"):
-      if fstr.endsWith(".nim") and fstr.startsWith("tests" / "t"):
-        echo "running ", fstr
-        selfExec("cpp -r --gc:refc -d:danger " & fstr)
-
+        selfExec("cpp -r --gc:refc -d:release " & fstr)
 
