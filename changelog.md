@@ -1,6 +1,6 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
-Release v0.632 - 2021_11_05
+Release v0.6.3 - 2021_11_05
 ===========================
 * Row major / col major handling when converting Arraymancer Tensor <-> JlArray
 
