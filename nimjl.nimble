@@ -21,11 +21,5 @@ task runexamples, "Run all examples":
     for fstr in listFiles("."):
       if fstr.endsWith(".nim"):
         echo "running ", fstr
-        selfExec("cpp -r --gc:orc -d:release " & fstr)
-
-  withDir "examples":
-    for fstr in listFiles("."):
-      if fstr.endsWith(".nim"):
-        echo "running ", fstr
-        selfExec("cpp -r --gc:refc -d:release " & fstr)
+        selfExec("cpp -r --gc:arc -d:release " & fstr)
 

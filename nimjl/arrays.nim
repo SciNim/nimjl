@@ -6,7 +6,6 @@ import ./private/jlcores
 import ./private/jlarrays
 
 import arraymancer
-import std/algorithm
 
 proc tensor_shape[T](x: Tensor[T]): seq[int] =
   # toSeq was causing issue for some reason and I don't want to import some of Arraymancer Metadata here
