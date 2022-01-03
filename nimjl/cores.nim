@@ -1,40 +1,38 @@
 import ./types
 import ./private/jlcores
 import ./config
-import std/[strformat, os]
+import std/[strformat, os, sets, macros, tables, strutils]
 
-proc jlVmIsInit*() : bool =
-  bool(jl_is_initialized())
+var staticContents: Table[string, string]
+template JlRessources*(body: untyped) =
 
-# Init & Exit function
-proc jlVmInit*() =
-  ## jlVmInit should only be called once per process
-  ## Subsequent calls after the first one will be ignored
-  if not jlVmIsInit():
-    jl_init()
-    return
-  # raise newException(JlError, "jl_init() must be called once per process")
+  proc loadRawFile(filename: static string) =
+    const jlContent = staticRead(filename)
+    staticContents[filename] = jlContent
 
-# Not exported for now because I don't know how it works
-proc jlVmInit(pathToImage: string) {.used.} =
-  ## Same as jlVmInit but with a pre-compiler image
-  if not jlVmIsInit():
-    let jlBinDir = cstring(JuliaPath / "bin")
-    jl_init_with_image(jlBinDir, pathToImage.cstring)
-    return
-  # raise newException(JlError, "jl_init_with_image(...) must be called once per process")
+  proc loadFile(filename: static string) =
+    const jlContent = staticRead(getProjectPath() / filename)
+    staticContents[filename] = jlContent
 
-proc jlVmSaveImage*(fname: string) =
-  jl_save_system_image(fname.cstring)
+  # when defined(linux):
+    # This only works with Linux / bash
+  const dirname {.strdefine.} = ""
+  macro loadDir() : untyped =
+    const path = getProjectPath() / dirname
+    const line = "ls " & path / "*.jl"
+    const filelist = staticExec(line)
+    const files = filelist.splitLines()
 
-proc jlVmExit*(exit_code: cint = 0.cint) =
-  ## jlVmExit should only be called once per process
-  ## Subsequent calls after the first one will be ignored
-  once:
-    jl_atexit_hook(exit_code)
-    return
-  # Do nothing -> atexit_hook must be called once
-  # raise newException(JlError, "jl_atexit_hook() must be called once per process")
+    result = newStmtList()
+    for file in files:
+      result.add newCall(
+        "loadRawFile",
+        newStrLitNode(file),
+      )
+    echo result.repr
+
+  block:
+    body
 
 # Convert a string to Julia Symbol
 proc jlSym*(symname: string): JlSym =
@@ -83,3 +81,47 @@ proc jlGetModule*(modname: string): JlModule =
 
 # JlNothing is handy to have
 template JlNothing*(): JlValue = jlEval("nothing")
+
+template JlCode*(body: string) =
+  block:
+    discard jleval(body)
+
+proc jlVmIsInit*(): bool =
+  bool(jl_is_initialized())
+
+proc loadJlRessources() =
+  for key, content in staticContents.pairs():
+    echo "> Nimjl loading...", key
+    JlCode(content)
+
+# Init & Exit function
+proc jlVmInit*() =
+  ## jlVmInit should only be called once per process
+  ## Subsequent calls after the first one will be ignored
+  if not jlVmIsInit():
+    jl_init()
+    loadJlRessources()
+    return
+  # raise newException(JlError, "jl_init() must be called once per process")
+
+# Not exported for now because I don't know how it works
+proc jlVmInit(pathToImage: string) {.used.} =
+  ## Same as jlVmInit but with a pre-compiler image
+  if not jlVmIsInit():
+    let jlBinDir = cstring(JuliaPath / "bin")
+    jl_init_with_image(jlBinDir, pathToImage.cstring)
+    loadJlRessources()
+    return
+  # raise newException(JlError, "jl_init_with_image(...) must be called once per process")
+
+proc jlVmSaveImage*(fname: string) =
+  jl_save_system_image(fname.cstring)
+
+proc jlVmExit*(exit_code: cint = 0.cint) =
+  ## jlVmExit should only be called once per process
+  ## Subsequent calls after the first one will be ignored
+  once:
+    jl_atexit_hook(exit_code)
+    return
+  # Do nothing -> atexit_hook must be called once
+  # raise newException(JlError, "jl_atexit_hook() must be called once per process")
