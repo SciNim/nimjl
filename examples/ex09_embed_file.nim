@@ -1,15 +1,8 @@
 import nimjl
 
-proc main_1() =
-  # Alias for JlEmbed
-  Julia.Embed:
-    dir("jlassets/")
-    file("localasset.jl")
-
-  Julia.init()
-
-  discard Julia.HelloWorld1()
-  discard Julia.HelloWorld2()
+proc common() =
+  discard Julia.helloWorld1()
+  discard Julia.helloWorld2()
 
   block:
     let res = Julia.meanAB(12, 16)
@@ -18,6 +11,19 @@ proc main_1() =
   block:
     let res = Julia.squareDiv(9.3, 8.0)
     echo res
+
+
+
+proc main_1() =
+  # Alias for JlEmbed
+  Julia.Embed:
+    dir("jlassets/")
+    file("localasset.jl")
+
+  Julia.init()
+  defer: Julia.exit()
+
+  common()
 
 proc main_2() =
   # Alias for JlEmbedDir
@@ -26,31 +32,17 @@ proc main_2() =
   Julia.embedFile("localasset.jl")
 
   Julia.init()
+  defer: Julia.exit()
 
-  discard Julia.HelloWorld1()
-  discard Julia.HelloWorld2()
-
-  block:
-    let res = Julia.meanAB(12, 16)
-    echo res
-
-  block:
-    let res = Julia.squareDiv(9.3, 8.0)
-    echo res
+  common()
 
 proc main_3() =
   Julia.init:
     dir("jlassets/")
     file("localasset.jl")
+  defer: Julia.exit()
 
-  discard Julia.HelloWorld1()
-  discard Julia.HelloWorld2()
+  common()
 
-  block:
-    let res = Julia.meanAB(12, 16)
-    echo res
-
-  block:
-    let res = Julia.squareDiv(9.3, 8.0)
-    echo res
-
+when isMainModule:
+  main_3()
