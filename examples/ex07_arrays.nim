@@ -3,6 +3,8 @@ import std/sugar
 import std/random
 import nimjl
 
+import arraymancer
+
 randomize()
 
 proc main() =
@@ -28,6 +30,11 @@ proc main() =
       let
         jlResArray = res.toJlArray(int64)
       echo "Sorted jlResArray=", jlResArray
+
+      # Or if you prefer using arraymancer Tensor
+      let
+        tensorEquivalent = res.to(Tensor[int64])
+      echo tensorEquivalent
     # End of Template equivalent to :
     # julia gc pop and julia gc push need to be in the same scope
     # julia_gc_pop()

@@ -1,5 +1,20 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.7.0 - 2022_01_04
+===========================
+* Add Julia.useModule alias for jlUseModule
+* Add Julia.includeFile (include is reserved keyword) alias for jlInclude 
+* Add mechanism to embed julia files at compile-time and run the code at init for an easy way to distribute binary with Julia code contained
+* Add Pkg template to easily install new Julia package during init ; it is also compatible with the embedding stuff :
+* See ex09
+  ```nim
+    Julia.init: 
+      Pkg: 
+        add("LinearAlgebra")
+      Embed: 
+        file("myfile.jl")
+  ```
+
 Release v0.6.3 - 2021_11_05
 ===========================
 * Row major / col major handling when converting Arraymancer Tensor <-> JlArray

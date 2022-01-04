@@ -8,7 +8,6 @@ type
     z: string
 
 Julia.init() # Initialize Julia VM. This should be done once in the lifetime of your program.
-
 # Include Julia file
 jlInclude("localmodule.jl")
 # Use the module. If you're confused by the syntax, go and read through Julia's Manual where module usage is explained

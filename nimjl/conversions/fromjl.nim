@@ -53,7 +53,8 @@ proc toNimVal[T](x: JlArray[T], locseq: var seq[T]) =
 
 proc toNimVal[T](x: JlValue, tensor: var Tensor[T]) =
   let x = toJlArray[T](x)
-  toNimVal(x, tensor)
+  # Assume rowMajor layout
+  toNimVal(x, tensor, rowMajor)
 
 proc toNimVal[T](x: JlValue, locseq: var seq[T]) =
   let x = toJlArray[T](x)
@@ -75,7 +76,7 @@ proc toNimVal(x: JlValue, jlfunc: var JlFunc) =
 {.pop.}
 
 # Public API
-proc to*[U](x: JlArray[U], T: typedesc, layout: static OrderType= rowMajor): T =
+proc to*[U](x: JlArray[U], T: typedesc, layout: static OrderType = rowMajor): T =
   when T is void:
     discard
   elif T is Tensor:

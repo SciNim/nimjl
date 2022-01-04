@@ -199,7 +199,9 @@ when defined(checkMemLeak):
   import std/os
 
 when isMainModule:
-  Julia.init()
+  Julia.init:
+    Pkg: add("LinearAlgebra")
+
   when defined(checkMemLeak):
     var
       srcPath = currentSourcePath()
