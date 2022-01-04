@@ -1,38 +1,7 @@
 import ./types
 import ./private/jlcores
 import ./config
-import std/[strformat, os, sets, macros, tables, strutils]
-
-var staticContents: Table[string, string]
-template JlRessources*(body: untyped) =
-
-  proc loadRawFile(filename: static string) =
-    const jlContent = staticRead(filename)
-    staticContents[filename] = jlContent
-
-  proc loadFile(filename: static string) =
-    const jlContent = staticRead(getProjectPath() / filename)
-    staticContents[filename] = jlContent
-
-  # when defined(linux):
-    # This only works with Linux / bash
-  const dirname {.strdefine.} = ""
-  macro loadDir() : untyped =
-    const path = getProjectPath() / dirname
-    const line = "ls " & path / "*.jl"
-    const filelist = staticExec(line)
-    const files = filelist.splitLines()
-
-    result = newStmtList()
-    for file in files:
-      result.add newCall(
-        "loadRawFile",
-        newStrLitNode(file),
-      )
-    echo result.repr
-
-  block:
-    body
+import std/[strformat, os, macros, tables]
 
 # Convert a string to Julia Symbol
 proc jlSym*(symname: string): JlSym =
@@ -89,9 +58,26 @@ template JlCode*(body: string) =
 proc jlVmIsInit*(): bool =
   bool(jl_is_initialized())
 
-proc loadJlRessources() =
+proc jlVmSaveImage*(fname: string) =
+  jl_save_system_image(fname.cstring)
+
+proc jlVmExit*(exit_code: cint = 0.cint) =
+  ## jlVmExit should only be called once per process
+  ## Subsequent calls after the first one will be ignored
+  once:
+    jl_atexit_hook(exit_code)
+    return
+  # Do nothing -> atexit_hook must be called once
+ # raise newException(JlError, "jl_atexit_hook() must be called once per process")
+
+#########################################
+var staticContents: Table[string, string]
+
+import std/logging
+
+proc loadJlRessources*() =
   for key, content in staticContents.pairs():
-    echo "> Nimjl loading...", key
+    info("> Nimjl loading Julia ressource: ", key, ".jl")
     JlCode(content)
 
 # Init & Exit function
@@ -112,16 +98,49 @@ proc jlVmInit(pathToImage: string) {.used.} =
     jl_init_with_image(jlBinDir, pathToImage.cstring)
     loadJlRessources()
     return
+
   # raise newException(JlError, "jl_init_with_image(...) must be called once per process")
+proc private_addKeyVal*(key, value: string) =
+  staticContents[key] = value
 
-proc jlVmSaveImage*(fname: string) =
-  jl_save_system_image(fname.cstring)
+macro jlEmbedDir*(dirname: static[string]): untyped =
+  result = newStmtList()
+  let path = getProjectPath() / dirname
+  # echo path
+  # echo "------------------------------------------"
 
-proc jlVmExit*(exit_code: cint = 0.cint) =
-  ## jlVmExit should only be called once per process
-  ## Subsequent calls after the first one will be ignored
-  once:
-    jl_atexit_hook(exit_code)
-    return
-  # Do nothing -> atexit_hook must be called once
-  # raise newException(JlError, "jl_atexit_hook() must be called once per process")
+  for file in path.walkDir:
+    if file.kind == pcFile:
+      let (dir, name, ext) = file.path.splitFile
+      if ext == ".jl":
+        # echo ">> ", name
+        let content = readFile(file.path)
+        result.add newCall("private_addKeyVal", newStrLitNode(name), newStrLitNode(content))
+
+  # echo "------------------------------------------"
+  # echo result.repr
+
+proc jlEmbedFileImpl(filename: static[string]) =
+  const jlContent = staticRead(getProjectPath() / filename)
+  staticContents[filename] = jlContent
+
+proc jlEmbedFile*(filename: static[string]) =
+  if jlVmIsInit():
+    raise newException(JlError, "Error cannot embed ressources after Julia VM has been initialized")
+  jlEmbedFileImpl(filename)
+
+template JlEmbed*(body: untyped) =
+  if jlVmIsInit():
+    raise newException(JlError, "Error cannot embed ressources after Julia VM has been initialized")
+
+  template file(filename: static[string]) =
+    jlEmbedFileImpl(filename)
+
+  template dir(dirname: static[string]) =
+    jlEmbedDir(dirname)
+
+  template thisDir() =
+    jlEmbedDir("")
+
+  block:
+    body
