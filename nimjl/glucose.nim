@@ -9,27 +9,56 @@ import ./private/jlcores
 
 type Julia* = object
 
-template Embed*(jl: type Julia, body: untyped) =
-  JlEmbed(body)
-
-proc embedFile*(jl: type Julia, fname: static[string]) =
-  jlEmbedFile(fname)
-
-proc embedDir*(jl: type Julia, dirname: static[string]) =
-  jlEmbedDir(dirname)
-
 proc init*(jl: type Julia) =
   jlVmInit()
 
 template init*(jl: type Julia, body: untyped) =
-  JlEmbed(body)
-  jlVmInit()
+  # Pkg installation interface
+  var packages : seq[string]
+  template Pkg(innerbody: untyped) =
+    proc add(pkgname: string) =
+      packages.add pkgname
+    innerbody
+
+  # Embedding ressources interface
+  template Embed(innerbody: untyped) =
+    template file(filename: static[string]) =
+      jlEmbedFile(filename)
+
+    template dir(dirname: static[string]) =
+      jlEmbedDir(dirname)
+
+    template thisDir() =
+      jlEmbedDir("")
+
+    block:
+      innerbody
+
+  body
+
+  # Don't do anything if Julia is already initialized
+  if not jlVmIsInit():
+    jl_init()
+    # Module installation
+    Julia.useModule("Pkg")
+    let pkg = Julia.getModule("Pkg")
+    for pkgname in packages:
+      discard jlCall(pkg, "add", pkgname)
+
+    # Eval Julia code embedded
+    loadJlRessources()
+
+  else:
+    raise newException(JlError, "Error Julia.init() has already been initialized")
 
 proc exit*(jl: type Julia, exitcode: int = 0) =
   jlVmExit(exitcode.cint)
 
 proc useModule*(jl: type Julia, modname: string) =
   jlUseModule(modname)
+
+proc getModule*(jl: type Julia, modname: string) : JlModule =
+  jlGetModule(modname)
 
 proc includeFile*(jl: type Julia, fname: string) =
   jlInclude(fname)

@@ -3,8 +3,9 @@ import nimjl
 
 proc testEmbedRessources*() =
   Julia.init:
-    file("embed.jl")
-    dir("assets/")
+    Embed:
+      file("embed.jl")
+      dir("assets/")
 
   suite "Embedding File & Dir ":
     test "file ressources":

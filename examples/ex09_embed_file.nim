@@ -12,37 +12,31 @@ proc common() =
     let res = Julia.squareDiv(9.3, 8.0)
     echo res
 
-
-
-proc main_1() =
-  # Alias for JlEmbed
-  Julia.Embed:
-    dir("jlassets/")
-    file("localasset.jl")
-
-  Julia.init()
-  defer: Julia.exit()
-
-  common()
+# All methods accomplish the same result
+# main_3 is the cleanest (subjective option) so it should be preferred
 
 proc main_2() =
-  # Alias for JlEmbedDir
-  Julia.embedDir("jlassets/")
-  # Alias for JlEmbedFile
-  Julia.embedFile("localasset.jl")
+  # Manual embedding; must be done before init
+  jlEmbedDir("jlassets/")
+  jlEmbedFile("localasset.jl")
 
   Julia.init()
   defer: Julia.exit()
 
   common()
 
-proc main_3() =
+proc main_1() =
+  # Idiomatic way to embed Julia ressources and call them during after VM Init
   Julia.init:
-    dir("jlassets/")
-    file("localasset.jl")
+    # Install package at init
+    Pkg:
+      add("LinearAlgebra")
+    Embed:
+      dir("jlassets/")
+      file("localasset.jl")
   defer: Julia.exit()
 
   common()
 
 when isMainModule:
-  main_3()
+  main_1()

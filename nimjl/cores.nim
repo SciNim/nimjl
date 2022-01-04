@@ -101,6 +101,7 @@ proc jlVmInit(pathToImage: string) {.used.} =
 
   # raise newException(JlError, "jl_init_with_image(...) must be called once per process")
 proc private_addKeyVal*(key, value: string) =
+  ## exported because macro doesn't work otherwise but shouldn't be used
   staticContents[key] = value
 
 macro jlEmbedDir*(dirname: static[string]): untyped =
@@ -120,27 +121,6 @@ macro jlEmbedDir*(dirname: static[string]): untyped =
   # echo "------------------------------------------"
   # echo result.repr
 
-proc jlEmbedFileImpl(filename: static[string]) =
+proc jlEmbedFile*(filename: static[string]) =
   const jlContent = staticRead(getProjectPath() / filename)
   staticContents[filename] = jlContent
-
-proc jlEmbedFile*(filename: static[string]) =
-  if jlVmIsInit():
-    raise newException(JlError, "Error cannot embed ressources after Julia VM has been initialized")
-  jlEmbedFileImpl(filename)
-
-template JlEmbed*(body: untyped) =
-  if jlVmIsInit():
-    raise newException(JlError, "Error cannot embed ressources after Julia VM has been initialized")
-
-  template file(filename: static[string]) =
-    jlEmbedFileImpl(filename)
-
-  template dir(dirname: static[string]) =
-    jlEmbedDir(dirname)
-
-  template thisDir() =
-    jlEmbedDir("")
-
-  block:
-    body
