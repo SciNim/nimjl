@@ -3,46 +3,48 @@ import ./private/jlcores
 import ./config
 import std/[strformat, os, macros, tables]
 
-# Convert a string to Julia Symbol
 proc jlSym*(symname: string): JlSym =
+  ## Convert a string to Julia Symbol
   result = jl_symbol(symname.cstring)
 
 proc jlExceptionHandler*() =
   let excpt: JlValue = jl_exception_occurred()
+  ## Convert a Julia exception to Nim exception
   if not isNil(excpt):
     let msg = $(jl_exception_message())
     raise newException(JlError, msg)
   else:
     discard
 
-# Eval function that checkes error
 proc jlEval*(code: string): JlValue =
+  ## Eval function that checks JuliaError
   result = jl_eval_string(code)
   jlExceptionHandler()
 
-# Include file or use module
-# Check for nil result
 proc jlInclude*(filename: string) =
+  ## Include Julia file
   let tmp = jlEval(&"include(\"{filename}\")")
   if tmp.isNil:
     raise newException(JlError, "&Cannot include file {filename}")
 
 proc jlUseModule*(modname: string) =
+  ## Call using module
   let tmp = jlEval(&"using {modname}")
   if tmp.isNil:
     raise newException(JlError, "&Cannot use module {modname}")
 
-# Just for convenience since Julia funciton is called using
 proc jlUsing*(modname: string) =
+  ## Alias for conveniece
   jlUseModule(modname)
 
-# Import can be useful
 proc jlImport*(modname: string) =
+  ## Import Julia file
   let tmp = jlEval(&"import {modname}")
   if tmp.isNil:
     raise newException(JlError, "&Cannot import module {modname}")
 
 proc jlGetModule*(modname: string): JlModule =
+  ## Get Julia module. Useful to resolve ambiguity
   let tmp = jlEval(modname)
   if tmp.isNil:
     raise newException(JlError, "&Cannot load module {modname}")
@@ -105,6 +107,7 @@ proc private_addKeyVal*(key, value: string) =
   staticContents[key] = value
 
 macro jlEmbedDir*(dirname: static[string]): untyped =
+  ## Embed all Julia files from specified directory
   result = newStmtList()
   let path = getProjectPath() / dirname
   # echo path
@@ -122,5 +125,6 @@ macro jlEmbedDir*(dirname: static[string]): untyped =
   # echo result.repr
 
 proc jlEmbedFile*(filename: static[string]) =
+  ## Embed specific Julia file
   const jlContent = staticRead(getProjectPath() / filename)
   staticContents[filename] = jlContent
