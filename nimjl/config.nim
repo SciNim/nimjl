@@ -6,7 +6,9 @@ const JuliaBinPath = gorge("julia -E Sys.BINDIR").replace("\"", "")
 # JuliaPath should be parent folder of Julia-bindir
 # This is resolved AT COMPILE TIME. Therefore, using the environment of the machine that compile.
 # If you want to ship a binary, you need to install in a fixed path and pass this path using -d:JuliaPath="/path/to/Julia"
-const JuliaPath* {.strdefine.} = if not existsEnv("JULIA_PATH"): JuliaBinPath.parentDir() else: getEnv("JULIA_PATH")
+const JuliaPath* {.strdefine.} = if not existsEnv("JULIA_PATH"): JuliaBinPath.parentDir().normalizedPath().absolutePath() else: getEnv("JULIA_PATH")
+static:
+  echo JuliaPath
 const JuliaIncludesPath* = JuliaPath / "include" / "julia"
 const JuliaHeader* = "julia.h"
 const JuliaLibPath* = JuliaPath / "lib"
