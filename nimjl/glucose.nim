@@ -48,6 +48,7 @@ template init*(jl: type Julia, body: untyped) =
     let pkg = Julia.getModule("Pkg")
     for pkgname in packages:
       discard jlCall(pkg, "add", pkgname)
+      jlUsing(pkgname)
 
     # Eval Julia code embedded
     loadJlRessources()
