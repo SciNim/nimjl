@@ -2,18 +2,15 @@ import arraymancer
 import nimjl
 
 proc main() =
-  Julia.init() # Initialize Julia VM. This should be done once in the lifetime of your program.
+  Julia.init:
+    Pkg:
+      add "LinearAlgebra"
+  # Initialize Julia VM. This should be done once in the lifetime of your program.
 
   # Just be aware that Nim Seq/Tensor are Row Major.
   # Julia usually work in Column major.
   var tensor = randomTensor[float](2, 3, 10.0)
 
-  # Uncomment this block if you haven't installed LinearAlgebra on Julia yet
-  ##################################################
-  # Install LinearAlgebra package
-  # let evRes = jlEval("""using Pkg; Pkg.add("LinearAlgebra")""")
-  # doAssert not isNil(evRes)
-  ##################################################
   # Use the module
   jlUseModule("LinearAlgebra")
 
@@ -36,7 +33,6 @@ proc main() =
       echo res
       echo tensor
       echo res.shape()
-
 
 when isMainModule:
   main()
