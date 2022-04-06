@@ -2,7 +2,7 @@ import arraymancer
 import nimjl
 
 proc main() =
-  Julia.init:
+  Julia.init(1):
     Pkg:
       add "LinearAlgebra"
   # Initialize Julia VM. This should be done once in the lifetime of your program.

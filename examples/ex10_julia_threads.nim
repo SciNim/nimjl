@@ -7,7 +7,7 @@ proc main() =
   # Julia.init(4)
   # Calling Julia.init() is equivalent to calling Julia.init(1)
   Julia.init(4):
-    Pkg: add("DSP")
+    Pkg: add("LinearAlgebra")
 
   let Threads = jlGetModule("Threads")
   echo Threads.nthreads()
