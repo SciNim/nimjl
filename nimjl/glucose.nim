@@ -1,5 +1,6 @@
 # This file is named glucose because it gives you sugar ;)
 # It contains most syntactic sugar to ease using Julia inside Nim
+import std/os
 import ./types
 import ./cores
 import ./functions
@@ -9,10 +10,10 @@ import ./private/jlcores
 
 type Julia* = object
 
-proc init*(jl: type Julia) =
-  jlVmInit()
+proc init*(jl: type Julia, nthreads: int = 1) =
+  jlVmInit(nthreads)
 
-template init*(jl: type Julia, body: untyped) =
+template init*(jl: type Julia, nthreads: int, body: untyped) =
   ## Init Julia VM
   var packages: seq[string]
   template Pkg(innerbody: untyped) =
@@ -42,6 +43,7 @@ template init*(jl: type Julia, body: untyped) =
 
   # Don't do anything if Julia is already initialized
   if not jlVmIsInit():
+    putEnv("JULIA_NUM_THREADS", $nthreads)
     jl_init()
     # Module installation
     Julia.useModule("Pkg")

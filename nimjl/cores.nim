@@ -9,7 +9,7 @@ proc jlSym*(symname: string): JlSym =
 
 proc jlExceptionHandler*() =
   let excpt: JlValue = jl_exception_occurred()
-  ## Convert a Julia exception to Nim exception
+   ## Convert a Julia exception to Nim exception
   if not isNil(excpt):
     let msg = $(jl_exception_message())
     raise newException(JlError, msg)
@@ -91,6 +91,10 @@ proc jlVmInit*() =
     loadJlRessources()
     return
   # raise newException(JlError, "jl_init() must be called once per process")
+
+proc jlVmInit*(nthreads: int) =
+  putEnv("JULIA_NUM_THREADS", $nthreads)
+  jlVmInit()
 
 # Not exported for now because I don't know how it works
 proc jlVmInit(pathToImage: string) {.used.} =

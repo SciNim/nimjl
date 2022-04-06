@@ -199,7 +199,7 @@ when defined(checkMemLeak):
   import std/os
 
 when isMainModule:
-  Julia.init:
+  Julia.init(1):
     Pkg: add("LinearAlgebra")
 
   when defined(checkMemLeak):
