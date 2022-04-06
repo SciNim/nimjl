@@ -2,7 +2,7 @@ import unittest
 import nimjl
 
 proc testEmbedRessources*() =
-  Julia.init:
+  Julia.init(1):
     Embed:
       file("embed.jl")
       dir("assets/")
