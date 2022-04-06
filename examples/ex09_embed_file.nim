@@ -27,7 +27,8 @@ proc main_2() =
 
 proc main_1() =
   # Idiomatic way to embed Julia ressources and call them during after VM Init
-  Julia.init:
+  # The int argument is the number of threads used by the Julia VM
+  Julia.init(2):
     # Install package at init
     Pkg:
       add("LinearAlgebra")
