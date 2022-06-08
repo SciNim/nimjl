@@ -78,7 +78,7 @@ echo res # 2.0
 
 ```
 
-## New in version 0.7.5
+## New in version 0.7.4
 
 It is now possible to embed Julia files inside a Nim compiled binary to easily distribute Julia code. To make distribution possible, an API to call ``Pkg.add("...")`` has also been added **with version number easy to specify**.
 
