@@ -8,6 +8,7 @@ type
   JlArray*[T] = ptr jl_array
   JlSym* = ptr jl_sym
   JlDataType* = ptr jl_datatype
+  JlExpr* = ptr jl_expr
 
 type
   JlError* = object of IOError

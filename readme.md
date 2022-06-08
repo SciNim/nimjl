@@ -61,6 +61,7 @@ Mostly quality-of-life improvements, especially when handling arrays.
 * Linux / WSL supports only
   * Windows dynamic library linking is different than Linux.
   * If you need Windows support, consider opening an issue or a PR :).
+  * Otherwise, just use WSL
 
 # Examples
 
@@ -77,19 +78,19 @@ echo res # 2.0
 
 ```
 
-## New in version 0.7.0
+## New in version 0.7.4
 
-It is now possible to embed Julia files inside a Nim compiled binary to easily distribute Julia code. To make distribution possible, an API to call ``Pkg.add("...")`` has also been added.
+It is now possible to embed Julia files inside a Nim compiled binary to easily distribute Julia code. To make distribution possible, an API to call ``Pkg.add("...")`` has also been added **with version number easy to specify**.
 
 ```nim
 import nimjl
 
 Julia.init:
   Pkg:
+    add(name="Polynomials", version="3.0.0")
+    add(name="LinearAlgebra")
     add("DSP")
-    add("Wavelets")
-    add("LinearAlgebra")
-    add("Statistics")
+    add(name="Wavelets", version="0.9.4")
 
   Embed:
     # embed all files with '*.jl' extension in folder ``JuliaToolBox/``

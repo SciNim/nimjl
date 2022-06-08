@@ -1,6 +1,6 @@
 # This file is named glucose because it gives you sugar ;)
 # It contains most syntactic sugar to ease using Julia inside Nim
-import std/os
+import std/[os, strutils, strformat]
 import ./types
 import ./cores
 import ./functions
@@ -13,16 +13,63 @@ type Julia* = object
 proc init*(jl: type Julia, nthreads: int = 1) =
   jlVmInit(nthreads)
 
+# This should only be used to generate Expr() in order to use named argument in Pkg interface
+proc fmtJlExpr(val: string): string =
+  result = ""
+  if val[0] == ':' or val.startsWith("Expr") or val.startsWith("QuoteNode"):
+    result.add(val)
+  else:
+    result.addQuoted(val)
+
+proc jlExpr(head: string, vals: varargs[string]): string =
+  result = "Expr("
+  result &= fmtJlExpr(head)
+
+  for val in vals:
+    if not val.isEmptyorWhitespace():
+      result &= ", "
+      result &= fmtJlExpr(val)
+  result &= ")"
+
+type
+  JlPkgSpec = object
+    name, url, path, subdir, rev, version, mode, level: string
+  JlPkgs = seq[JlPkgSpec]
+
+# Workaround because named parameters do not work inside closure for proc defined in template
+# TODO : Should string be static ?
+proc addImpl(pkgs: var JlPkgs, name: static string, url: static string = "", path: static string = "", subdir: static string = "", rev: static string = "", version: static string = "", mode: static string = "", level: static string = "") =
+  if not jlVmIsInit():
+    pkgs.add(JlPkgSpec(name: name, url: url, path: path, subdir: subdir, rev: rev, version: version, mode: mode, level: level))
+
+template add*(name: static string, url: static string = "", path: static string = "", subdir: static string = "", rev: static string = "", version: static string = "", mode: static string = "", level: static string = "") =
+  ## Nim native way of calling Julia Pkg.add during Julia.init()
+  ##
+  ## See https://pkgdocs.julialang.org/dev/api/#Pkg.add for more info
+  ## Pkg.add("Example") # Add a package from registry
+  ## Pkg.add("Example"; preserve=Pkg.PRESERVE_ALL) # Add the `Example` package and preserve existing dependencies
+  ## Pkg.add(name="Example", version="0.3") # Specify version; latest release in the 0.3 series
+  ## Pkg.add(name="Example", version="0.3.1") # Specify version; exact release
+  ## Pkg.add(url="https://github.com/JuliaLang/Example.jl", rev="master") # From url to remote gitrepo
+  ## Pkg.add(url="/remote/mycompany/juliapackages/OurPackage") # From path to local gitrepo
+  ## Pkg.add(url="https://github.com/Company/MonoRepo", subdir="juliapkgs/Package.jl)") # With subdir
+  when declared(jl_pkg_private_scope):
+    addImpl(jl_pkg_private_scope, name, url, path, subdir, rev, version, mode, level)
+  else:
+    {.error: "Pkg: add() can only be called during Julia.init() scope"}
+
 template init*(jl: type Julia, nthreads: int, body: untyped) =
   ## Init Julia VM
-  var packages: seq[string]
-  template Pkg(innerbody: untyped) =
-    ## Pkg installation API
-    proc add(pkgname: string) =
-      packages.add pkgname
-    innerbody
+  var packages :JlPkgs
+  template Pkg(innerbody: untyped) {.used.} =
+    block:
+      # Technically accessible but since the type are not exported, what are you going to do with it ?
+      # It's good enough : the API is simple and close to Julia native for people not to get confused
+      var jl_pkg_private_scope {.inject.}: JlPkgs
+      innerbody
+      packages = jl_pkg_private_scope
 
-  template Embed(innerbody: untyped) =
+  template Embed(innerbody: untyped) {.used.} =
     ## Emded Julia file explicitly of from a directory
     template file(filename: static[string]) =
       ## Embed file
@@ -47,10 +94,19 @@ template init*(jl: type Julia, nthreads: int, body: untyped) =
     jl_init()
     # Module installation
     Julia.useModule("Pkg")
-    let pkg = Julia.getModule("Pkg")
-    for pkgname in packages:
-      discard jlCall(pkg, "add", pkgname)
-      jlUsing(pkgname)
+    for pkgspec in packages:
+      var exprs: seq[string] = @[jlExpr(":.", ":Pkg", "QuoteNode(:add)")]
+      for key, field in pkgspec.fieldPairs():
+        let fname =  ":" & key
+        if not isEmptyOrWhitespace(field):
+          exprs.add jlExpr(":kw", fname, field)
+      let strexpr = jlExpr(":call", exprs)
+      var jlexpr = jlEval(strexpr)
+      # Will crash if version are invalid
+      discard jlTopLevelEval(jlexpr)
+      # TODO : handle precompilation ?
+      # Julia.precompile()
+      jlUsing(pkgspec.name)
 
     # Eval Julia code embedded
     loadJlRessources()

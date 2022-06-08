@@ -11,12 +11,17 @@ type jl_func *{.importc: "jl_function_t", pure, final.} = object
 type jl_module *{.importc: "jl_module_t", pure, final.} = object
 type jl_datatype*{.importc: "jl_datatype_t", pure, final.} = object
 type jl_sym*{.importc: "jl_sym_t", pure, final.} = object
+type jl_expr*{.importc: "jl_expr_t", pure, final.} = object
+  # head: ptr jl_sym
+  # args: ptr jl_array
 {.pop.}
 
 {.push nodecl, header: JuliaHeader, dynlib: JuliaLibName.}
 proc jl_symbol*(symname: cstring): ptr jl_sym {.importc: "jl_symbol".}
 
 proc jl_eval_string*(code: cstring): ptr jl_value {.importc: "jl_eval_string".}
+
+proc jl_toplevel_eval*(m: ptr jl_module, expr: ptr jl_value): ptr jl_value {.importc: "jl_toplevel_eval".}
 
 # Error handler
 proc jl_exception_occurred*(): ptr jl_value {.importc: "jl_exception_occurred".}

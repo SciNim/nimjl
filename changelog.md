@@ -1,5 +1,32 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.7.4 - 2022_06_08
+===========================
+* Improve Pkg template to handle version, url etc; parameters :
+* See ex11
+  ```nim
+    Julia.init(1):
+      Pkg:
+        add(name="Polynomials", version="3.0.0")
+        add(name="LinearAlgebra")
+        add("DSP")
+      Embed:
+        file("myfile.jl")
+  ```
+
+Release v0.7.3 - 2022_01_04
+===========================
+* Bugfix related to JULIA_PATH not being defined
+
+Release v0.7.2 - 2022_01_04
+===========================
+* Add nthreads argument to Julia.init() to start the Julia VM on multiple threads
+
+Release v0.7.1 - 2022_01_04
+===========================
+* Normalize path during compilation
+* Various docs improvements
+
 Release v0.7.0 - 2022_01_04
 ===========================
 * Add Julia.useModule alias for jlUseModule
