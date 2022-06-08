@@ -1,6 +1,6 @@
 # This file is named glucose because it gives you sugar ;)
 # It contains most syntactic sugar to ease using Julia inside Nim
-import std/os
+import std/[os, strutils, strformat]
 import ./types
 import ./cores
 import ./functions
@@ -13,13 +13,32 @@ type Julia* = object
 proc init*(jl: type Julia, nthreads: int = 1) =
   jlVmInit(nthreads)
 
+# This should only be used to generate Expr() in order to use named argument in Pkg interface
+proc fmtJlExpr(val: string) : string =
+  result = ""
+  if val[0] == ':' or val.startsWith("Expr") or val.startsWith("QuoteNode"):
+    result.add(val)
+  else:
+    result.addQuoted(val)
+
+proc jlExpr(head: string, vals: varargs[string]) : string =
+  result = "Expr("
+  result &= fmtJlExpr(head)
+
+  for val in vals:
+    if not val.isEmptyorWhitespace():
+      result &= ", "
+      result &= fmtJlExpr(val)
+  result &= ")"
+
 template init*(jl: type Julia, nthreads: int, body: untyped) =
   ## Init Julia VM
-  var packages: seq[string]
+  var packages: seq[tuple[name, version: string]]
   template Pkg(innerbody: untyped) =
     ## Pkg installation API
-    proc add(pkgname: string) =
-      packages.add pkgname
+    proc add(name: string, version: string = "") =
+      packages.add((name: name, version: version, ))
+
     innerbody
 
   template Embed(innerbody: untyped) =
@@ -47,9 +66,23 @@ template init*(jl: type Julia, nthreads: int, body: untyped) =
     jl_init()
     # Module installation
     Julia.useModule("Pkg")
-    let pkg = Julia.getModule("Pkg")
-    for pkgname in packages:
-      discard jlCall(pkg, "add", pkgname)
+    let Pkg = Julia.getModule("Pkg")
+    for pkgspec in packages:
+      let pkgversion = pkgspec.version
+      let pkgname = pkgspec.name
+      if isEmptyOrWhitespace(pkgversion):
+        discard jlCall(Pkg, "add", pkgname)
+      else:
+        var strexpr = jlExpr(":call",
+                       jlExpr(":.", ":Pkg", "QuoteNode(:add)"),
+                       jlExpr(":kw", ":name", pkgname),
+                       jlExpr(":kw", ":version", pkgversion)
+        )
+        var jlexpr = jlEval(strexpr)
+        # Will crash if version are invalid
+        discard jlTopLevelEval(jlexpr)
+
+      # Julia.precompile()
       jlUsing(pkgname)
 
     # Eval Julia code embedded

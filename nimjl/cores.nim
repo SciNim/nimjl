@@ -12,6 +12,7 @@ proc jlExceptionHandler*() =
    ## Convert a Julia exception to Nim exception
   if not isNil(excpt):
     let msg = $(jl_exception_message())
+    echo "->", msg, "<-"
     raise newException(JlError, msg)
   else:
     discard
@@ -19,6 +20,11 @@ proc jlExceptionHandler*() =
 proc jlEval*(code: string): JlValue =
   ## Eval function that checks JuliaError
   result = jl_eval_string(code)
+  jlExceptionHandler()
+
+proc jlTopLevelEval*(x: JlValue) : JlValue =
+  ## Only use it if you know what you're doing
+  result = jl_toplevel_eval(JlMain, x)
   jlExceptionHandler()
 
 proc jlInclude*(filename: string) =
@@ -132,3 +138,4 @@ proc jlEmbedFile*(filename: static[string]) =
   ## Embed specific Julia file
   const jlContent = staticRead(getProjectPath() / filename)
   staticContents[filename] = jlContent
+
