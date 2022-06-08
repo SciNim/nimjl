@@ -62,10 +62,12 @@ template init*(jl: type Julia, nthreads: int, body: untyped) =
   ## Init Julia VM
   var packages :JlPkgs
   template Pkg(innerbody: untyped) {.used.} =
-    var jl_pkg_private_scope {.inject.}: JlPkgs
     block:
+      # Technically accessible but since the type are not exported, what are you going to do with it ?
+      # It's good enough : the API is simple and close to Julia native for people not to get confused
+      var jl_pkg_private_scope {.inject.}: JlPkgs
       innerbody
-    packages = jl_pkg_private_scope
+      packages = jl_pkg_private_scope
 
   template Embed(innerbody: untyped) {.used.} =
     ## Emded Julia file explicitly of from a directory
