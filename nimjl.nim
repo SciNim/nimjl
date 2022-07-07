@@ -22,7 +22,7 @@ export conversions
 import ./nimjl/config
 
 static:
-  debugEcho "Nimjl> Using Julia install: ", JuliaPath
+  debugEcho "Nimjl> Using : ", JuliaPath, "/bin/julia v", JuliaMajorVersion, ".", JuliaMinorVersion, ".", JuliaPatchVersion
 
 import std/exitprocs
 proc jlVmProcessExit() =

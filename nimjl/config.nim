@@ -21,13 +21,13 @@ const (cmdOutput, exitCode) = gorgeEx(JlVersionCmd)
 when exitCode != 0:
   {.error: "Nimjl> Fatal error ! Julia could not be found on your system.".}
 
-const JuliaVersion = cmdOutput.split("\"")[1].split(".")
+const JuliaArrayVersion* = cmdOutput.split("\"")[1].split(".")
 
   # For release : result has the form ["v", "1.6.0", ""] -> splitting [1] yiels ["1", "6, "0"]
   # For dev: result has the form ["v", "1.7.0-DEV", "667"] -> splitting [1] yiels ["1", "7, "0-DEV", "667"]
-const JuliaMajorVersion* = JuliaVersion[0].parseInt
-const JuliaMinorVersion* = JuliaVersion[1].parseInt
-const JuliaPatchVersion* = JuliaVersion[2].parseInt
+const JuliaMajorVersion* = JuliaArrayVersion[0].parseInt
+const JuliaMinorVersion* = JuliaArrayVersion[1].parseInt
+const JuliaPatchVersion* = JuliaArrayVersion[2].parseInt
 const libPrefix = "lib"
 const libSuffix = ".so"
 const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
