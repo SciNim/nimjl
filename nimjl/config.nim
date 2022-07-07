@@ -19,7 +19,7 @@ const (cmdOutput, exitCode) = gorgeEx(JlVersionCmd)
 # static:
 #   echo exitCode
 when exitCode != 0:
-  {.error: "Failure to build nimjl : Julia executable could not be found on your system.".}
+  {.error: "Nimjl> Fatal error ! Julia could not be found on your system.".}
 
 const JuliaVersion = cmdOutput.split("\"")[1].split(".")
 
