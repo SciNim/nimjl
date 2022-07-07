@@ -16,8 +16,12 @@ const JuliaDepPath* = JuliaPath / "lib" / "julia"
 
 const JlVersionCmd = JuliaPath / "bin" / "julia" & " -E VERSION"
 const (cmdOutput, exitCode) = gorgeEx(JlVersionCmd)
+# static:
+#   echo exitCode
+when exitCode != 0:
+  {.error: "Failure to build nimjl : Julia executable could not be found on your system.".}
+
 const JuliaVersion = cmdOutput.split("\"")[1].split(".")
-static: doAssert(exitCode == 0, "Julia executable could not be found")
 
   # For release : result has the form ["v", "1.6.0", ""] -> splitting [1] yiels ["1", "6, "0"]
   # For dev: result has the form ["v", "1.7.0-DEV", "667"] -> splitting [1] yiels ["1", "7, "0-DEV", "667"]
