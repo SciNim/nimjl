@@ -1,5 +1,9 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.7.5 - 2022_07_07
+===========================
+* Fixed https://github.com/Clonkk/nimjl/issues/18
+
 Release v0.7.4 - 2022_06_08
 ===========================
 * Improve Pkg template to handle version, url etc; parameters :
