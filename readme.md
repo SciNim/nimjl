@@ -4,7 +4,7 @@
 
 ## Prerequisite
 
-* Install Julia version 1.5.3 or above
+* Install Julia version 1.5.3 or above. Version 1.6.6 or above is recommended.
 * ``julia`` executable must be in your path.
   * By-default, ``nimjl`` will use Julia's ``Sys.BINDIR`` parent directory as the installation folder of Julia.
   * If you want ``nimjl`` to use a specific Julia installation, set the environment variable ``JULIA_PATH`` to the root of the installation folder.
