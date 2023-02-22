@@ -16,8 +16,8 @@ const JuliaDepPath* = JuliaPath / "lib" / "julia"
 
 const JlVersionCmd = JuliaPath / "bin" / "julia" & " -E VERSION"
 const (cmdOutput, exitCode) = gorgeEx(JlVersionCmd)
-# static:
-#   echo exitCode
+static:
+  echo "Nimjl> ", JuliaPath
 when exitCode != 0:
   {.error: "Nimjl> Fatal error ! Julia could not be found on your system.".}
 
