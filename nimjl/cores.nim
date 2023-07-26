@@ -61,7 +61,7 @@ template JlNothing*(): JlValue = jlEval("nothing")
 
 template JlCode*(body: string) =
   block:
-    discard jleval(body)
+    discard jlEval(body)
 
 proc jlVmIsInit*(): bool =
   bool(jl_is_initialized())
@@ -77,6 +77,9 @@ proc jlVmExit*(exit_code: cint = 0.cint) =
     return
   # Do nothing -> atexit_hook must be called once
  # raise newException(JlError, "jl_atexit_hook() must be called once per process")
+
+# proc jlVmSaveExit*(fpath: string) =
+#   discard jlEval(fmt"exit_save_sysimage({fpath})")
 
 #########################################
 var staticContents: Table[string, string]
@@ -94,9 +97,12 @@ proc jlVmInit*() =
   ## Subsequent calls after the first one will be ignored
   if not jlVmIsInit():
     jl_init()
-    loadJlRessources()
+    # loadJlRessources()
     return
   # raise newException(JlError, "jl_init() must be called once per process")
+
+proc jlVmInitWithImg*(fpath: string) =
+  jl_init_with_image(JuliaBinDir.cstring, fpath.cstring)
 
 proc jlVmInit*(nthreads: int) =
   putEnv("JULIA_NUM_THREADS", $nthreads)
@@ -108,7 +114,7 @@ proc jlVmInit(pathToImage: string) {.used.} =
   if not jlVmIsInit():
     let jlBinDir = cstring(JuliaPath / "bin")
     jl_init_with_image(jlBinDir, pathToImage.cstring)
-    loadJlRessources()
+    # loadJlRessources()
     return
 
   # raise newException(JlError, "jl_init_with_image(...) must be called once per process")
