@@ -34,7 +34,7 @@ proc jlTupleToNim*(val: JlValue, tup: var tuple) =
     else:
       raise newException(JlError, "Tuple conversion from Julia to Nim failed ! Fields must identical")
 
-proc jlDictToNim*[U, V: string|SomeNumber|bool](val: JlValue, tab: var Table[U, V]) =
+proc jlDictToNim*[U, V](val: JlValue, tab: var Table[U, V]) =
   # julia> collect(keys(val))
   var keys = jlCall("keys", val)
   keys = jlCall("collect", keys)

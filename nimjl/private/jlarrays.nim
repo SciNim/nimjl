@@ -1,7 +1,10 @@
 import ../config
 import ../types
 import ./jlcores
-import std/strformat
+import std/[strformat, complex]
+
+# template jlType*(T: typedesc[Complex32]): JlDataType = jlEval("ComplexF32")
+# template jlType*(T: typedesc[Complex64]): JlDataType = jlEval("ComplexF64")
 
 template julia_type(arg: typedesc): ptr jl_datatype =
   jlType(arg)
@@ -28,8 +31,13 @@ proc jl_array_eltype*(x: ptr jl_value): ptr jl_datatype {.importc: "jl_array_elt
 
 {.pop.}
 
-proc julia_apply_array_type*[T: SomeNumber|bool|char](dim: int): ptr jl_value =
-  let jl_type = cast[ptr jl_value](julia_type(T))
+proc julia_apply_array_type*[T: Complex32|Complex64|SomeNumber|bool|char](dim: int): ptr jl_value =
+  when T is Complex32:
+    let jl_type = jlEval("ComplexF32")
+  elif T is Complex64:
+    let jl_type = jlEval("ComplexF64")
+  else:
+    let jl_type = cast[ptr jl_value](julia_type(T))
   jl_apply_array_type(jl_type, dim.csize_t)
 
 proc julia_make_array*[T](data: ptr UncheckedArray[T], dims: openArray[int]): ptr jl_array =
