@@ -101,8 +101,8 @@ proc jlVmInit*() =
     return
   # raise newException(JlError, "jl_init() must be called once per process")
 
-proc jlVmInitWithImg*(fpath: string) =
-  jl_init_with_image(JuliaBinDir.cstring, fpath.cstring)
+# proc jlVmInitWithImg*(fpath: string) =
+#   jl_init_with_image(JuliaBinDir.cstring, fpath.cstring)
 
 proc jlVmInit*(nthreads: int) =
   putEnv("JULIA_NUM_THREADS", $nthreads)

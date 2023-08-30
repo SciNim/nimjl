@@ -1,6 +1,6 @@
 # This file is named glucose because it gives you sugar ;)
 # It contains most syntactic sugar to ease using Julia inside Nim
-import std/[os, strutils, strformat]
+import std/[os, strutils, strformat, tables]
 import ./types
 import ./cores
 import ./functions
@@ -9,6 +9,50 @@ import ./conversions
 import ./private/jlcores
 
 type Julia* = object
+
+#####################################################
+# Interop and utility
+#####################################################
+proc `$`*(val: JlValue): string =
+  jlCall("string", val).to(string)
+
+proc `$`*(val: JlModule): string =
+  jlCall("string", val).to(string)
+
+proc `$`*[T](val: JlArray[T]): string =
+  jlCall("string", val).to(string)
+
+proc `$`*(val: JlFunc): string =
+  jlCall("string", val).to(string)
+
+proc `$`*(val: JlSym): string =
+  jlCall("string", val).to(string)
+
+# typeof is taken by Nim already
+proc jltypeof*(x: JlValue): JlValue =
+  ## Call the Julia function typeof
+  jlCall("typeof", x)
+
+proc len*(val: JlValue): int =
+  ##Call length
+  jlCall("length", val).to(int)
+
+proc firstindex*(val: JlValue): int =
+  ## Call firstindex
+  jlCall("firstindex", val).to(int)
+
+proc lastindex*(val: JlValue): int =
+  ## Call lastindex
+  jlCall("lastindex", val).to(int)
+
+template getproperty*(val: JlValue, propertyname: string): JlValue =
+  ## Call getproperty
+  jlCall("getproperty", val, jlSym(propertyname))
+
+template setproperty*(val: JlValue, propertyname: string, newval: untyped) =
+  ## Call setproperty
+  discard jlCall("setproperty!", val, jlSym(propertyname), newval)
+
 
 proc init*(jl: type Julia, nthreads: int = 1) =
   jlVmInit(nthreads)
@@ -35,6 +79,24 @@ type
   JlPkgSpec = object
     name, url, path, subdir, rev, version, mode, level: string
   JlPkgs = seq[JlPkgSpec]
+
+proc checkJlPkgSpec(installed: Table[string, string], package: JlPkgSpec) : bool =
+  # Check if package is installed with the correct version
+
+  result = false
+  if installed.contains(package.name):
+    let installedVer = installed[package.name]
+    var verCheck = ""
+    if installedVer != "nothing":
+      # Split + symbol for some reason Julia.Pkg sometimes use it even if it's outside of semver
+      verCheck = installedVer.split('+')[0]
+
+    if package.version.isEmptyOrWhitespace():
+      # If no Pkg version is specified, package presence is enough
+      result = true
+    else:
+      # Else result is true if semver matches
+      result = (verCheck == package.version)
 
 # Workaround because named parameters do not work inside closure for proc defined in template
 # TODO : Should string be static ?
@@ -94,16 +156,26 @@ template init*(jl: type Julia, nthreads: int, body: untyped) =
     jl_init()
     # Module installation
     Julia.useModule("Pkg")
+
+    let
+      jlExistingPkgStr = "Dict(x[2].name => string(x[2].version) for x in Pkg.dependencies())"
+      jlPkgsExisting = jlEval(jlExistingPkgStr)
+      installed = jlPkgsExisting.to(Table[string, string])
+
     for pkgspec in packages:
-      var exprs: seq[string] = @[jlExpr(":.", ":Pkg", "QuoteNode(:add)")]
-      for key, field in pkgspec.fieldPairs():
-        let fname =  ":" & key
-        if not isEmptyOrWhitespace(field):
-          exprs.add jlExpr(":kw", fname, field)
-      let strexpr = jlExpr(":call", exprs)
-      var jlexpr = jlEval(strexpr)
-      # Will crash if version are invalid
-      discard jlTopLevelEval(jlexpr)
+      if not checkJlPkgSpec(installed, pkgspec):
+        var exprs: seq[string] = @[jlExpr(":.", ":Pkg", "QuoteNode(:add)")]
+        for key, field in pkgspec.fieldPairs():
+          let fname =  ":" & key
+          if not isEmptyOrWhitespace(field):
+            exprs.add jlExpr(":kw", fname, field)
+
+        let strexpr = jlExpr(":call", exprs)
+        var jlexpr = jlEval(strexpr)
+        # Will crash if version are invalid
+        discard jlTopLevelEval(jlexpr)
+
+    for pkgspec in packages:
       # TODO : handle precompilation ?
       # Julia.precompile()
       jlUsing(pkgspec.name)
@@ -132,49 +204,6 @@ proc includeFile*(jl: type Julia, fname: string) =
 
 # macro loadModule*(jl: type Julia, modname: untyped) =
 # TODO generate a proc ``modname`` that returns module
-
-#####################################################
-# Interop and utility
-#####################################################
-proc `$`*(val: JlValue): string =
-  jlCall("string", val).to(string)
-
-proc `$`*(val: JlModule): string =
-  jlCall("string", val).to(string)
-
-proc `$`*[T](val: JlArray[T]): string =
-  jlCall("string", val).to(string)
-
-proc `$`*(val: JlFunc): string =
-  jlCall("string", val).to(string)
-
-proc `$`*(val: JlSym): string =
-  jlCall("string", val).to(string)
-
-# typeof is taken by Nim already
-proc jltypeof*(x: JlValue): JlValue =
-  ## Call the Julia function typeof
-  jlCall("typeof", x)
-
-proc len*(val: JlValue): int =
-  ##Call length
-  jlCall("length", val).to(int)
-
-proc firstindex*(val: JlValue): int =
-  ## Call firstindex
-  jlCall("firstindex", val).to(int)
-
-proc lastindex*(val: JlValue): int =
-  ## Call lastindex
-  jlCall("lastindex", val).to(int)
-
-template getproperty*(val: JlValue, propertyname: string): JlValue =
-  ## Call getproperty
-  jlCall("getproperty", val, jlSym(propertyname))
-
-template setproperty*(val: JlValue, propertyname: string, newval: untyped) =
-  ## Call setproperty
-  discard jlCall("setproperty!", val, jlSym(propertyname), newval)
 
 #####################################################
 # Syntactic sugar
