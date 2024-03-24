@@ -1,6 +1,6 @@
 # This file is named glucose because it gives you sugar ;)
 # It contains most syntactic sugar to ease using Julia inside Nim
-import std/[os, strutils, strformat, tables]
+import std/[os, strutils, strformat, tables, paths]
 import ./types
 import ./cores
 import ./functions
@@ -122,7 +122,9 @@ template add*(name: static string, url: static string = "", path: static string 
 
 template init*(jl: type Julia, nthreads: int, body: untyped) =
   ## Init Julia VM
-  var packages :JlPkgs
+  var packages: JlPkgs
+  var pkgEnv {.inject.} : string = ""
+
   template Pkg(innerbody: untyped) {.used.} =
     block:
       # Technically accessible but since the type are not exported, what are you going to do with it ?
@@ -130,6 +132,9 @@ template init*(jl: type Julia, nthreads: int, body: untyped) =
       var jl_pkg_private_scope {.inject.}: JlPkgs
       innerbody
       packages = jl_pkg_private_scope
+
+  template activate(env: string) {.used.} =
+    pkgEnv = string(expandTilde(Path(env)))
 
   template Embed(innerbody: untyped) {.used.} =
     ## Emded Julia file explicitly of from a directory
@@ -156,35 +161,41 @@ template init*(jl: type Julia, nthreads: int, body: untyped) =
     jl_init()
     # Module installation
     Julia.useModule("Pkg")
-
-    let
-      jlExistingPkgStr = "Dict(x[2].name => string(x[2].version) for x in Pkg.dependencies())"
-      jlPkgsExisting = jlEval(jlExistingPkgStr)
-      installed = jlPkgsExisting.to(Table[string, string])
-
-    for pkgspec in packages:
-      if not checkJlPkgSpec(installed, pkgspec):
-        var exprs: seq[string] = @[jlExpr(":.", ":Pkg", "QuoteNode(:add)")]
-        for key, field in pkgspec.fieldPairs():
-          let fname =  ":" & key
-          if not isEmptyOrWhitespace(field):
-            exprs.add jlExpr(":kw", fname, field)
-
-        let strexpr = jlExpr(":call", exprs)
-        var jlexpr = jlEval(strexpr)
-        # Will crash if version are invalid
-        discard jlTopLevelEval(jlexpr)
-
-    for pkgspec in packages:
-      # TODO : handle precompilation ?
-      # Julia.precompile()
-      jlUsing(pkgspec.name)
-
-    # Eval Julia code embedded
-    loadJlRessources()
-
   else:
     raise newException(JlError, "Error Julia.init() has already been initialized")
+
+  if not pkgEnv.isEmptyOrWhitespace():
+    debugEcho(&"\"Pkg.activate(\"{pkgEnv}\")\"")
+    discard jlEval(&"Pkg.activate(\"{pkgEnv}\")")
+
+  when compiles(postJlInit()):
+    postJlInit()
+
+  let
+    jlExistingPkgStr = "Dict(x[2].name => string(x[2].version) for x in Pkg.dependencies())"
+    jlPkgsExisting = jlEval(jlExistingPkgStr)
+    installed = jlPkgsExisting.to(Table[string, string])
+
+  for pkgspec in packages:
+    if not checkJlPkgSpec(installed, pkgspec):
+      var exprs: seq[string] = @[jlExpr(":.", ":Pkg", "QuoteNode(:add)")]
+      for key, field in pkgspec.fieldPairs():
+        let fname =  ":" & key
+        if not isEmptyOrWhitespace(field):
+          exprs.add jlExpr(":kw", fname, field)
+
+      let strexpr = jlExpr(":call", exprs)
+      var jlexpr = jlEval(strexpr)
+      # Will crash if version are invalid
+      discard jlTopLevelEval(jlexpr)
+
+  for pkgspec in packages:
+    # TODO : handle precompilation ?
+    # Julia.precompile()
+    jlUsing(pkgspec.name)
+
+  # Eval Julia code embedded
+  loadJlRessources()
 
 proc exit*(jl: type Julia, exitcode: int = 0) =
   ## Exit Julia VM
