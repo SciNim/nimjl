@@ -82,13 +82,14 @@ proc jlVmExit*(exit_code: cint = 0.cint) =
 #   discard jlEval(fmt"exit_save_sysimage({fpath})")
 
 #########################################
-var staticContents: Table[string, string]
+var staticContents: OrderedTable[string, string]
 
 import std/logging
 
 proc loadJlRessources*() =
   for key, content in staticContents.pairs():
-    info("> Nimjl loading Julia ressource: ", key, ".jl")
+    info("> Nimjl loading Julia ressource: ", key)
+    # debugEcho("> Nimjl loading Julia ressource: ", key)
     JlCode(content)
 
 # Init & Exit function

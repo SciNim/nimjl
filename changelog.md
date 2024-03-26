@@ -1,5 +1,22 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.8.1 - 2024_03_23
+===========================
+* Repo moved to SciNim
+* Added activate option in init to start-up Julia in a virtual environment
+* Added Hook function at init to execute code : BEFORE jl_init() is called; AFTER jl_init() and Pkg.activate() is called but BEFORE Pkg.add calls and BEFORE the embedded code is passed through ``eval`` function.
+* Order of update is now relevant
+
+Release v0.8.0 - 2023_09_30
+===========================
+* Clean-up some code
+* Added more type in evaluation of Dict and Tuples
+* Improve loading a Package at init when the Package is already present (speed up init phase)
+
+Release v0.7.6 - 2023_02_22
+===========================
+* Small CI change
+
 Release v0.7.5 - 2022_07_07
 ===========================
 * Fixed https://github.com/Clonkk/nimjl/issues/18
@@ -34,15 +51,15 @@ Release v0.7.1 - 2022_01_04
 Release v0.7.0 - 2022_01_04
 ===========================
 * Add Julia.useModule alias for jlUseModule
-* Add Julia.includeFile (include is reserved keyword) alias for jlInclude 
+* Add Julia.includeFile (include is reserved keyword) alias for jlInclude
 * Add mechanism to embed julia files at compile-time and run the code at init for an easy way to distribute binary with Julia code contained
 * Add Pkg template to easily install new Julia package during init ; it is also compatible with the embedding stuff :
 * See ex09
   ```nim
-    Julia.init: 
-      Pkg: 
+    Julia.init:
+      Pkg:
         add("LinearAlgebra")
-      Embed: 
+      Embed:
         file("myfile.jl")
   ```
 
@@ -60,7 +77,7 @@ Release v0.6.1 - 2021_10_14
 
 Release v0.6.0 - 2021_10_08
 ===========================
-* Add --gc:orc to CI 
+* Add --gc:orc to CI
 
 Release v0.5.9 - 2021_10_05
 ===========================
@@ -157,4 +174,4 @@ Release v0.4.0 - 2021_03_08
 * Add ``toJlVal`` / ``to`` proc to make conversion betwen Julia types and Nim types "smooth"
 * Added Julia exception handler from Nim
 * Examples in the examples folder
-* Tess suite and memory leak suite
+* Test suite and memory leak suite
