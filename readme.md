@@ -72,15 +72,22 @@ Mostly quality-of-life improvements, especially when handling arrays.
 Here is the basic example:
 ```nim
 import nimjl
+proc main() =
+ Julia.init() # Initialize Julia VM. Subsequent call will be ignored
+ 
+ var myval = 4.0'f64
+ # Call Julia function "sqrt" and convert the result to a float
+ var res = Julia.sqrt(myval).to(float64)
+ echo res # 2.0
 
-Julia.init() # Initialize Julia VM. Subsequent call will be ignored
-
-var myval = 4.0'f64
-# Call Julia function "sqrt" and convert the result to a float
-var res = Julia.sqrt(myval).to(float64)
-echo res # 2.0
+when isMainModule:
+  main()
 
 ```
+
+JlVmExit() seems optionnal. It's present in the C API but not calling it doesn't seem to cause any problem.
+
+Nonetheless, if you use OS resources from Julia it is probably better to call Julia.exit() / JlVmExit() for a clean exit.
 
 ## Setting up Julia dependency
 
