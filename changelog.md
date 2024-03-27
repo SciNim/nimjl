@@ -1,11 +1,16 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
-Release v0.8.1 - 2024_03_23
+Release v0.8.2 - 2024_03_27
 ===========================
 * Repo moved to SciNim
 * Added activate option in init to start-up Julia in a virtual environment
 * Added Hook function at init to execute code : BEFORE jl_init() is called; AFTER jl_init() and Pkg.activate() is called but BEFORE Pkg.add calls and BEFORE the embedded code is passed through ``eval`` function.
 * Order of update is now relevant
+* Updated readme and examples
+
+Release v0.8.1 - 2023_09_30
+===========================
+* Inexisting (nimble wasn't up to date when tagged)
 
 Release v0.8.0 - 2023_09_30
 ===========================
