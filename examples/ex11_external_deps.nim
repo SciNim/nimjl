@@ -8,11 +8,11 @@ proc main() =
       add(name="LinearAlgebra")
       add("DSP")
 
+  defer: Julia.exit()
   Julia.useModule("Pkg")
   let jlpkg = Julia.getModule("Pkg")
   discard jlpkg.status()
 
-  Julia.exit()
 
 when isMainModule:
   main()
