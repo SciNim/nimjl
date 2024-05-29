@@ -134,6 +134,7 @@ template init*(jl: type Julia, nthreads: int, body: untyped) =
       packages = jl_pkg_private_scope
 
   template activate(env: string) {.used.} =
+    ## Activate a Julia virtual env
     pkgEnv = string(expandTilde(Path(env)))
 
   template Embed(innerbody: untyped) {.used.} =
