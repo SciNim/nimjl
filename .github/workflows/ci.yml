@@ -9,26 +9,33 @@ on:
 
 jobs:
   tests:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        # os: [ubuntu-latest, macos-latest, windows-latest]
+        nim:
+          - '2.0.x'
+          - 'stable'
+          - devel
 
-    runs-on: ${{ matrix.os }}
-    # runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: "install_nim"
-        id: install_nim
-        uses: iffy/install-nim@v3.2.2
+      - uses: actions/checkout@v4
+      - name: Setup nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          use-nightlies: true
+          nim-version: ${{ matrix.nim }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: "install_julia"
         id: install_julia
         uses: julia-actions/setup-julia@latest
         with:
           show-versioninfo: 'true'
+          
       - run: nimble install -y
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
+          
       - run: nimble test
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
