@@ -9,13 +9,16 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         nim:
           - '2.0.x'
           - 'stable'
           - devel
+        os:
+          - ubuntu-latest
+          - macOS-latest
 
     steps:
       - uses: actions/checkout@v4
