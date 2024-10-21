@@ -23,11 +23,11 @@ when exitCode != 0:
 
 const JuliaArrayVersion* = cmdOutput.split("\"")[1].split(".")
 
-  # For release : result has the form ["v", "1.6.0", ""] -> splitting [1] yiels ["1", "6, "0"]
-  # For dev: result has the form ["v", "1.7.0-DEV", "667"] -> splitting [1] yiels ["1", "7, "0-DEV", "667"]
-const JuliaMajorVersion* = JuliaArrayVersion[0].parseInt
-const JuliaMinorVersion* = JuliaArrayVersion[1].parseInt
-const JuliaPatchVersion* = JuliaArrayVersion[2].parseInt
+  # For release : result has the form ["v", "1.6.0", ""] -> splitting [1] yields ["1", "6, "0"]
+  # For dev: result has the form ["v", "1.7.0-DEV", "667"] -> splitting [1] yields ["1", "7, "0-DEV", "667"]
+const JuliaMajorVersion* = JuliaArrayVersion[0].parseInt()
+const JuliaMinorVersion* = JuliaArrayVersion[1].parseInt()
+const JuliaPatchVersion* = JuliaArrayVersion[2].parseInt()
 const libPrefix = "lib"
 const libSuffix = ".so"
 const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
