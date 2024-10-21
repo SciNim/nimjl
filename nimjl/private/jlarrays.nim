@@ -11,7 +11,12 @@ template julia_type(arg: typedesc): ptr jl_datatype =
 
 ## Array bindings
 {.push nodecl, header: JuliaHeader, dynlib: JuliaLibName.}
-proc jl_array_data*(values: ptr jl_array): pointer {.importc.}
+
+when (JuliaMajorVersion, JuliaMinorVersion) >= (1, 11):
+  proc jl_array_data*(values: ptr jl_array): pointer {.importc: "jl_array_data_".}
+else:
+  proc jl_array_data*(values: ptr jl_array): pointer {.importc: "jl_array_data".}
+
 proc jl_array_dim*(a: ptr jl_array, dim: cint): cint {.importc.}
 proc jl_array_len*(a: ptr jl_array): cint {.importc.}
 proc jl_array_rank*(a: ptr jl_value): cint {.importc.}

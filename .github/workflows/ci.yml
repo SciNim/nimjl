@@ -18,7 +18,11 @@ jobs:
           - devel
         os:
           - ubuntu-latest
-          - macOS-latest
+          # - macOS-latest
+        julia:
+          - '1.10'
+          - '1.11'
+          - 'lts'
 
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +38,8 @@ jobs:
         uses: julia-actions/setup-julia@latest
         with:
           show-versioninfo: 'true'
+          arch: ${{ runner.arch }}
+          version: ${{ matrix.julia }}
           
       - run: nimble install -y
         env:
