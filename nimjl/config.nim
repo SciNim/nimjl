@@ -1,6 +1,9 @@
 import std/os
 import std/strutils
 
+when defined(windows):
+  {.error: "Compilation on windows is not supported.".}
+
 proc JuliaBinPath*() : string {.compileTime.} =
   gorge("julia -E Sys.BINDIR").replace("\"", "")
 
@@ -14,7 +17,25 @@ const JuliaHeader* = "julia.h"
 const JuliaLibPath* = JuliaPath / "lib"
 const JuliaDepPath* = JuliaPath / "lib" / "julia"
 
-const JlVersionCmd = JuliaPath / "bin" / "julia" & " -E VERSION"
+const libPrefix = "lib"
+when defined(osx):
+  const libSuffix = ".dylib"
+else:
+  const libSuffix = ".so"
+
+const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
+
+when defined(nimjl_cross_compile):
+  # This will use bash to extract the version from the naming of the file
+  # It's less robust and thus not preferred but necessary for cross-compilation
+  const
+    JuliaLibPattern = JuliaLibPath / libPrefix & "julia*" & libSuffix
+    prefixLen = len(libPrefix)+len("julia")+1 # length of the string 'libjulia.'
+    suffixLen = len(libSuffix)
+    JlVersionCmd = fmt"cd {JuliaLibPath} && name=$(echo libjulia.*.*.*.dylib); vers=$\{name:{prefixLen}:-{suffixLen}\}; echo $vers"
+else:
+  const JlVersionCmd = JuliaPath / "bin" / "julia" & " -E VERSION"
+
 const (cmdOutput, exitCode) = gorgeEx(JlVersionCmd)
 static:
   echo "Nimjl> ", JuliaPath
@@ -28,9 +49,6 @@ const JuliaArrayVersion* = cmdOutput.split("\"")[1].split(".")
 const JuliaMajorVersion* = JuliaArrayVersion[0].parseInt()
 const JuliaMinorVersion* = JuliaArrayVersion[1].parseInt()
 const JuliaPatchVersion* = JuliaArrayVersion[2].parseInt()
-const libPrefix = "lib"
-const libSuffix = ".so"
-const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
 
 # TODO: handle more platform
 {.passC: " -DJulia_ENABLE_THREADING=1".}
@@ -46,4 +64,3 @@ const JuliaLibName* = JuliaLibPath / libPrefix & "julia" & libSuffix
 when (JuliaMajorVersion, JuliaMinorVersion) == (1, 6):
   const internalJuliaLibName* = JuliaDepPath / libPrefix & "julia-internal" & libSuffix
   {.passL: "-ljulia-internal".}
-
