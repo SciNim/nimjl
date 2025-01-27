@@ -1,5 +1,4 @@
-import std/os
-import std/strutils
+import std/[os, strutils, strformat]
 
 when defined(windows):
   {.error: "Compilation on windows is not supported.".}
@@ -32,23 +31,34 @@ when defined(nimjl_cross_compile):
     JuliaLibPattern = JuliaLibPath / libPrefix & "julia*" & libSuffix
     prefixLen = len(libPrefix)+len("julia")+1 # length of the string 'libjulia.'
     suffixLen = len(libSuffix)
-    JlVersionCmd = fmt"cd {JuliaLibPath} && name=$(echo libjulia.*.*.*.dylib); vers=$\{name:{prefixLen}:-{suffixLen}\}; echo $vers"
+
+  const JlVersionCmd = &"fullname=$(echo {JuliaLibPath}/libjulia.*.*.*.dylib); name=$(basename ${{fullname}}); vers=${{name:{prefixLen}:{suffixLen} }}; echo $vers"
+  const (cmdOutput, exitCode) = gorgeEx(JlVersionCmd)
+  when exitCode != 0:
+    {.error: "Nimjl> Fatal error ! Julia could not be found on your system.".}
+  # The bash line is just paramters expansion + string substitution to extract the version from the name
+  # This assumes the files is always called : libjulia.so OR libjulia.dylib for osx
+  const JuliaArrayVersion* = cmdOutput.split(".")
+  const JuliaMajorVersion* = JuliaArrayVersion[0].parseInt()
+  const JuliaMinorVersion* = JuliaArrayVersion[1].parseInt()
+  const JuliaPatchVersion* = JuliaArrayVersion[2].parseInt()
+
+
 else:
   const JlVersionCmd = JuliaPath / "bin" / "julia" & " -E VERSION"
-
-const (cmdOutput, exitCode) = gorgeEx(JlVersionCmd)
-static:
-  echo "Nimjl> ", JuliaPath
-when exitCode != 0:
-  {.error: "Nimjl> Fatal error ! Julia could not be found on your system.".}
-
-const JuliaArrayVersion* = cmdOutput.split("\"")[1].split(".")
-
+  const (cmdOutput, exitCode) = gorgeEx(JlVersionCmd)
+  when exitCode != 0:
+    {.error: "Nimjl> Fatal error ! Julia could not be found on your system.".}
+  const JuliaArrayVersion* = cmdOutput.split("\"")[1].split(".")
   # For release : result has the form ["v", "1.6.0", ""] -> splitting [1] yields ["1", "6, "0"]
   # For dev: result has the form ["v", "1.7.0-DEV", "667"] -> splitting [1] yields ["1", "7, "0-DEV", "667"]
-const JuliaMajorVersion* = JuliaArrayVersion[0].parseInt()
-const JuliaMinorVersion* = JuliaArrayVersion[1].parseInt()
-const JuliaPatchVersion* = JuliaArrayVersion[2].parseInt()
+  const JuliaMajorVersion* = JuliaArrayVersion[0].parseInt()
+  const JuliaMinorVersion* = JuliaArrayVersion[1].parseInt()
+  const JuliaPatchVersion* = JuliaArrayVersion[2].parseInt()
+
+static:
+  echo "Nimjl> ", JuliaPath, ", version:", JuliaMajorVersion, ".", JuliaMinorVersion, ".", JuliaPatchVersion
+
 
 # TODO: handle more platform
 {.passC: " -DJulia_ENABLE_THREADING=1".}
