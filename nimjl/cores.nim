@@ -1,43 +1,49 @@
 import ./types
+import ./errors  # Import new error handling
 import ./private/jlcores
 import ./config
 import std/[strformat, os, macros, tables]
 
+export errors  # Export error handling utilities
+
 proc jlSym*(symname: string): JlSym =
   ## Convert a string to Julia Symbol
+  checkJlInitialized("creating Julia symbol")
   result = jl_symbol(symname.cstring)
 
 proc jlExceptionHandler*() =
-  let excpt: JlValue = jl_exception_occurred()
-   ## Convert a Julia exception to Nim exception
-  if not isNil(excpt):
-    let msg = $(jl_exception_message())
-    echo "->", msg, "<-"
-    raise newException(JlError, msg)
-  else:
-    discard
+  ## Deprecated: Use enhancedJlExceptionHandler instead
+  enhancedJlExceptionHandler()
 
 proc jlEval*(code: string): JlValue =
-  ## Eval function that checks JuliaError
+  ## Eval function that checks Julia errors with context
+  checkJlInitialized("evaluating Julia code")
   result = jl_eval_string(code)
-  jlExceptionHandler()
+  enhancedJlExceptionHandler(&"evaluating: {code}")
 
 proc jlTopLevelEval*(x: JlValue) : JlValue =
   ## Only use it if you know what you're doing
+  checkJlInitialized("top-level eval")
+  if x.isNil:
+    raise newException(JlNullPointerError, "Cannot evaluate nil JlValue")
   result = jl_toplevel_eval(JlMain, x)
-  jlExceptionHandler()
+  enhancedJlExceptionHandler("top-level eval")
 
 proc jlInclude*(filename: string) =
-  ## Include Julia file
+  ## Include Julia file with improved error handling
+  checkJlInitialized(&"including file '{filename}'")
+  if not fileExists(filename):
+    raise newException(JlError, &"File not found: {filename}")
   let tmp = jlEval(&"include(\"{filename}\")")
   if tmp.isNil:
-    raise newException(JlError, "&Cannot include file {filename}")
+    raise newException(JlError, &"Failed to include file: {filename}")
 
 proc jlUseModule*(modname: string) =
-  ## Call using module
+  ## Call using module with improved error handling
+  checkJlInitialized(&"loading module '{modname}'")
   let tmp = jlEval(&"using {modname}")
   if tmp.isNil:
-    raise newException(JlError, "&Cannot use module {modname}")
+    raise newException(JlError, &"Failed to load module: {modname}")
 
 proc jlUsing*(modname: string) =
   ## Alias for conveniece
@@ -51,9 +57,10 @@ proc jlImport*(modname: string) =
 
 proc jlGetModule*(modname: string): JlModule =
   ## Get Julia module. Useful to resolve ambiguity
+  checkJlInitialized(&"getting module '{modname}'")
   let tmp = jlEval(modname)
   if tmp.isNil:
-    raise newException(JlError, "&Cannot load module {modname}")
+    raise newException(JlError, &"Cannot load module: {modname}")
   result = cast[JlModule](tmp)
 
 # JlNothing is handy to have
@@ -85,6 +92,11 @@ proc jlVmExit*(exit_code: cint = 0.cint) =
 var staticContents: OrderedTable[string, string]
 
 import std/logging
+
+proc getStaticContents*(): OrderedTable[string, string] =
+  ## Get the compile-time embedded Julia files
+  ## Used by system image creation to include embedded code
+  result = staticContents
 
 proc loadJlRessources*() =
   for key, content in staticContents.pairs():
@@ -145,4 +157,3 @@ proc jlEmbedFile*(filename: static[string]) =
   ## Embed specific Julia file
   const jlContent = staticRead(getProjectPath() / filename)
   staticContents[filename] = jlContent
-
