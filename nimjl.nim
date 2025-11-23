@@ -7,6 +7,9 @@ export cores
 import ./nimjl/types
 export types
 
+import ./nimjl/errors
+export errors
+
 import ./nimjl/gc
 export gc
 
@@ -18,6 +21,9 @@ export glucose
 
 import ./nimjl/conversions
 export conversions
+
+import ./nimjl/sysimage
+export sysimage
 
 import ./nimjl/config
 
