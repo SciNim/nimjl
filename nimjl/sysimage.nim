@@ -233,7 +233,7 @@ proc createAppSysImage*(
     packages: openArray[string],
     sourceFiles: openArray[string] = [],
     sourceDirs: openArray[string] = [],
-    optimize: int = 2
+    optimize: int = 2,
 ) =
   ## Convenient helper to create an application system image
   ##
