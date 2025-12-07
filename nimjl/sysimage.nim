@@ -11,67 +11,12 @@ import ./types
 import ./errors
 import ./cores
 import ./private/jlcores
+import ./private/jlbuilder
 import ./config
-import std/[os, strformat, macros, strutils, osproc, sequtils]
+import std/[os, strformat, macros, strutils]
 
-type SysImageConfig* = object ## Configuration for system image creation
-  imagePath*: string ## Path where system image will be saved
-  baseImage*: string ## Base system image to build on (empty = default)
-  packages*: seq[string] ## Packages to include
-  juliaFiles*: seq[string] ## Julia source files to compile into image (runtime paths)
-  juliaCode*: seq[tuple[filename: string, content: string]] ## Julia source code embedded at compile-time
-  cpuTarget*: string ## CPU target (e.g., "native", "x86-64")
-  optimize*: int ## Optimization level (0-3)
-  checkBounds*: bool ## Include bounds checking
-  compileMin*: bool ## Minimal compilation (faster build)
-
-proc defaultSysImageConfig*(): SysImageConfig =
-  ## Create default system image configuration
-  result = SysImageConfig(
-    imagePath: getCurrentDir() / "custom_sys.so",
-    baseImage: "",
-    packages: @[],
-    juliaFiles: @[],
-    juliaCode: @[],
-    cpuTarget: "native",
-    optimize: 2,
-    checkBounds: false,
-    compileMin: false,
-  )
-
-proc expandJuliaFiles(paths: openArray[string]): seq[string] =
-  ## Expand paths to include all .jl files from directories
-  ## Supports both individual files and directories
-  result = @[]
-
-  for path in paths:
-    if fileExists(path):
-      # It's a file, add it directly
-      if path.endsWith(".jl"):
-        result.add(path)
-      else:
-        echo &"Warning: Skipping non-.jl file: {path}"
-    elif dirExists(path):
-      # It's a directory, add all .jl files recursively
-      for file in walkDirRec(path):
-        if file.endsWith(".jl"):
-          result.add(file)
-    else:
-      raise newException(ValueError, &"Path not found: {path}")
-
-proc validateSysImageConfig(config: SysImageConfig) =
-  ## Validate system image configuration
-  if config.imagePath.len == 0:
-    raise newException(ValueError, "System image path cannot be empty")
-
-  let imageDir = config.imagePath.parentDir()
-  if imageDir.len > 0 and not dirExists(imageDir):
-    raise newException(ValueError, &"Directory does not exist: {imageDir}")
-
-  # Validate that paths exist (files or directories)
-  for path in config.juliaFiles:
-    if not fileExists(path) and not dirExists(path):
-      raise newException(ValueError, &"Julia file or directory not found: {path}")
+# Re-export the config type for convenience
+export jlbuilder.SysImageConfig, jlbuilder.defaultSysImageConfig
 
 proc createSysImage*(config: SysImageConfig) =
   ## Create a Julia system image with custom packages and code
@@ -84,84 +29,7 @@ proc createSysImage*(config: SysImageConfig) =
   ## cfg.juliaFiles = @["app_init.jl", "core_functions.jl"]
   ## createSysImage(cfg)
   ## ```
-
-  validateSysImageConfig(config)
-
-  # Check if Julia is initialized (we need it to create the image)
-  let wasInitialized = jl_is_initialized().bool
-  if not wasInitialized:
-    jl_init()
-
-  try:
-    # Build the precompile script
-    var precompileScript = ""
-
-    # Add packages
-    if config.packages.len > 0:
-      precompileScript.add "# Loading packages\n"
-      for pkg in config.packages:
-        precompileScript.add &"using {pkg}\n"
-      precompileScript.add "\n"
-
-    # Add custom Julia files (from disk, expanding directories)
-    let expandedFiles = expandJuliaFiles(config.juliaFiles)
-    if expandedFiles.len > 0:
-      precompileScript.add "# Including Julia files\n"
-      for jlFile in expandedFiles:
-        let absPath = jlFile.absolutePath()
-        precompileScript.add &"include(\"{absPath}\")\n"
-      precompileScript.add "\n"
-
-      # Add embedded Julia code (compile-time embedded)
-      if config.juliaCode.len > 0:
-        precompileScript.add "# Embedded Julia code\n"
-        for (filename, code) in config.juliaCode:
-          precompileScript.add &"# From: {filename}\n"
-          precompileScript.add code
-          precompileScript.add "\n\n"
-
-      # Save precompile script
-    let precompileFile = getTempDir() / "nimjl_precompile.jl"
-    writeFile(precompileFile, precompileScript)
-
-    echo &"Creating system image at: {config.imagePath}"
-    echo &"Precompile script saved to: {precompileFile}"
-
-    # Use PackageCompiler to create system image
-    discard jlEval("using Pkg; Pkg.add(\"PackageCompiler\")")
-    discard jlEval("using PackageCompiler")
-
-    # Build the command
-    let packagesList = config.packages.mapIt("\"" & it & "\"").join(", ")
-    var createCmd =
-      &"""
-PackageCompiler.create_sysimage(
-  [{packagesList}];
-  sysimage_path = "{config.imagePath}",
-  precompile_execution_file = "{precompileFile}",
-  cpu_target = "{config.cpuTarget}",
-"""
-
-    if config.baseImage.len > 0:
-      createCmd.add &"  base_sysimage = \"{config.baseImage}\",\n"
-
-    createCmd.add &"  filter_stdlibs = {not config.checkBounds},\n"
-    createCmd.add ")\n"
-
-    echo "Building system image (this may take several minutes)..."
-    let result = jlEval(createCmd)
-    enhancedJlExceptionHandler("creating system image")
-
-    if fileExists(config.imagePath):
-      echo &"System image created successfully: {config.imagePath}"
-      echo &"Size: {getFileSize(config.imagePath) div 1024 div 1024} MB"
-    else:
-      raise newException(JlError, "System image creation failed - file not found")
-  finally:
-    # Clean up temp file
-    let precompileFile = getTempDir() / "nimjl_precompile.jl"
-    if fileExists(precompileFile):
-      removeFile(precompileFile)
+  jlbuilder.buildSysImage(config)
 
 proc jlVmInitWithImage*(imagePath: string, nthreads: int = 1) =
   ## Initialize Julia VM with a custom system image
@@ -199,35 +67,11 @@ proc jlVmInitWithImage*(imagePath: string, nthreads: int = 1) =
 
   echo "Julia VM initialized successfully with custom image"
 
-proc jlVmInitWithImageThreaded*(imagePath: string, nthreads: int) =
-  ## Initialize Julia VM with custom image and threading support
-  ##
-  ## Note: Requires Julia 1.9+ and specific Julia build
-  ## Falls back to regular init if threading version not available
-
-  if jl_is_initialized().bool:
-    raise newException(JlInitError, "Julia VM is already initialized")
-
-  if not fileExists(imagePath):
-    raise newException(JlError, &"System image not found: {imagePath}")
-
-  putEnv("JULIA_NUM_THREADS", $nthreads)
-
-  let absImagePath = imagePath.absolutePath()
-  let juliaBinDir = JuliaPath / "bin"
-
-  # For now, just use regular init
-  # The threading version requires special Julia builds
-  echo "Note: Using standard init (threading init requires special Julia build)"
-  jl_init_with_image(juliaBinDir.cstring, absImagePath.cstring)
-
-# Convenience proc for init with system image
 proc initWithSysImage*(imagePath: string, nthreads: int = 1) =
   ## Initialize Julia with a custom system image
   ## This is a convenience wrapper around jlVmInitWithImage
   jlVmInitWithImage(imagePath, nthreads)
 
-# Helper to create comprehensive system images
 proc createAppSysImage*(
     outputPath: string,
     packages: openArray[string],
@@ -265,7 +109,44 @@ proc createAppSysImage*(
 
   createSysImage(config)
 
-# Information about current system image
+proc createAppSysImageWithEmbedded*(
+    outputPath: string,
+    packages: openArray[string],
+    embeddedFiles: openArray[tuple[filename: string, content: string]] = [],
+    optimize: int = 2
+) =
+  ## Create a system image with compile-time embedded Julia code
+  ##
+  ## Example:
+  ## ```nim
+  ## const code = staticRead("init.jl")
+  ## createAppSysImageWithEmbedded(
+  ##   "app.so",
+  ##   packages = ["DataFrames"],
+  ##   embeddedFiles = [("init.jl", code)]
+  ## )
+  ## ```
+
+  var config = defaultSysImageConfig()
+  config.imagePath = outputPath
+  config.packages = @packages
+  config.juliaCode = @embeddedFiles
+  config.optimize = optimize
+
+  createSysImage(config)
+
+macro embedJuliaFile*(config: var SysImageConfig, filename: static[string]) =
+  ## Embeds a Julia file's content into the SysImageConfig at compile-time
+  let content = staticRead(filename)
+  let baseFilename = filename.splitFile().name & filename.splitFile().ext
+  quote do:
+    `config`.juliaCode.add((`baseFilename`, `content`))
+
+macro embedJuliaCode*(config: var SysImageConfig, name: static[string], code: static[string]) =
+  ## Embed Julia code directly at compile-time
+  quote do:
+    `config`.juliaCode.add((`name`, `code`))
+
 proc currentSysImageInfo*(): tuple[path: string, size: int64, isDefault: bool] =
   ## Get information about currently loaded system image
   checkJlInitialized("getting system image info")

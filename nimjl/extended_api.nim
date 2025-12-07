@@ -1,50 +1,15 @@
-## Extended Julia API bindings
+## Extended Julia API - High-level wrappers
 ##
-## This module provides additional Julia C API functions that are commonly needed
+## This module provides high-level Nim-friendly wrappers for additional Julia C API functions
 ## Note: This module is currently under development and not yet integrated into the main nimjl module
 
 import ./private/jlcores
+import ./private/jlextapi
 import ./config
 import ./types
 import ./errors
-import std/strformat
 
-# These bindings extend the core Julia C API with additional commonly-used functions
-# They are kept separate to avoid conflicts with existing bindings
-
-{.push nodecl, header: JuliaHeader, dynlib: JuliaLibName.}
-
-# Additional module operations not in core
-proc jl_module_name(m: JlModule): JlSym {.importc: "jl_module_name".}
-proc jl_module_parent(m: JlModule): JlModule {.importc: "jl_module_parent".}
-proc jl_symbol_name(sym: JlSym): cstring {.importc: "jl_symbol_name".}
-
-# Additional type checking functions
-proc jl_is_nothing(val: JlValue): cint {.importc: "jl_is_nothing".}
-proc jl_is_tuple(val: JlValue): cint {.importc: "jl_is_tuple".}
-proc jl_is_array(val: JlValue): cint {.importc: "jl_is_array".}
-proc jl_is_string(val: JlValue): cint {.importc: "jl_is_string".}
-
-# String operations
-proc jl_string_len(s: JlValue): csize_t {.importc: "jl_string_len".}
-
-# Tuple/struct operations
-proc jl_nfields(val: JlValue): cint {.importc: "jl_nfields".}
-
-# Additional GC control
-proc jl_gc_safepoint() {.importc: "jl_gc_safepoint".}
-
-# Threading info
-proc jl_n_threads(): cint {.importc: "jl_n_threads".}
-proc jl_threadid(): cint {.importc: "jl_threadid".}
-
-# System image functions
-proc jl_get_default_sysimg_path(): cstring {.importc: "jl_get_default_sysimg_path".}
-proc jl_get_libdir(): cstring {.importc: "jl_get_libdir".}
-
-{.pop.}
-
-# High-level wrapper functions with Nim-friendly types
+# High-level wrapper functions with Nim-friendly types and error handling
 
 proc jlGetModuleName*(m: JlModule): string =
   ## Get name of module
