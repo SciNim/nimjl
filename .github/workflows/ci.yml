@@ -20,7 +20,7 @@ jobs:
         os:
           - ubuntu-latest
         julia:
-          - '1.11'  # Latest stable
+          - '1'     # Latest stable (auto-updates to newest 1.x)
           - 'lts'   # LTS version
 
     steps:
