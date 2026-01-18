@@ -3,7 +3,7 @@
 ## Additional low-level C bindings for Julia API functions
 
 import ../config
-import ./jlcores  # Import type definitions
+import ./jlcores # Import type definitions
 
 {.push nodecl, header: JuliaHeader, dynlib: JuliaLibName.}
 

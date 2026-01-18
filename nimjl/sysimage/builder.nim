@@ -7,7 +7,7 @@ import ../errors
 import ../cores
 import ../private/jlcores
 import ../config
-import std/[os, strformat, strutils, osproc, sequtils]
+import std/[os, strformat, strutils, sequtils]
 
 type SysImageConfig* = object
   ## Configuration for system image creation

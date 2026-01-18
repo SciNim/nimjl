@@ -7,16 +7,19 @@
 ## - Distribute applications without embedding source code
 ## - Include custom packages in the system image
 
+when not (defined(linux) or defined(macosx) or defined(windows)):
+  {.error: "System image creation is only supported on Linux, macOS, and Windows".}
+
 import ./types
 import ./errors
 import ./cores
 import ./private/jlcores
-import ./private/jlbuilder
+import ./sysimage/builder
 import ./config
 import std/[os, strformat, macros, strutils]
 
 # Re-export the config type for convenience
-export jlbuilder.SysImageConfig, jlbuilder.defaultSysImageConfig
+export builder.SysImageConfig, builder.defaultSysImageConfig
 
 proc createSysImage*(config: SysImageConfig) =
   ## Create a Julia system image with custom packages and code
@@ -29,7 +32,7 @@ proc createSysImage*(config: SysImageConfig) =
   ## cfg.juliaFiles = @["app_init.jl", "core_functions.jl"]
   ## createSysImage(cfg)
   ## ```
-  jlbuilder.buildSysImage(config)
+  builder.buildSysImage(config)
 
 proc jlVmInitWithImage*(imagePath: string, nthreads: int = 1) =
   ## Initialize Julia VM with a custom system image
@@ -113,7 +116,7 @@ proc createAppSysImageWithEmbedded*(
     outputPath: string,
     packages: openArray[string],
     embeddedFiles: openArray[tuple[filename: string, content: string]] = [],
-    optimize: int = 2
+    optimize: int = 2,
 ) =
   ## Create a system image with compile-time embedded Julia code
   ##
@@ -139,12 +142,12 @@ macro embedJuliaFile*(config: var SysImageConfig, filename: static[string]) =
   ## Embeds a Julia file's content into the SysImageConfig at compile-time
   let content = staticRead(filename)
   let baseFilename = filename.splitFile().name & filename.splitFile().ext
-  quote do:
+  quote:
     `config`.juliaCode.add((`baseFilename`, `content`))
 
 macro embedJuliaCode*(config: var SysImageConfig, name: static[string], code: static[string]) =
   ## Embed Julia code directly at compile-time
-  quote do:
+  quote:
     `config`.juliaCode.add((`name`, `code`))
 
 proc currentSysImageInfo*(): tuple[path: string, size: int64, isDefault: bool] =
