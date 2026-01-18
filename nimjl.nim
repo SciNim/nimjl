@@ -25,6 +25,9 @@ export conversions
 import ./nimjl/sysimage
 export sysimage
 
+import ./nimjl/extended_api
+export extended_api
+
 import ./nimjl/config
 
 static:
