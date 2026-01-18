@@ -62,17 +62,17 @@ proc demonstrateErrorContext() =
   Julia.init()
 
   proc innerFunction(x: int) =
-    withJlErrorContext(&"processing value {x}"):
-      if x < 0:
-        discard jlEval("error(\"Negative values not allowed\")")
-      let result = Julia.sqrt(x.float.toJlVal)
-      echo &"sqrt({x}) = ", result.to(float)
+    # Enhanced error handler provides context automatically
+    if x < 0:
+      discard jlEval("error(\"Negative values not allowed\")")
+    let result = Julia.sqrt(x.float.toJlVal)
+    echo "sqrt(", x, ") = ", result.to(float)
 
   try:
     innerFunction(16) # This works
-    innerFunction(-4) # This will error with context
+    innerFunction(-4) # This will error with enhanced context
   except JlError as e:
-    echo "Error with context:"
+    echo "Error with enhanced context:"
     echo e.msg
 
 proc demonstrateDiagnostics() =
