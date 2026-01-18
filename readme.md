@@ -89,6 +89,40 @@ JlVmExit() seems optionnal. It's present in the C API but not calling it doesn't
 
 Nonetheless, if you use OS resources from Julia it is probably better to call Julia.exit() / JlVmExit() for a clean exit.
 
+## System Images (v0.9.0+)
+
+For faster startup times, you can create and load precompiled Julia system images:
+
+```nim
+import nimjl/sysimage
+
+# Create a system image with packages and code
+createAppSysImage(
+  "myapp.so",
+  packages = ["DataFrames", "Plots"],
+  sourceFiles = ["init.jl"],
+  sourceDirs = ["src/"]  # Includes all .jl files recursively
+)
+
+# Initialize Julia with the custom image
+initWithSysImage("myapp.so")
+```
+
+System images eliminate recompilation overhead and allow distributing precompiled binaries.
+
+## Error Handling (v0.9.0+)
+
+Enhanced error messages with Julia stack traces in debug mode:
+
+```nim
+try:
+  discard Julia.myFunction(42)
+except JlError as e:
+  echo "Julia error: ", e.msg  # Includes context and stack trace
+except JlInitError as e:
+  echo "VM not initialized: ", e.msg
+```
+
 ## Setting up Julia dependency
 
 * It is now possible to embed Julia files inside a Nim compiled binary to easily distribute Julia code. To make distribution possible, an API to call ``Pkg.add("...")`` has also been added **with version number easy to specify**.
