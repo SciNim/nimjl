@@ -93,8 +93,8 @@ proc demonstrateDiagnostics() =
   echo "  Is Default: ", info.isDefault
 
   echo "\nThreading Info:"
-  echo "  Number of threads: ", jlNThreads()
-  echo "  Current thread: ", jlThreadId()
+  echo "  Number of threads: ", jlGetNThreads()
+  echo "  Current thread: ", jlGetThreadId()
 
   echo "\nGC Info:"
   echo "  GC enabled: ", jlGcIsEnabled()
