@@ -27,8 +27,4 @@ proc jl_nfields*(val: ptr jl_value): cint {.importc: "jl_nfields".}
 # GC control
 proc jl_gc_safepoint*() {.importc: "jl_gc_safepoint".}
 
-# Threading
-proc jl_n_threads*(): cint {.importc: "jl_n_threads".}
-proc jl_threadid*(): cint {.importc: "jl_threadid".}
-
 {.pop.}

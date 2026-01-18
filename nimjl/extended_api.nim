@@ -52,16 +52,6 @@ proc jlGcSafepoint*() =
   ## Insert a GC safepoint for cooperative garbage collection
   jl_gc_safepoint()
 
-proc jlGetNThreads*(): int =
-  ## Get number of Julia threads
-  checkJlInitialized("getting thread count")
-  result = jl_n_threads().int
-
-proc jlGetThreadId*(): int =
-  ## Get current Julia thread ID (0-indexed)
-  checkJlInitialized("getting thread ID")
-  result = jl_threadid().int
-
 proc jlGetStringLen*(s: JlValue): int =
   ## Get length of Julia string
   checkJlInitialized("getting string length")

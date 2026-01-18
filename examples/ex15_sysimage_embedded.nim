@@ -45,9 +45,9 @@ proc demonstrateEmbeddedAPI() =
   echo ""
   
   echo "4. The embedded code is:"
-  echo "-" .repeat(40)
+  echo "----------------------------------------"
   echo EmbeddedJuliaCode
-  echo "-" .repeat(40)
+  echo "----------------------------------------"
   echo ""
 
 proc demonstrateUsage() =

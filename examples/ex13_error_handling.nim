@@ -5,9 +5,8 @@ import nimjl
 proc demonstrateUninitializedError() =
   echo "\n=== Demonstrating Uninitialized Error ==="
   try:
-    # This will give a helpful error message
-    let result = Julia.sqrt(4.0)
-    echo "Result: ", result
+    # This will give a helpful error message about uninitialized Julia
+    discard jlEval("1 + 1")
   except JlInitError as e:
     echo "Caught expected error:"
     echo e.msg
@@ -92,10 +91,6 @@ proc demonstrateDiagnostics() =
   echo "  Size: ", info.size div (1024 * 1024), " MB"
   echo "  Is Default: ", info.isDefault
 
-  echo "\nThreading Info:"
-  echo "  Number of threads: ", jlGetNThreads()
-  echo "  Current thread: ", jlGetThreadId()
-
   echo "\nGC Info:"
   echo "  GC enabled: ", jlGcIsEnabled()
 
@@ -105,9 +100,9 @@ proc main() =
   # Demonstrate various error scenarios
   demonstrateUninitializedError()
   demonstrateNullPointerError()
-  demonstrateJuliaException()
+  # demonstrateJuliaException() - Disabled due to Julia 1.11 issue
   demonstrateTypeError()
-  demonstrateErrorContext()
+  # demonstrateErrorContext() - Disabled due to Julia 1.11 issue
   demonstrateDiagnostics()
 
   echo "\n=== Demo Complete ==="
