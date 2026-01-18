@@ -42,19 +42,20 @@ proc demonstrateTypeError() =
 
   let value = jlBox(42)
 
-  # Good type checking
-  echo "Type info: ", getJlTypeInfo(value)
-
-  if jlIsa(value, JlInt64):
-    echo "✓ Value is an Int64"
-  else:
-    echo "✗ Value is not an Int64"
+  # Good type checking with available functions
+  echo "Type checking value..."
 
   # Check if it's an array (it's not)
-  if jlIsArray(cast[JlValue](value)):
+  if jlCheckArray(value):
     echo "Value is an array"
   else:
-    echo "Value is not an array (correct!)"
+    echo "✓ Value is not an array (correct!)"
+
+  # Check if it's a tuple (it's not)
+  if jlCheckTuple(value):
+    echo "Value is a tuple"
+  else:
+    echo "✓ Value is not a tuple (correct!)"
 
 proc demonstrateErrorContext() =
   echo "\n=== Demonstrating Error Context ==="
