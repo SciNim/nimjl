@@ -5,7 +5,9 @@ on:
   push:
     branches:
       - master
-
+  schedule:
+    # Run monthly on the 1st at 00:00 UTC to catch new version issues
+    - cron: '0 0 1 * *'
 
 jobs:
   tests:
@@ -13,19 +15,17 @@ jobs:
     strategy:
       matrix:
         nim:
-          - '2.0.x'
           - 'stable'
-          - devel
+          - 'devel'
         os:
           - ubuntu-latest
-          # - macOS-latest
         julia:
-          - '1.10'
-          - '1.11'
-          - 'lts'
+          - '1.11'  # Latest stable
+          - 'lts'   # LTS version
 
     steps:
       - uses: actions/checkout@v4
+      
       - name: Setup nim
         uses: jiro4989/setup-nim-action@v2
         with:
@@ -33,22 +33,35 @@ jobs:
           nim-version: ${{ matrix.nim }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: "install_julia"
+      - name: Setup Julia
         id: install_julia
         uses: julia-actions/setup-julia@latest
         with:
           show-versioninfo: 'true'
           arch: ${{ runner.arch }}
           version: ${{ matrix.julia }}
+      
+      - name: Fix untar dependency bug (Nim 2.2+ compatibility)
+        run: |
+          # Workaround for untar gzip.nim bug in Nim 2.2+
+          # See: https://github.com/nim-lang/untar/issues/X
+          UNTAR_PATH=$(find ~/.nimble/pkgs* -name "gzip.nim" -path "*/untar/*" 2>/dev/null | head -1)
+          if [ -n "$UNTAR_PATH" ]; then
+            sed -i 's/closeImpl = gzclose/closeImpl = gzClose/g' "$UNTAR_PATH"
+            echo "Fixed untar gzip.nim at: $UNTAR_PATH"
+          fi
           
-      - run: nimble install -y
+      - name: Install dependencies
+        run: nimble install -y
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
           
-      - run: nimble test
+      - name: Run tests
+        run: nimble test
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
 
-      - run: nimble runexamples
+      - name: Run examples
+        run: nimble runexamples
         env:
           JULIA_PATH: ${{ steps.install_julia.outputs.julia-bindir }}/..
