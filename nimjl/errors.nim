@@ -6,6 +6,10 @@ import ./types
 import ./private/jlcores
 import std/[strformat, strutils]
 
+# Track initialization state - must match the variable in cores.nim
+# This avoids circular dependency while allowing safe initialization checks
+var jlInitialized* {.global.}: bool = false
+
 type
   JlInitError* = object of JlError
     ## Raised when Julia VM is not initialized
@@ -16,7 +20,9 @@ type
 
 proc checkJlInitialized*(operation: string = "") =
   ## Check if Julia VM is initialized, raise detailed error if not
-  if not jl_is_initialized().bool:
+  ## Uses Nim-side tracking to avoid calling jl_is_initialized() before Julia is loaded
+  ## This is critical for C++ backend compatibility
+  if not jlInitialized:
     var msg = "Julia VM is not initialized."
     if operation.len > 0:
       msg.add &" Cannot perform operation: {operation}"

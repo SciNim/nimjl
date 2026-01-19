@@ -71,7 +71,10 @@ template JlCode*(body: string) =
     discard jlEval(body)
 
 proc jlVmIsInit*(): bool =
-  bool(jl_is_initialized())
+  ## Check if Julia VM is initialized
+  ## Safe to call before Julia is loaded (unlike jl_is_initialized())
+  ## Uses the jlInitialized variable from errors.nim
+  result = jlInitialized
 
 proc jlVmSaveImage*(fname: string) =
   jl_save_system_image(fname.cstring)
@@ -81,6 +84,7 @@ proc jlVmExit*(exit_code: cint = 0.cint) =
   ## Subsequent calls after the first one will be ignored
   once:
     jl_atexit_hook(exit_code)
+    jlInitialized = false
     return
   # Do nothing -> atexit_hook must be called once
  # raise newException(JlError, "jl_atexit_hook() must be called once per process")
@@ -110,6 +114,7 @@ proc jlVmInit*() =
   ## Subsequent calls after the first one will be ignored
   if not jlVmIsInit():
     jl_init()
+    jlInitialized = jl_is_initialized().bool  # Verify initialization succeeded
     # loadJlRessources()
     return
   # raise newException(JlError, "jl_init() must be called once per process")
@@ -118,8 +123,10 @@ proc jlVmInit*() =
 #   jl_init_with_image(JuliaBinDir.cstring, fpath.cstring)
 
 proc jlVmInit*(nthreads: int) =
-  putEnv("JULIA_NUM_THREADS", $nthreads)
-  jlVmInit()
+  if not jlVmIsInit():
+    putEnv("JULIA_NUM_THREADS", $nthreads)
+    jl_init()
+    jlInitialized = jl_is_initialized().bool  # Verify initialization succeeded
 
 # Not exported for now because I don't know how it works
 proc jlVmInit(pathToImage: string) {.used.} =

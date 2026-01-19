@@ -74,9 +74,10 @@ proc buildSysImage*(config: SysImageConfig) =
   validateSysImageConfig(config)
 
   # Check if Julia is initialized (we need it to create the image)
-  let wasInitialized = jl_is_initialized().bool
+  let wasInitialized = jlVmIsInit()
   if not wasInitialized:
     jl_init()
+    jlInitialized = jl_is_initialized().bool  # Verify initialization succeeded
 
   try:
     # Build the precompile script
