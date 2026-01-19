@@ -8,6 +8,10 @@ import ./private/jlextapi
 import ./config
 import ./types
 import ./errors
+import ./cores
+import ./functions
+import ./conversions/tojl
+import ./conversions/fromjl
 
 # High-level wrapper functions with Nim-friendly types and error handling
 
@@ -51,6 +55,21 @@ proc jlCheckString*(val: JlValue): bool =
 proc jlGcSafepoint*() =
   ## Insert a GC safepoint for cooperative garbage collection
   jl_gc_safepoint()
+
+# Threading API
+proc jlGetNThreads*(): int =
+  ## Get number of Julia threads by calling Threads.nthreads()
+  checkJlInitialized("getting thread count")
+  let threadsModule = jlGetModule("Threads")
+  let nthreadsFunc = jlGetFunc(threadsModule, "nthreads")
+  result = jlCall(nthreadsFunc).to(int)
+
+proc jlGetThreadId*(): int =
+  ## Get current Julia thread ID by calling Threads.threadid()
+  checkJlInitialized("getting thread ID")
+  let threadsModule = jlGetModule("Threads")
+  let threadidFunc = jlGetFunc(threadsModule, "threadid")
+  result = jlCall(threadidFunc).to(int)
 
 proc jlGetStringLen*(s: JlValue): int =
   ## Get length of Julia string

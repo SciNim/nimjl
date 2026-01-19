@@ -91,6 +91,10 @@ proc demonstrateDiagnostics() =
   echo "  Size: ", info.size div (1024 * 1024), " MB"
   echo "  Is Default: ", info.isDefault
 
+  echo "\nThreading Info:"
+  echo "  Number of threads: ", jlGetNThreads()
+  echo "  Current thread ID: ", jlGetThreadId()
+
   echo "\nGC Info:"
   echo "  GC enabled: ", jlGcIsEnabled()
 

@@ -24,10 +24,9 @@ task runexamples, "Run all examples":
         if fstr.contains("ex06") or fstr.contains("ex07") or fstr.contains("ex08"):
           echo "skipping ", fstr, " (requires arraymancer)"
           continue
-        # Skip ex13 due to cpp backend issue with error handling
+        # Skip ex13 due to cpp backend issue with uninitialized error handling
         if fstr.contains("ex13"):
           echo "skipping ", fstr, " (cpp backend issue)"
           continue
         echo "running ", fstr
         selfExec("cpp -r --gc:arc -d:release " & fstr)
-
