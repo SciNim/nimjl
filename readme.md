@@ -74,7 +74,7 @@ Here is the basic example:
 import nimjl
 proc main() =
  Julia.init() # Initialize Julia VM. Subsequent call will be ignored
- 
+
  var myval = 4.0'f64
  # Call Julia function "sqrt" and convert the result to a float
  var res = Julia.sqrt(myval).to(float64)
@@ -140,14 +140,14 @@ Julia.init:
   Embed:
     # embed all files with '*.jl' extension in folder ``JuliaToolBox/``
     dir("JuliaToolBox/")
-    # embed all files with '*.jl' extension in the folder of he source file (at compilation) i.e. ``getProjectPath()`` 
+    # embed all files with '*.jl' extension in the folder of he source file (at compilation) i.e. ``getProjectPath()``
     thisDir()
     # embed specific file; path should be relative to ``getProjectPath()``
     file("localfile.jl")
 ```
 
 Note that the order of the file matters.
-See examples/ex09_embed_file.nim for a concrete example. 
+See examples/ex09_embed_file.nim for a concrete example.
 
 Take a look at ``tests/`` or ``examples/`` folder for typical examples.
 
@@ -159,11 +159,25 @@ Take a look at ``tests/`` or ``examples/`` folder for typical examples.
 
 `nimjl` supports cross-compilation for scenarios where you need to compile for a different architecture than your host machine (e.g., compiling on x86_64 for ARM64, or on macOS for Linux).
 
+### Prerequisites
+
+**Important**: Cross-compilation requires the target architecture Julia libraries to be available on your build machine. You must specify the path using either:
+- The `-d:JuliaPath="/path/to/target-julia"` compile flag, OR
+- The `JULIA_PATH` environment variable
+
 ### Usage
 
 Enable cross-compilation mode by adding the `-d:nimjl_cross_compile` flag:
 
 ```bash
+# Using compile flag (recommended for explicit control)
+nim c -d:nimjl_cross_compile \
+     -d:JuliaPath="/path/to/arm64-julia" \
+     --cpu:arm64 --os:linux \
+     myapp.nim
+
+# Using environment variable
+export JULIA_PATH=/path/to/arm64-julia
 nim c -d:nimjl_cross_compile --cpu:arm64 --os:linux myapp.nim
 ```
 
@@ -172,12 +186,14 @@ nim c -d:nimjl_cross_compile --cpu:arm64 --os:linux myapp.nim
 **Normal Mode** (default):
 - Queries the Julia binary at compile time: `julia -E VERSION`
 - Most reliable, but requires Julia to be installed and runnable on the host
+- Auto-detects Julia from `julia` in PATH if not specified
 
 **Cross-Compilation Mode** (`-d:nimjl_cross_compile`):
 - Extracts Julia version from the library filename instead
 - macOS: `libjulia.1.11.7.dylib` → version 1.11.7
 - Linux: `libjulia.so.1.11.7` → version 1.11.7
-- Allows compilation when target Julia binary isn't available on host
+- Allows compilation when target Julia binary isn't runnable on host
+- **Requires explicit path** via `-d:JuliaPath` or `JULIA_PATH` environment variable
 
 ### Example: Compiling for ARM64 Linux from x86_64 macOS
 
@@ -230,7 +246,7 @@ To validate cross-compilation worked correctly:
 
 * If you have random segfault that are non-reproductible, that may be a cause of the Julia GC cleaning memory that Nim uses. Consider using jlGcRoot.
 
-* If you do not work with fixed version package for Julia, you are at risk of code breaking when packages are updated / upgraded. 
+* If you do not work with fixed version package for Julia, you are at risk of code breaking when packages are updated / upgraded.
 
 
 # License
