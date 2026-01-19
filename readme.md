@@ -155,6 +155,75 @@ Take a look at ``tests/`` or ``examples/`` folder for typical examples.
   * Alternatively, you can embed a Julia file that setup your environment and dependencies and embed it **first**.
   * Because files are evaluated in the order they are embedded, it will deterine the env for all the other files.
 
+## Cross-Compilation
+
+`nimjl` supports cross-compilation for scenarios where you need to compile for a different architecture than your host machine (e.g., compiling on x86_64 for ARM64, or on macOS for Linux).
+
+### Usage
+
+Enable cross-compilation mode by adding the `-d:nimjl_cross_compile` flag:
+
+```bash
+nim c -d:nimjl_cross_compile --cpu:arm64 --os:linux myapp.nim
+```
+
+### How It Works
+
+**Normal Mode** (default):
+- Queries the Julia binary at compile time: `julia -E VERSION`
+- Most reliable, but requires Julia to be installed and runnable on the host
+
+**Cross-Compilation Mode** (`-d:nimjl_cross_compile`):
+- Extracts Julia version from the library filename instead
+- macOS: `libjulia.1.11.7.dylib` → version 1.11.7
+- Linux: `libjulia.so.1.11.7` → version 1.11.7
+- Allows compilation when target Julia binary isn't available on host
+
+### Example: Compiling for ARM64 Linux from x86_64 macOS
+
+```bash
+# Install ARM64 Julia libraries in a known location
+export JULIA_PATH=/path/to/arm64-julia
+
+# Cross-compile with Nim
+nim c -d:nimjl_cross_compile \
+     --cpu:arm64 \
+     --os:linux \
+     -d:JuliaPath="/path/to/arm64-julia" \
+     myapp.nim
+```
+
+### Validation
+
+To validate cross-compilation worked correctly:
+
+1. **Check library dependencies**:
+   ```bash
+   # On Linux:
+   ldd myapp | grep julia
+   # On macOS:
+   otool -L myapp | grep julia
+   ```
+   Should show paths to the correct Julia libraries
+
+2. **Verify architecture**:
+   ```bash
+   # On Linux:
+   file myapp
+   # On macOS:
+   lipo -info myapp
+   ```
+   Should show the target architecture (e.g., ARM64, x86_64)
+
+3. **Check embedded version**:
+   ```bash
+   strings myapp | grep "Nimjl> Using"
+   ```
+   Should show the Julia version extracted from the library
+
+4. **Runtime test**:
+   Transfer the binary to the target platform and run it. If Julia initialization succeeds, the cross-compilation worked correctly.
+
 ## Debugging
 
 * Most error will come from incorrect type passed between Julia and Nim. Check function interface and return type first.
