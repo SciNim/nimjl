@@ -115,6 +115,7 @@ proc jlVmInit*() =
   if not jlVmIsInit():
     jl_init()
     jlInitialized = jl_is_initialized().bool  # Verify initialization succeeded
+    assert jlInitialized, "Julia VM initialization failed"
     # loadJlRessources()
     return
   # raise newException(JlError, "jl_init() must be called once per process")
@@ -127,6 +128,7 @@ proc jlVmInit*(nthreads: int) =
     putEnv("JULIA_NUM_THREADS", $nthreads)
     jl_init()
     jlInitialized = jl_is_initialized().bool  # Verify initialization succeeded
+    assert jlInitialized, "Julia VM initialization failed"
 
 # Not exported for now because I don't know how it works
 proc jlVmInit(pathToImage: string) {.used.} =

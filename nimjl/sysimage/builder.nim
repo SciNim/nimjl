@@ -78,6 +78,7 @@ proc buildSysImage*(config: SysImageConfig) =
   if not wasInitialized:
     jl_init()
     jlInitialized = jl_is_initialized().bool  # Verify initialization succeeded
+    assert jlInitialized, "Julia VM initialization failed"
 
   try:
     # Build the precompile script

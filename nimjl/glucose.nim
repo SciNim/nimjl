@@ -161,6 +161,7 @@ template init*(jl: type Julia, nthreads: int, body: untyped) =
     putEnv("JULIA_NUM_THREADS", $nthreads)
     jl_init()
     jlInitialized = jl_is_initialized().bool  # Verify initialization succeeded
+    assert jlInitialized, "Julia VM initialization failed"
     # Module installation
     Julia.useModule("Pkg")
   else:
