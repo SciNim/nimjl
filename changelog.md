@@ -1,6 +1,6 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
-Release v0.9.0 - 2026_01_24 (Planned)
+Release v0.9.0 - 2026_01_20
 ===========================
 * Enhanced error handling with custom exceptions (JlError, JlInitError) and Julia stack traces
 * System image support for faster startup via precompiled Julia environments
