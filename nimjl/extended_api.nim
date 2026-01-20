@@ -8,10 +8,9 @@ import ./private/jlextapi
 import ./config
 import ./types
 import ./errors
-import ./cores
-import ./functions
-import ./conversions/tojl
-import ./conversions/fromjl
+import ./cores # For jlGetModule, jlEval
+import ./functions # For jlCall, jlGetFunc
+import ./conversions/fromjl # For .to()
 
 # High-level wrapper functions with Nim-friendly types and error handling
 

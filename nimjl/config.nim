@@ -1,4 +1,4 @@
-import std/[os, strutils, strformat]
+import std/[os, strutils]
 
 when defined(windows):
   {.error: "Compilation on Windows is not supported yet.".}
