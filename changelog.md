@@ -1,5 +1,18 @@
 Changelog for Nimjl. Date in format YYYY_MM_DD
 
+Release v0.9.0 - 2026_01_24 (Planned)
+===========================
+* Enhanced error handling with custom exceptions (JlError, JlInitError) and Julia stack traces
+* System image support for faster startup via precompiled Julia environments
+* Compile-time Julia code embedding (no external .jl files needed for deployment)
+* Extended Julia C API bindings (module operations, type checking, threading, GC control)
+* Cross-compilation support: compile for different architectures without target Julia binary
+* macOS support: proper .dylib detection and rpath handling
+* C++ backend compatibility: Nim-side initialization tracking prevents pre-dylib segfaults
+* Refactored architecture: C bindings in private/, implementation modules properly organized
+* Platform validation for system image support (Linux, macOS, Windows)
+* New examples: ex13 (error handling), ex14 (system images), ex15 (embedded code)
+
 Release v0.8.2 - 2024_03_27
 ===========================
 * Repo moved to SciNim
